@@ -1,6 +1,6 @@
 import { ArrowUp, CalendarDays, Mail, Send } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import logo from "../../../assets/logo/logo.png";
 import { EASE_OUT_QUINT } from "../../../constants/motion";
@@ -104,6 +104,18 @@ const Footer = () => {
   const isMobile = useIsMobile();
   const socials = SOCIALS.filter((s) => s.href);
 
+  /**
+   * The closing CTA (badge, heading, description, buttons) and its dedicated
+   * glow are Home-only. Everything else in this file — divider, brand/nav/
+   * contact, bottom bar, and this component's own padding — is unchanged and
+   * still renders on every page. Gated in place rather than relocated: both
+   * pieces keep the exact DOM position and surrounding padding/margin
+   * context they've always had, so Home's spacing can't drift by even a
+   * pixel — only whether they render changes.
+   */
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
+
   // Mobile: no reveal at all — no initial/whileInView/viewport/transition
   // props, so Framer never creates an IntersectionObserver or animation
   // subscription for these elements. Content renders directly in its final
@@ -127,15 +139,18 @@ const Footer = () => {
 
   return (
     <footer className="relative overflow-hidden pt-[clamp(88px,11vw,150px)]">
-      {/* The one decorative element: a soft radial glow behind the closing CTA */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-[620px] w-[1020px] -translate-x-1/2 -translate-y-[38%] rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(79,40,183,.16) 0%, rgba(79,40,183,.05) 44%, transparent 72%)",
-        }}
-      />
+      {/* The one decorative element: a soft radial glow behind the closing CTA.
+          Home only — see isHome above. */}
+      {isHome && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 h-[620px] w-[1020px] -translate-x-1/2 -translate-y-[38%] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(79,40,183,.16) 0%, rgba(79,40,183,.05) 44%, transparent 72%)",
+          }}
+        />
+      )}
 
       <div
         className="
@@ -146,61 +161,64 @@ const Footer = () => {
       >
         {/* ── Closing CTA ─────────────────────────────────────
             Carries the same −40px optical shift as every other centred
-            heading on the site, gated at 1180px. See Technologies.tsx. */}
-        <motion.div
-          {...reveal(0)}
-          className="flex flex-col items-center text-center min-[1180px]:-translate-x-[40px]"
-        >
-          <span
-            className="
-              inline-flex w-fit items-center gap-3 rounded-full
-              border border-violet-500/20 bg-violet-500/5
-              px-9 py-3.5
-              text-[13px] font-semibold uppercase tracking-[0.2em] text-violet-300
-              shadow-[0_0_20px_rgba(79,40,183,.15)]
-              sm:text-[14px]
-            "
+            heading on the site, gated at 1180px. See Technologies.tsx.
+            Home only — see isHome above. */}
+        {isHome && (
+          <motion.div
+            {...reveal(0)}
+            className="flex flex-col items-center text-center min-[1180px]:-translate-x-[40px]"
           >
-            ✦ Let&rsquo;s Build The Future
-          </span>
-
-          <h2
-            className="
-              mt-9
-              font-['Space_Grotesk']
-              text-[32px] sm:text-[40px] lg:text-[47px]
-              font-bold uppercase
-              leading-[1.06] tracking-[-0.035em]
-              text-white
-            "
-          >
-            <span className="block">Ready to Build</span>
-            <span className="block text-violet-400">Something Intelligent?</span>
-          </h2>
-
-          <p className="mt-7 max-w-[620px] text-[15px] leading-[1.9] text-white/60 lg:text-[16px]">
-            Have an idea, a workflow that needs automation, or a product you
-            want to bring to life? Let&rsquo;s build it together.
-          </p>
-
-          <div className="mt-11 flex flex-col items-center gap-4 sm:flex-row sm:gap-5">
-            <PrimaryLink
-              href="/contact"
-              icon={<Send size={15} strokeWidth={2.2} aria-hidden />}
+            <span
+              className="
+                inline-flex w-fit items-center gap-3 rounded-full
+                border border-violet-500/20 bg-violet-500/5
+                px-9 py-3.5
+                text-[13px] font-semibold uppercase tracking-[0.2em] text-violet-300
+                shadow-[0_0_20px_rgba(79,40,183,.15)]
+                sm:text-[14px]
+              "
             >
-              Start a Project
-            </PrimaryLink>
+              ✦ Let&rsquo;s Build The Future
+            </span>
 
-            <SecondaryLink
-              href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              icon={<CalendarDays size={15} strokeWidth={2.2} aria-hidden />}
+            <h2
+              className="
+                mt-9
+                font-['Space_Grotesk']
+                text-[32px] sm:text-[40px] lg:text-[47px]
+                font-bold uppercase
+                leading-[1.06] tracking-[-0.035em]
+                text-white
+              "
             >
-              Book a Call
-            </SecondaryLink>
-          </div>
-        </motion.div>
+              <span className="block">Ready to Build</span>
+              <span className="block text-violet-400">Something Intelligent?</span>
+            </h2>
+
+            <p className="mt-7 max-w-[620px] text-[15px] leading-[1.9] text-white/60 lg:text-[16px]">
+              Have an idea, a workflow that needs automation, or a product you
+              want to bring to life? Let&rsquo;s build it together.
+            </p>
+
+            <div className="mt-11 flex flex-col items-center gap-4 sm:flex-row sm:gap-5">
+              <PrimaryLink
+                href="/contact"
+                icon={<Send size={15} strokeWidth={2.2} aria-hidden />}
+              >
+                Start a Project
+              </PrimaryLink>
+
+              <SecondaryLink
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                icon={<CalendarDays size={15} strokeWidth={2.2} aria-hidden />}
+              >
+                Book a Call
+              </SecondaryLink>
+            </div>
+          </motion.div>
+        )}
 
         {/* ── Divider ─────────────────────────────────────────── */}
         <div
