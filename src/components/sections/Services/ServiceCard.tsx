@@ -112,6 +112,20 @@ const ServiceCard = ({ service, index, onOpen }: ServiceCardProps) => {
         "
       />
 
+      {/* The whole card is the control: a real button wrapping the entire
+          surface, with an accessible name and normal keyboard/focus
+          behaviour, so clicking or tabbing to anywhere in the card (icon,
+          index, title, description, empty space, arrow) opens the same
+          detail modal. `group` is duplicated here (article already carries
+          it, for the hover-driven styles below) because it also needs to be
+          on the actually-focusable element for `group-focus-visible:` on
+          the arrow to react to real keyboard focus, not just pointer hover. */}
+      <button
+        type="button"
+        onClick={() => onOpen(service)}
+        aria-label={`View details for ${title}`}
+        className="group block h-full w-full text-left outline-none rounded-[22px] focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+      >
       <div className={SURFACE}>
         {/* Glass sheen — implies a light source above the card so the surface
             does not read as a flat swatch. Static, so it costs nothing. */}
@@ -215,29 +229,33 @@ const ServiceCard = ({ service, index, onOpen }: ServiceCardProps) => {
             "
           />
 
-          {/* The arrow is the affordance, so it is the control: a real button
-              with an accessible name, reachable by keyboard. The whole card is
-              deliberately NOT the click target — a card-sized button would
-              swallow text selection and read as one huge control to a screen
-              reader. */}
-          <button
-            type="button"
-            onClick={() => onOpen(service)}
-            aria-label={`View details for ${title}`}
+          {/* Purely a visual indicator now that the whole card is the click
+              target — no onClick, no button semantics, so there is exactly
+              one interactive control on this card (the wrapping button
+              above), not two competing ones. Reacts to the card's own
+              hover/focus state via `group-*` rather than its own, since it
+              is no longer independently focusable. */}
+          <span
+            aria-hidden
             className="
-              -m-2 shrink-0 rounded-full p-2
-              text-white/35 outline-none
-              transition-[color,background-color,translate] duration-500 ease-out
-              hover:bg-white/[0.06] hover:text-violet-200
-              focus-visible:ring-2 focus-visible:ring-violet-400/60
-              group-hover:translate-x-[3px] group-hover:-translate-y-[3px]
-              group-hover:text-violet-200
+              -m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full
+              border border-violet-400/25 bg-white/[0.04]
+              text-violet-200/80
+              transition-all duration-300 ease-out
+              group-hover:scale-110 group-hover:border-violet-400/60
+              group-hover:bg-violet-500/10 group-hover:text-white
+              group-hover:shadow-[0_0_16px_rgba(164,124,237,.5)]
+              group-hover:translate-x-[2px] group-hover:-translate-y-[2px]
+              group-focus-visible:scale-110 group-focus-visible:border-violet-400/60
+              group-focus-visible:bg-violet-500/10 group-focus-visible:text-white
+              group-focus-visible:shadow-[0_0_16px_rgba(164,124,237,.5)]
             "
           >
-            <ArrowUpRight aria-hidden size={17} strokeWidth={2} />
-          </button>
+            <ArrowUpRight aria-hidden size={18} strokeWidth={2.2} />
+          </span>
         </div>
       </div>
+      </button>
     </motion.article>
   );
 };

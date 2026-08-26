@@ -210,15 +210,18 @@ const TechnologyCard = ({ tech, index }: TechnologyCardProps) => {
           "
         />
 
-        {/* Mark */}
+        {/* Mark — every technology, Claude and Node.js included, renders
+            through the same single currentColor line-mark: no per-vendor
+            colours, so the whole grid reads as one unified purple/lavender
+            treatment. */}
         <svg
           viewBox="0 0 24 24"
           aria-hidden
           className="
             relative h-[32px] w-[32px] lg:h-[36px] lg:w-[36px]
-            text-white/55
+            text-violet-300/75
             transition-[color,filter] duration-500 ease-out
-            group-hover:text-white
+            group-hover:text-violet-100
             group-hover:drop-shadow-[0_0_12px_rgba(164,124,237,.55)]
           "
         >

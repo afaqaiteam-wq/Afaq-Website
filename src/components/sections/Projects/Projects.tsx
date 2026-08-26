@@ -103,12 +103,13 @@ const Projects = () => {
         className="
           relative mx-auto w-full
           max-w-[1180px] px-6
-          lg:w-[1000px] lg:max-w-[82vw] lg:px-0
+          lg:w-[min(82vw,1440px)] lg:max-w-none lg:px-0
         "
       >
         {/* ── Header ─────────────────────────────────────────
-            Same −40px optical shift as the other sections, gated at 1180px
-            where the Navbar grid stops overflowing. See Technologies.tsx. */}
+            Shifted onto the Navbar logo's axis — see the derivation in
+            Services.tsx. Gated at 1180px where the Navbar grid stops
+            overflowing its pill. */}
         <div className="flex flex-col items-center text-center min-[1180px]:-translate-x-[40px]">
           <motion.span
             {...reveal(0)}

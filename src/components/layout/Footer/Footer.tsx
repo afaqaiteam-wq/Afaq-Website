@@ -5,7 +5,9 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../../../assets/logo/logo.png";
 import { EASE_OUT_QUINT } from "../../../constants/motion";
 import { BOOKING_URL } from "../../../config/booking";
+import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "../../../config/whatsapp";
 import { useIsMobile } from "../../../hooks/useIsMobile";
+import { WhatsAppGlyph } from "../../ui/FloatingWhatsApp";
 import { EMAIL, FOOTER_NAV, SOCIALS, type SocialId } from "./footer.data";
 
 /**
@@ -99,6 +101,31 @@ const SecondaryLink = ({
 const LINK =
   "text-[14px] leading-[1.7] text-white/50 outline-none transition-colors duration-300 hover:text-white focus-visible:text-white focus-visible:underline focus-visible:decoration-violet-400/60 focus-visible:underline-offset-4";
 
+/**
+ * The "Let's Talk" column's three contact rows (email, Facebook,
+ * LinkedIn) — same icon+text shape and left edge, violet accent on
+ * hover/focus rather than `LINK`'s white, so they read as one deliberate
+ * contact block.
+ *
+ * The colour classes below live on the icon and a wrapping `<span>`
+ * around the label — not on the `<a>` itself. `globals.css` resets every
+ * `a` to `color: inherit` as a plain, unlayered rule, and an unlayered
+ * declaration always wins over any `@layer utilities` rule regardless of
+ * specificity — including a Tailwind colour class applied straight to the
+ * anchor. That reset is invisible everywhere else `LINK` is used (its
+ * white-on-hover sits close enough to the inherited page colour that the
+ * difference is imperceptible), but a distinct violet accent has to
+ * actually change colour, so the text needs its own element to hold it.
+ */
+const CONTACT_ROW =
+  "group inline-flex items-center gap-3 text-[14px] leading-[1.7] outline-none focus-visible:underline focus-visible:decoration-violet-400/60 focus-visible:underline-offset-4";
+
+const CONTACT_ICON =
+  "shrink-0 text-violet-300/60 transition-colors duration-300 group-hover:text-violet-200 group-focus-visible:text-violet-200";
+
+const CONTACT_TEXT =
+  "text-white/55 transition-colors duration-300 group-hover:text-violet-200 group-focus-visible:text-violet-200";
+
 const Footer = () => {
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
@@ -156,7 +183,7 @@ const Footer = () => {
         className="
           relative mx-auto w-full
           max-w-[1180px] px-6
-          lg:w-[1000px] lg:max-w-[82vw] lg:px-0
+          lg:w-[min(82vw,1440px)] lg:max-w-none lg:px-0
         "
       >
         {/* ── Closing CTA ─────────────────────────────────────
@@ -284,63 +311,73 @@ const Footer = () => {
               Let&rsquo;s Talk
             </h3>
 
+            {/* Email, then Facebook/LinkedIn side by side, then the
+                WhatsApp number — three matching rows (same icon+text shape,
+                same left edge) rather than a standalone "Send us a message"
+                link plus separate pill-shaped social badges, so the whole
+                column reads as one contact block. Deliberately its own
+                style (CONTACT_ROW) rather than reusing the shared `LINK`
+                constant: this column wants a violet hover accent, where
+                `LINK` (still used by the Company/Explore nav columns,
+                untouched) goes white. */}
             <div className="mt-5 flex flex-col gap-4">
-              {EMAIL ? (
-                <a
-                  href={`mailto:${EMAIL}`}
-                  className={`inline-flex items-center gap-2.5 ${LINK}`}
-                >
-                  <Mail size={15} strokeWidth={1.8} aria-hidden className="shrink-0 text-violet-300/70" />
-                  {EMAIL}
+              {EMAIL && (
+                <a href={`mailto:${EMAIL}`} className={CONTACT_ROW}>
+                  <Mail
+                    size={15}
+                    strokeWidth={1.8}
+                    aria-hidden
+                    className={CONTACT_ICON}
+                  />
+                  <span className={CONTACT_TEXT}>{EMAIL}</span>
                 </a>
-              ) : (
-                <Link to="/contact" className={`inline-flex items-center gap-2.5 ${LINK}`}>
-                  <Mail size={15} strokeWidth={1.8} aria-hidden className="shrink-0 text-violet-300/70" />
-                  Send us a message
-                </Link>
               )}
 
               {socials.length > 0 && (
-                <ul className="mt-1 flex flex-wrap items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                   {socials.map((s) => {
-                    // "#" is the LinkedIn placeholder — it must not open a tab
-                    // or advertise itself as an external destination.
+                    // "#" is the LinkedIn placeholder — it must not open a
+                    // tab or advertise itself as an external destination.
                     const external = s.href !== "#";
 
                     return (
-                      <li key={s.id}>
-                        <a
-                          href={s.href}
-                          {...(external
-                            ? { target: "_blank", rel: "noopener noreferrer" }
-                            : {})}
-                          className="
-                            inline-flex items-center gap-2 rounded-full
-                            border border-white/[0.09] bg-white/[0.03]
-                            px-3 py-1.5
-                            text-[13px] leading-none text-white/50
-                            outline-none transition-all duration-300
-                            hover:border-violet-400/35 hover:bg-white/[0.06] hover:text-white
-                            focus-visible:ring-2 focus-visible:ring-violet-400/60
-                          "
+                      <a
+                        key={s.id}
+                        href={s.href}
+                        {...(external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                        className={CONTACT_ROW}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width={15}
+                          height={15}
+                          fill="currentColor"
+                          aria-hidden
+                          className={CONTACT_ICON}
                         >
-                          <svg
-                            viewBox="0 0 24 24"
-                            width={14}
-                            height={14}
-                            fill="currentColor"
-                            aria-hidden
-                            className="shrink-0 text-violet-300/70 transition-colors duration-300 group-hover:text-violet-200"
-                          >
-                            {SOCIAL_GLYPHS[s.id]}
-                          </svg>
-                          {s.label}
-                        </a>
-                      </li>
+                          {SOCIAL_GLYPHS[s.id]}
+                        </svg>
+                        <span className={CONTACT_TEXT}>{s.label}</span>
+                      </a>
                     );
                   })}
-                </ul>
+                </div>
               )}
+
+              {/* Same wa.me destination as the floating WhatsApp button —
+                  see src/config/whatsapp.ts, the single shared source for
+                  both. */}
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={CONTACT_ROW}
+              >
+                <WhatsAppGlyph size={15} className={CONTACT_ICON} />
+                <span className={CONTACT_TEXT}>{WHATSAPP_DISPLAY}</span>
+              </a>
             </div>
           </div>
         </motion.div>

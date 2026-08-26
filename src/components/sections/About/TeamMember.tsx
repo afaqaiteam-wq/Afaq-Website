@@ -1,224 +1,146 @@
-import { useCallback, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
 
-import { EASE_OUT_EXPO, EASE_OUT_QUINT } from "../../../constants/motion";
-import { useIsMobile } from "../../../hooks/useIsMobile";
+import { LinkedInGlyph } from "./TeamModal";
 import type { TeamMember as Member } from "./team.data";
 
 /**
- * A team node in the orbit composition.
- *
- * Shares the surface vocabulary of the Services card — same border alpha,
- * glass fill, violet hover and cursor spotlight — so the section reads as part
- * of the same system rather than a new one.
+ * A single card in the Team deck — a portrait-led "identity card" rather
+ * than the old icon-row list tile. Used for every slot in the stack
+ * (TeamOrbit.tsx); `isActive` only changes which affordances render (social
+ * icon, founder badge, "view profile" hint, ambient glow) — the surface
+ * itself is identical front-to-back so the deck reads as one consistent
+ * object.
  */
 
-const SURFACE = `
-  relative flex h-full w-full items-center gap-4 overflow-hidden
-  rounded-[20px] p-4 sm:p-5
-  border border-white/[0.08]
-  bg-white/[0.035] backdrop-blur-xl max-sm:backdrop-blur-md
-  shadow-[0_10px_34px_rgba(6,4,18,.38)]
-  transition-[border-color,background-color,box-shadow] duration-500 ease-out
-  group-hover:border-violet-400/30
-  group-hover:bg-white/[0.055]
-  group-hover:shadow-[0_20px_50px_rgba(79,40,183,.26)]
-`;
-
-/**
- * Portrait tile. Falls back to a monogram when no photo is supplied — same
- * frame, same glow, so the composition never looks like it is missing an asset.
- */
-const Portrait = ({
-  member,
-  size,
-}: {
+interface TeamMemberCardProps {
   member: Member;
-  size: "sm" | "lg";
-}) => {
-  const box =
-    size === "lg"
-      ? "h-[74px] w-[74px] sm:h-[86px] sm:w-[86px]"
-      : "h-[58px] w-[58px] sm:h-[64px] sm:w-[64px]";
-
-  return (
-    <div
-      className={`
-        ${box} relative shrink-0 overflow-hidden rounded-[16px]
-        border border-white/[0.10]
-        bg-gradient-to-b from-white/[0.10] to-white/[0.02]
-        shadow-[inset_0_1px_0_rgba(255,255,255,.12)]
-        transition-[border-color,box-shadow] duration-500 ease-out
-        group-hover:border-violet-400/35
-        group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,.18),0_0_24px_rgba(117,73,216,.30)]
-      `}
-    >
-      {member.photo ? (
-        <img
-          src={member.photo}
-          alt={member.name}
-          className="h-full w-full object-cover object-top"
-        />
-      ) : (
-        <>
-          <span
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(80% 70% at 50% 12%, rgba(117,73,216,.28), transparent 68%)",
-            }}
-          />
-          <span
-            aria-hidden
-            className={`
-              relative flex h-full w-full items-center justify-center
-              font-['Space_Grotesk'] font-bold tracking-[0.06em]
-              text-violet-100/85
-              ${size === "lg" ? "text-[24px]" : "text-[19px]"}
-            `}
-          >
-            {member.initials}
-          </span>
-        </>
-      )}
-    </div>
-  );
-};
-
-interface TeamMemberProps {
-  member: Member;
-  index: number;
-  onOpen: (member: Member) => void;
+  isActive: boolean;
 }
 
-const TeamMemberCard = ({ member, index, onOpen }: TeamMemberProps) => {
-  const reduced = useReducedMotion() ?? false;
-  const isMobile = useIsMobile();
-  const ref = useRef<HTMLDivElement>(null);
-  const featured = Boolean(member.featured);
-
-  /** Cursor spotlight via CSS vars — no state, so hovering never re-renders. */
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const el = ref.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      el.style.setProperty("--my", `${e.clientY - r.top}px`);
-    },
-    []
-  );
-
+const TeamMemberCard = ({ member, isActive }: TeamMemberCardProps) => {
   return (
-    <motion.div
-      ref={ref}
-      onPointerMove={handlePointerMove}
-      className="group relative w-full"
-      // Mobile: no initial/whileInView/viewport at all — no observer, no
-      // animation subscription. Desktop keeps the original entrance exactly.
-      initial={
-        isMobile
-          ? undefined
-          : reduced
-          ? { opacity: 0 }
-          : { opacity: 0, y: 22, filter: "blur(6px)" }
-      }
-      whileInView={
-        isMobile
-          ? undefined
-          : reduced
-          ? { opacity: 1 }
-          : { opacity: 1, y: 0, filter: "blur(0px)" }
-      }
-      viewport={isMobile ? undefined : { once: true, margin: "-70px" }}
-      whileHover={reduced ? undefined : { y: -6, scale: 1.02 }}
-      transition={{
-        duration: reduced ? 0.3 : 0.68,
-        delay: reduced ? 0 : index * 0.08,
-        ease: EASE_OUT_QUINT,
-        y: { duration: 0.42, ease: EASE_OUT_EXPO },
-        scale: { duration: 0.42, ease: EASE_OUT_EXPO },
-      }}
-    >
-      {/* Ambient bloom — stronger on the founder card */}
+    <div className="group relative h-full w-full">
+      {/* Ambient purple glow behind the active card only — the "premium
+          depth" cue; kept off the rear cards so it doesn't muddy the stack. */}
+      {isActive && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-5 -z-10 rounded-[38px] bg-violet-600/20 blur-2xl"
+        />
+      )}
+
       <div
-        aria-hidden
         className={`
-          pointer-events-none absolute -inset-3 -z-10 rounded-[28px] blur-2xl
-          transition-opacity duration-500
-          ${featured ? "bg-violet-500/22 opacity-40" : "bg-violet-500/20 opacity-0 max-sm:hidden"}
-          group-hover:opacity-100
+          relative h-full w-full overflow-hidden rounded-[26px]
+          border bg-[linear-gradient(180deg,rgba(30,22,50,.5)_0%,rgba(9,6,17,.92)_100%)]
+          transition-colors duration-500
+          ${
+            isActive
+              ? "border-white/[0.16] shadow-[inset_0_1px_0_rgba(255,255,255,.08),0_28px_74px_rgba(4,2,12,.58)]"
+              : "border-white/[0.07] shadow-[0_14px_38px_rgba(4,2,12,.42)]"
+          }
         `}
-      />
-
-      <button
-        type="button"
-        onClick={() => onOpen(member)}
-        aria-label={`Open profile for ${member.name}, ${member.role}`}
-        className="block w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent rounded-[20px]"
       >
-        <div className={SURFACE}>
-          {/* Cursor spotlight */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            style={{
-              background:
-                "radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(164,124,237,.16), transparent 66%)",
-            }}
+        {/* Portrait / monogram fill */}
+        {member.photo ? (
+          <img
+            src={member.photo}
+            alt={member.name}
+            className="absolute inset-0 h-full w-full object-cover object-top"
+            draggable={false}
           />
-
-          {/* Top edge highlight — the motif used across the site */}
-          <div
-            aria-hidden
-            className={`
-              pointer-events-none absolute left-6 right-6 top-0 h-px
-              bg-gradient-to-r from-transparent to-transparent
-              transition-colors duration-500
-              ${featured ? "via-violet-300/45" : "via-white/25"}
-              group-hover:via-violet-300/60
-            `}
-          />
-
-          <Portrait member={member} size={featured ? "lg" : "sm"} />
-
-          <div className="relative min-w-0 flex-1">
-            {featured && (
-              <span className="mb-1.5 inline-block rounded-full border border-violet-500/25 bg-violet-500/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-violet-300">
-                Founder
-              </span>
-            )}
-
-            <h3
-              className={`
-                truncate font-['Space_Grotesk'] font-bold tracking-[-0.015em] text-white
-                ${featured ? "text-[18px] sm:text-[20px]" : "text-[15.5px] sm:text-[17px]"}
-              `}
+        ) : (
+          <>
+            <span
+              aria-hidden
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(80% 65% at 50% 30%, rgba(117,73,216,.30), transparent 70%)",
+              }}
+            />
+            <span
+              aria-hidden
+              className="absolute inset-0 flex items-center justify-center font-['Space_Grotesk'] text-[64px] font-bold tracking-[0.06em] text-violet-100/70"
             >
-              {member.name}
-            </h3>
+              {member.initials}
+            </span>
+          </>
+        )}
 
-            <p className="mt-1 truncate text-[11.5px] font-medium uppercase tracking-[0.14em] text-violet-300/75">
-              {member.shortRole}
-            </p>
-          </div>
+        {/* Legibility wash so name/role always read over the photo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
+          style={{
+            background:
+              "linear-gradient(180deg, transparent 0%, rgba(6,4,14,.55) 42%, rgba(6,4,14,.95) 100%)",
+          }}
+        />
 
-          <ArrowUpRight
+        {/* Top hairline, the motif used across every card/panel on the site */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-6 right-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+        />
+
+        {/* Founder badge */}
+        {member.featured && (
+          <span className="absolute left-4 top-4 inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/15 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-violet-200 backdrop-blur-md">
+            Founder
+          </span>
+        )}
+
+        {/* Social — LinkedIn only, and only when the data actually has one */}
+        {isActive && member.linkedin && (
+          <a
+            href={member.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${member.name} on LinkedIn`}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.14] bg-black/30 text-white/75 backdrop-blur-md transition-colors duration-300 hover:border-violet-400/40 hover:text-white"
+          >
+            <LinkedInGlyph size={13} />
+          </a>
+        )}
+
+        {/* "View profile" hint — active card only. Visible (if subtle) at
+            rest rather than opacity-0, since hover alone isn't reachable on
+            touch or via keyboard; group-focus-visible reacts to the parent
+            card's own focus ring (see TeamOrbit.tsx), not just pointer
+            hover. Sized to stay legible over a bright portrait. */}
+        {isActive && (
+          <span
             aria-hidden
-            size={16}
-            strokeWidth={2}
-            className="
-              shrink-0 self-start text-white/30
-              transition-[color,translate] duration-500 ease-out
-              group-hover:translate-x-[3px] group-hover:-translate-y-[3px]
-              group-hover:text-violet-200
-            "
-          />
+            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.16] bg-black/40 text-white/65 backdrop-blur-md transition-all duration-200 ease-out group-hover:scale-110 group-hover:border-violet-400/60 group-hover:bg-black/60 group-hover:text-white group-hover:shadow-[0_0_18px_rgba(164,124,237,.6)] group-focus-visible:scale-110 group-focus-visible:border-violet-400/60 group-focus-visible:bg-black/60 group-focus-visible:text-white group-focus-visible:shadow-[0_0_18px_rgba(164,124,237,.6)]"
+            style={{ display: member.linkedin ? "none" : undefined }}
+          >
+            <ArrowUpRight size={14} strokeWidth={2.2} />
+          </span>
+        )}
+
+        {/* Identity */}
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+          <h3
+            className={`
+              font-['Space_Grotesk'] font-bold tracking-[-0.02em] text-white
+              ${isActive ? "text-[20px] sm:text-[23px]" : "text-[15px] sm:text-[17px]"}
+            `}
+          >
+            {member.name}
+          </h3>
+          <p
+            className={`
+              mt-1.5 font-medium uppercase tracking-[0.16em] text-violet-300/85
+              ${isActive ? "text-[10.5px] sm:text-[11px]" : "text-[9px] sm:text-[9.5px]"}
+            `}
+          >
+            {member.shortRole}
+          </p>
         </div>
-      </button>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

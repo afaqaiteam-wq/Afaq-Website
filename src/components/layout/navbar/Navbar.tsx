@@ -42,8 +42,7 @@ const Navbar = () => {
             glass
             relative
 
-            w-[1000px]
-            max-w-[82vw]
+            w-[min(82vw,1440px)]
 
             h-[80px]
 

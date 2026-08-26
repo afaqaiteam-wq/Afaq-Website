@@ -2,6 +2,7 @@ import mohamedSaber from "../../../assets/team/mohamed-saber.jpeg";
 import ghofranGharsallah from "../../../assets/team/ghofran-gharsallah.jpeg";
 import mahmoudAhmed from "../../../assets/team/mahmoud-ahmed.jpeg";
 import mohamedAlaa from "../../../assets/team/mohamed-alaa.jpeg";
+import mohamedRagab from "../../../assets/team/mohamed-ragab.jpeg";
 
 /**
  * Team data for the About section.
@@ -149,6 +150,29 @@ export const TEAM: TeamMember[] = [
     ],
     quote:
       "Brand is what people repeat about you when you are not in the room.",
+    linkedin: "",
+  },
+  {
+    id: "ragab",
+    name: "Mohamed Ragab",
+    role: "Growth & Content Lead",
+    shortRole: "Growth & Content Lead",
+    photo: mohamedRagab,
+    initials: "MR",
+    tagline: "Growth and content strategy that builds brand presence.",
+    bio: "Growth & Content Lead focused on content strategy, video, design and marketing campaigns that build brand presence.",
+    skills: [
+      "Content Strategy",
+      "Video Editing",
+      "Social Media Management",
+      "Graphic Design",
+      "Branding",
+      "Marketing Campaigns",
+    ],
+    tech: [],
+    highlights: [],
+    quote:
+      "Great content isn't just seen, it's remembered and it drives growth.",
     linkedin: "",
   },
 ];

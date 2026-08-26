@@ -595,6 +595,19 @@ const HeroLogo = () => {
     // headroom above the outermost ring grows with viewport width (~46px at
     // 1366, ~65px at 1920), so a single value tuned for wide screens would
     // tuck the ring under the navbar at 1366.
+    //
+    // min-[1920px]:scale: every element in this composition (glow, cards,
+    // sparkle, wordmark) is sized in fixed px per breakpoint rather than in
+    // %, so growing this box's own width/height past 640px would pull it out
+    // of registration with its children instead of scaling them together.
+    // A uniform transform scales the whole rigid composition as one unit —
+    // safe here because nothing inside it is an interactive hit target on
+    // desktop. Below 1600px this box is still being flex-shrunk to fit
+    // Hero's own (48/52%) grid column, which already tracks the column
+    // continuously with no freeze; the column only outgrows the fixed 640px
+    // box above ~1567px viewport width, and its growth ceiling (container
+    // caps at min(82vw,1440px)) works out to 708.8px, i.e. 640 * 1.1075 —
+    // hence the factor, applied from 1920px where the gap becomes visible.
     <div
       style={{ perspective: 1400 }}
       className="
@@ -605,6 +618,7 @@ const HeroLogo = () => {
 
         lg:translate-y-[-36px]
         2xl:translate-y-[-50px]
+        min-[1920px]:scale-[1.1075]
 
         w-[280px] h-[280px]
         sm:w-[380px] sm:h-[380px]

@@ -37,6 +37,7 @@ const HeroContent = () => {
       className="
         w-full
         max-w-[560px]
+        lg:max-w-none
 
         mx-auto
 
@@ -70,8 +71,8 @@ const HeroContent = () => {
           px-5
           py-2.5
 
-          text-[11px]
-          sm:text-[12px]
+          text-[9px]
+          sm:text-[10px]
 
           font-semibold
 
@@ -91,7 +92,7 @@ const HeroContent = () => {
           ease: EASE_OUT_QUINT,
         }}
       >
-        ✦ Next Generation AI Studio
+        ✦ Intelligent Solutions. Automated Growth.
       </motion.div>
       {/* Title */}
 
@@ -120,8 +121,28 @@ const HeroContent = () => {
               // lg:whitespace-nowrap guarantees the intended four-line
               // structure on desktop regardless of column width. Left to wrap
               // freely below lg, where the smaller type still fits.
+              //
+              // The accent line ("INTELLIGENT AI") gets one continuous
+              // left-to-right gradient across the whole string, starting at
+              // the very first pixel of "I" — no separate solid-white
+              // section, and no flat/near-white hold at the start either:
+              // the second stop (light lavender) lands at 22% instead of the
+              // 45-70% range used previously, so the shift is already
+              // visible by "T" rather than only becoming noticeable past the
+              // midpoint. Stops: #F5F0FF (almost-white lavender start) ->
+              // violet-200 (#D0C2E3) -> violet-300/400 (#A47CED, the "AFAQ
+              // purple" used for the wordmark/CTA accents elsewhere) -> a
+              // strong purple between that and --primary -> --primary
+              // (#7d24a7), so "AI" lands on the deepest tone. bg-clip-text +
+              // transparent color is the standard gradient-text technique;
+              // the -webkit-text-fill-color override matches it for Safari.
+              // No other line is touched, and this doesn't interact with the
+              // color animation below, which only ever applied to
+              // non-accent lines.
               className={`block lg:whitespace-nowrap ${
-                line.accent ? "text-violet-400" : ""
+                line.accent
+                  ? "bg-[linear-gradient(90deg,#F5F0FF_0%,#D0C2E3_22%,#A47CED_48%,#8B2FB8_72%,#7d24a7_100%)] bg-clip-text text-transparent [-webkit-text-fill-color:transparent]"
+                  : ""
               }`}
               initial={
                 reduced
@@ -185,9 +206,9 @@ const HeroContent = () => {
             ease: EASE_OUT_QUINT,
           }}
         >
-          We build AI systems, intelligent automations and premium digital
-          experiences that help ambitious companies grow faster and work
-          smarter.
+        AI agents and automation that
+        open new horizons
+        for your business.
         </motion.p>
       </div>
       {/* Buttons */}

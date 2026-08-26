@@ -61,11 +61,28 @@ export const TECHNOLOGIES: Technology[] = [
   {
     name: "Claude",
     category: "AI model provider",
+    /**
+     * Traced directly from the reference image: 12 rays, 30° apart,
+     * alternating long/short, each a single round-capped stroke rather than
+     * a tapered fill — that's what gives the reference its distinctive
+     * *rounded* ray tips instead of sharp points. All 12 share one radius
+     * from centre (1.2) so they read as radiating from one point without
+     * actually overlapping into a solid disc. currentColor stroke, same as
+     * every other entry, so the card still drives its own colour.
+     */
     logo: [
-      {
-        kind: "path",
-        d: "M12 2.2c.5 0 .9.4.95.9l.55 5.6 3.4-4.5c.3-.4.9-.5 1.3-.2.4.3.5.9.2 1.3l-4.5 3.4 5.6.55c.5.05.9.45.9.95s-.4.9-.9.95l-5.6.55 4.5 3.4c.4.3.5.9.2 1.3-.3.4-.9.5-1.3.2l-3.4-4.5-.55 5.6c-.05.5-.45.9-.95.9s-.9-.4-.95-.9l-.55-5.6-3.4 4.5c-.3.4-.9.5-1.3.2-.4-.3-.5-.9-.2-1.3l4.5-3.4-5.6-.55c-.5-.05-.9-.45-.9-.95s.4-.9.9-.95l5.6-.55-4.5-3.4c-.4-.3-.5-.9-.2-1.3.3-.4.9-.5 1.3-.2l3.4 4.5.55-5.6c.05-.5.45-.9.95-.9z",
-      },
+      { kind: "line", x1: 12, y1: 10.8, x2: 12, y2: 1.5, stroke: 1.9 },
+      { kind: "line", x1: 12.6, y1: 10.96, x2: 16.15, y2: 4.81, stroke: 1.9 },
+      { kind: "line", x1: 13.04, y1: 11.4, x2: 21.09, y2: 6.75, stroke: 1.9 },
+      { kind: "line", x1: 13.2, y1: 12, x2: 20.3, y2: 12, stroke: 1.9 },
+      { kind: "line", x1: 13.04, y1: 12.6, x2: 21.09, y2: 17.25, stroke: 1.9 },
+      { kind: "line", x1: 12.6, y1: 13.04, x2: 16.15, y2: 19.19, stroke: 1.9 },
+      { kind: "line", x1: 12, y1: 13.2, x2: 12, y2: 22.5, stroke: 1.9 },
+      { kind: "line", x1: 11.4, y1: 13.04, x2: 7.85, y2: 19.19, stroke: 1.9 },
+      { kind: "line", x1: 10.96, y1: 12.6, x2: 2.91, y2: 17.25, stroke: 1.9 },
+      { kind: "line", x1: 10.8, y1: 12, x2: 3.7, y2: 12, stroke: 1.9 },
+      { kind: "line", x1: 10.96, y1: 11.4, x2: 2.91, y2: 6.75, stroke: 1.9 },
+      { kind: "line", x1: 11.4, y1: 10.96, x2: 7.85, y2: 4.81, stroke: 1.9 },
     ],
   },
   {
@@ -108,9 +125,12 @@ export const TECHNOLOGIES: Technology[] = [
   {
     name: "Node.js",
     category: "Runtime",
+    // Hexagon outline with "JS" lettering, matching the real mark — the
+    // previous version used a single "N", which isn't what the actual logo
+    // shows.
     logo: [
       { kind: "path", d: "M12 1.9 20.75 6.95V17.05L12 22.1 3.25 17.05V6.95Z", stroke: 1.3 },
-      { kind: "text", value: "N", x: 12, y: 15.6, size: 8.6, weight: 700 },
+      { kind: "text", value: "JS", x: 12, y: 15.2, size: 7, weight: 700, tracking: -0.3 },
     ],
   },
   {

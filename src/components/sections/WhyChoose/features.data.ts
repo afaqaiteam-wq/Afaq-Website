@@ -91,7 +91,7 @@ export interface Stat {
 
 export const STATS: Stat[] = [
   { value: 98, suffix: "%", label: "Client Satisfaction" },
-  { value: null, display: "24/7", label: "AI Automation" },
-  { value: 100, suffix: "+", label: "Projects Delivered" },
-  { value: 5, suffix: "+", label: "Years Experience" },
+  { value: null, display: "24/24", label: "AI Automation" },
+  { value: 4, suffix: "+", label: "Projects Delivered" },
+  { value: 1, suffix: "+", label: "Years Experience" },
 ];

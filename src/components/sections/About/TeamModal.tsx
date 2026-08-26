@@ -20,7 +20,7 @@ import type { TeamMember } from "./team.data";
  *
  * lucide 1.28 no longer ships brand marks, so the LinkedIn glyph is inline.
  */
-const LinkedInGlyph = ({ size = 15 }: { size?: number }) => (
+export const LinkedInGlyph = ({ size = 15 }: { size?: number }) => (
   <svg
     viewBox="0 0 24 24"
     width={size}

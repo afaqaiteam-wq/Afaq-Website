@@ -1,129 +1,113 @@
-import { motion, useReducedMotion } from "framer-motion";
+import { useCallback, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { AnimatePresence, motion, useReducedMotion, type PanInfo } from "framer-motion";
 
-import logo from "../../../assets/logo/logo.png";
-import { EASE_OUT_EXPO } from "../../../constants/motion";
-import { useIsMobile, useMediaQuery } from "../../../hooks/useIsMobile";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import TeamMemberCard from "./TeamMember";
 import { TEAM, type TeamMember } from "./team.data";
 
-/** Matches the `md:` (768px) split every class below already uses. */
-const MOBILE_QUERY = "(max-width: 767px)";
-
 /**
- * The team composition.
+ * The team composition — a stacked card deck / carousel, built around the
+ * Navbar logo's own axis rather than the section's true centre.
  *
- * Desktop is a three-track arrangement — two members, the core, two members —
- * with the outer columns counter-staggered vertically so the group reads as
- * orbiting a centre rather than sitting in a row. Hairlines run from the core
- * out to each side to make the relationship explicit.
+ * ALIGNMENT: the Navbar's desktop grid is grid-cols-[300px_auto_380px] (see
+ * Navbar.tsx), so its centre cell — the logo — sits (380−300)/2 = 40px left
+ * of the pill's, and therefore the viewport's, true centre. That's the same
+ * derivation already used for the Services/Projects/About/Contact page
+ * headers (see Services.tsx). Applying the identical, gated
+ * `min-[1180px]:-translate-x-[40px]` here — rather than inventing a new
+ * offset — puts the deck on that same logo axis using a value that's
+ * already proven constant from 1180px up, at any container width.
  *
- * The core is deliberately restrained: two thin elliptical arcs and a glow,
- * NOT a second copy of the Hero's ring system. The Hero owns that motif;
- * repeating it at full strength here would read as a duplicate rather than a
- * counterpart.
+ * DEPTH: one large active card sits in front; up to two further members
+ * peek from behind it (one on mobile, to keep the stack light on small
+ * screens), each progressively offset, scaled down, dimmed and softly
+ * blurred. A quiet, fully static orbital/glow motif sits behind the stack —
+ * an echo of the logo's own visual language, not a second animated system.
  *
- * Mobile is a separate composition, not a stack: the core sits at the top at
- * reduced scale and the members fall into a two-column grid beneath it, with
- * the founder spanning the full width to keep its hierarchy.
+ * PERFORMANCE: only the visible slots (2 on mobile, 3 from sm up) are ever
+ * mounted — changing the active member swaps each slot's own
+ * AnimatePresence child rather than animating all five members at once, and
+ * nothing here runs a continuous/idle loop.
+ *
+ * Clicking the front (active) card opens the profile modal. Clicking a card
+ * peeking behind it — or a dot, or dragging the active card, or
+ * ArrowLeft/ArrowRight with the deck focused — changes which member is
+ * active.
  */
 
-const Core = () => {
-  const reduced = useReducedMotion() ?? false;
-  // This is this codebase's standard 640px reveal-timing breakpoint (not the
-  // 768px layout split above) — same one every other scroll-reveal in the
-  // app already keys its mobile duration/margin off.
-  const isMobile = useIsMobile();
+interface SlotConfig {
+  x: number;
+  y: number;
+  scale: number;
+  opacity: number;
+  blur: number;
+  rotate: number;
+  z: number;
+}
 
-  // Mobile: no reveal (no initial/whileInView/viewport) and the three
-  // continuous `repeat: Infinity` loops below (two rotating arcs, one
-  // floating mark) don't run at all — `animate` is simply not passed, so
-  // there is no rAF-driven Framer subscription for them on mobile. Desktop
-  // is completely untouched.
-  return (
-    <motion.div
-      className="relative flex items-center justify-center"
-      initial={isMobile ? undefined : reduced ? { opacity: 0 } : { opacity: 0, scale: 0.86 }}
-      whileInView={isMobile ? undefined : { opacity: 1, scale: 1 }}
-      viewport={isMobile ? undefined : { once: true, margin: "-80px" }}
-      transition={{ duration: reduced ? 0.3 : 0.9, ease: EASE_OUT_EXPO }}
-    >
-      <div className="relative h-[190px] w-[190px] lg:h-[230px] lg:w-[230px]">
-        {/* Volumetric core glow */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-[45%] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(117,73,216,.30) 0%, rgba(79,40,183,.12) 40%, transparent 70%)",
-          }}
-        />
+const DESKTOP_SLOTS: SlotConfig[] = [
+  { x: 0, y: 0, scale: 1, opacity: 1, blur: 0, rotate: 0, z: 30 },
+  { x: 30, y: -25, scale: 0.94, opacity: 0.65, blur: 0.5, rotate: 2, z: 20 },
+  { x: 55, y: -46, scale: 0.89, opacity: 0.38, blur: 1.5, rotate: 3.5, z: 10 },
+];
 
-        {/* Two restrained arcs. Counter-rotating, very slow, very faint. */}
-        <svg
-          viewBox="0 0 240 240"
-          className="absolute inset-0 h-full w-full overflow-visible"
-          aria-hidden
-        >
-          <motion.g
-            style={{ transformOrigin: "120px 120px" }}
-            animate={reduced || isMobile ? undefined : { rotate: 360 }}
-            transition={{ duration: 46, repeat: Infinity, ease: "linear" }}
-          >
-            <ellipse
-              cx="120"
-              cy="120"
-              rx="112"
-              ry="46"
-              fill="none"
-              stroke="rgba(208,194,227,.26)"
-              strokeWidth="1"
-            />
-            <circle cx="232" cy="120" r="2.6" fill="rgba(245,242,249,.9)" />
-          </motion.g>
+const MOBILE_SLOTS: SlotConfig[] = [
+  { x: 0, y: 0, scale: 1, opacity: 1, blur: 0, rotate: 0, z: 30 },
+  { x: 19, y: -16, scale: 0.93, opacity: 0.58, blur: 0.5, rotate: 1.5, z: 20 },
+];
 
-          <motion.g
-            style={{ transformOrigin: "120px 120px" }}
-            animate={reduced || isMobile ? undefined : { rotate: -360 }}
-            transition={{ duration: 62, repeat: Infinity, ease: "linear" }}
-          >
-            <ellipse
-              cx="120"
-              cy="120"
-              rx="52"
-              ry="110"
-              fill="none"
-              stroke="rgba(164,124,237,.20)"
-              strokeWidth="1"
-            />
-            <circle cx="120" cy="10" r="2.2" fill="rgba(245,242,249,.75)" />
-          </motion.g>
-        </svg>
+const DRAG_THRESHOLD = 60;
+const DRAG_VELOCITY_THRESHOLD = 420;
 
-        {/* Mark */}
-        <motion.img
-          src={logo}
-          alt=""
-          aria-hidden
-          className="absolute left-1/2 top-1/2 w-[96px] -translate-x-1/2 -translate-y-1/2 select-none lg:w-[118px]"
-          style={{ filter: "drop-shadow(0 0 34px rgba(79,40,183,.55))" }}
-          animate={reduced || isMobile ? undefined : { y: [0, -7, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-/** Hairline from the core out to a member column. */
-const Tether = ({ side }: { side: "left" | "right" }) => (
-  <span
+/** Quiet, fully static twin arcs behind the stack — the same restrained
+ * motif the logo's own orbit ring uses elsewhere on the site, stilled here
+ * so it reads as ambience rather than a second moving system. */
+const OrbitGlow = () => (
+  <div
     aria-hidden
-    className={`
-      pointer-events-none absolute top-1/2 hidden h-px w-[clamp(28px,5vw,72px)] lg:block
-      ${side === "left"
-        ? "right-full bg-gradient-to-l from-violet-400/30 to-transparent"
-        : "left-full bg-gradient-to-r from-violet-400/30 to-transparent"}
-    `}
+    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+  >
+    <div
+      className="h-[300px] w-[460px] sm:h-[340px] sm:w-[520px] lg:h-[390px] lg:w-[600px] rounded-full"
+      style={{
+        background:
+          "radial-gradient(ellipse, rgba(117,73,216,.20) 0%, rgba(79,40,183,.08) 45%, transparent 72%)",
+      }}
+    />
+    <svg
+      viewBox="0 0 400 400"
+      className="absolute inset-0 h-full w-full overflow-visible opacity-40"
+    >
+      <ellipse
+        cx="200"
+        cy="200"
+        rx="190"
+        ry="86"
+        fill="none"
+        stroke="rgba(208,194,227,.24)"
+        strokeWidth="1"
+        transform="rotate(-14 200 200)"
+      />
+      <ellipse
+        cx="200"
+        cy="200"
+        rx="96"
+        ry="184"
+        fill="none"
+        stroke="rgba(164,124,237,.18)"
+        strokeWidth="1"
+        transform="rotate(10 200 200)"
+      />
+    </svg>
+  </div>
+);
+
+/** Very quiet upward connection toward the Navbar logo — felt, not seen. */
+const ConnectionBeam = () => (
+  <div
+    aria-hidden
+    className="pointer-events-none absolute left-1/2 -top-14 h-16 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-violet-300/25 to-violet-300/0"
   />
 );
 
@@ -132,68 +116,169 @@ interface TeamOrbitProps {
 }
 
 const TeamOrbit = ({ onOpen }: TeamOrbitProps) => {
-  // Left track carries the founder; right track the other two.
-  const left = [TEAM[0], TEAM[2]];
-  const right = [TEAM[1], TEAM[3]];
+  const reduced = useReducedMotion() ?? false;
+  const isMobile = useIsMobile();
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  /**
-   * `Core` runs three continuous Framer Motion loops (two counter-rotating
-   * arcs, one floating mark — all `repeat: Infinity`, driven by Framer's own
-   * rAF engine, not CSS). Both compositions below used to always mount and
-   * merely go `display:none` by breakpoint, so on mobile the entire desktop
-   * orbit — including its own separate `Core` — kept animating invisibly for
-   * as long as the About page stayed open. Conditionally rendering only the
-   * visible composition actually unmounts, and stops, the other one.
-   */
-  const isMobile = useMediaQuery(MOBILE_QUERY);
+  const count = TEAM.length;
+  const slotConfigs = isMobile ? MOBILE_SLOTS : DESKTOP_SLOTS;
+  const visibleCount = Math.min(slotConfigs.length, count);
+
+  const goTo = useCallback(
+    (index: number) => setActiveIndex(((index % count) + count) % count),
+    [count]
+  );
+  const next = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
+  const prev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+
+  const handleDragEnd = useCallback(
+    (_e: unknown, info: PanInfo) => {
+      if (info.offset.x < -DRAG_THRESHOLD || info.velocity.x < -DRAG_VELOCITY_THRESHOLD) {
+        next();
+      } else if (info.offset.x > DRAG_THRESHOLD || info.velocity.x > DRAG_VELOCITY_THRESHOLD) {
+        prev();
+      }
+    },
+    [next, prev]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        next();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prev();
+      }
+    },
+    [next, prev]
+  );
 
   return (
-    <>
-      {/* ── Desktop / tablet: orbit arrangement ───────────────── */}
-      {!isMobile && (
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-8 lg:gap-12">
-          <div className="flex flex-col gap-6 lg:translate-y-8 lg:gap-8">
-            {left.map((m, i) => (
-              <TeamMemberCard key={m.id} member={m} index={i} onOpen={onOpen} />
-            ))}
-          </div>
+    <div className="relative flex flex-col items-center min-[1180px]:-translate-x-[40px]">
+      <ConnectionBeam />
+      <OrbitGlow />
 
-          <div className="relative">
-            <Tether side="left" />
-            <Core />
-            <Tether side="right" />
-          </div>
+      {/* ── Stage ──────────────────────────────────────────── */}
+      <div
+        role="group"
+        aria-roledescription="carousel"
+        aria-label="Team members"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        className="relative h-[288px] w-full max-w-[218px] outline-none sm:h-[332px] sm:max-w-[250px] lg:h-[384px] lg:max-w-[290px] focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent rounded-[26px]"
+      >
+        {Array.from({ length: visibleCount }, (_, slotIndex) => {
+          const member = TEAM[(activeIndex + slotIndex) % count];
+          const cfg = slotConfigs[slotIndex];
+          const isActive = slotIndex === 0;
 
-          <div className="flex flex-col gap-6 lg:-translate-y-8 lg:gap-8">
-            {right.map((m, i) => (
-              <TeamMemberCard
-                key={m.id}
-                member={m}
-                index={i + 1}
-                onOpen={onOpen}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Mobile: core above, then every card in a single column ─ */}
-      {isMobile && (
-        <div>
-          <div className="flex justify-center">
-            <div className="scale-[0.82] origin-top">
-              <Core />
+          return (
+            <div
+              key={`slot-${slotIndex}`}
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ zIndex: cfg.z }}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.div
+                  key={member.id}
+                  drag={isActive && !reduced ? "x" : false}
+                  dragElastic={0.12}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragTransition={{ bounceStiffness: 400, bounceDamping: 32 }}
+                  onDragEnd={isActive ? handleDragEnd : undefined}
+                  onClick={() =>
+                    isActive ? onOpen(member) : goTo(activeIndex + slotIndex)
+                  }
+                  onKeyDown={
+                    isActive
+                      ? (e: KeyboardEvent<HTMLDivElement>) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onOpen(member);
+                          }
+                        }
+                      : undefined
+                  }
+                  aria-label={
+                    isActive
+                      ? `Open profile for ${member.name}, ${member.role}`
+                      : `Show ${member.name}`
+                  }
+                  role="button"
+                  tabIndex={isActive ? 0 : -1}
+                  initial={
+                    reduced
+                      ? { opacity: 0 }
+                      : { opacity: 0, scale: cfg.scale * 0.94, x: cfg.x, y: cfg.y + 8 }
+                  }
+                  animate={
+                    reduced
+                      ? { opacity: cfg.opacity }
+                      : {
+                          opacity: cfg.opacity,
+                          scale: cfg.scale,
+                          x: cfg.x,
+                          y: cfg.y,
+                          rotate: cfg.rotate,
+                          filter: `blur(${cfg.blur}px)`,
+                        }
+                  }
+                  exit={
+                    reduced
+                      ? { opacity: 0 }
+                      : { opacity: 0, scale: cfg.scale * 0.94 }
+                  }
+                  transition={
+                    reduced
+                      ? { duration: 0.15 }
+                      : { type: "spring", stiffness: 300, damping: 28, mass: 0.7 }
+                  }
+                  whileHover={
+                    !reduced && !isActive
+                      ? { opacity: Math.min(cfg.opacity + 0.2, 1) }
+                      : undefined
+                  }
+                  className="group h-full w-full max-w-[218px] cursor-pointer touch-pan-y will-change-transform outline-none sm:max-w-[250px] lg:max-w-[290px] focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent rounded-[26px]"
+                >
+                  <TeamMemberCard member={member} isActive={isActive} />
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </div>
+          );
+        })}
+      </div>
 
-          <div className="mt-2 flex flex-col gap-3.5">
-            {TEAM.map((m, i) => (
-              <TeamMemberCard key={m.id} member={m} index={i} onOpen={onOpen} />
-            ))}
-          </div>
-        </div>
-      )}
-    </>
+      {/* ── Dots ───────────────────────────────────────────── */}
+      <div className="mt-9 flex items-center gap-2.5" role="tablist" aria-label="Select team member">
+        {TEAM.map((member, i) => {
+          const isActive = i === activeIndex;
+          return (
+            <button
+              key={member.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-label={`Show ${member.name}`}
+              onClick={() => goTo(i)}
+              className="flex h-6 w-6 items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 rounded-full"
+            >
+              <span
+                className={`
+                  rounded-full transition-all duration-300
+                  ${
+                    isActive
+                      ? "h-2.5 w-6 bg-[linear-gradient(90deg,#A47CED,#7d24a7)] shadow-[0_0_10px_rgba(164,124,237,.55)]"
+                      : "h-2 w-2 bg-white/20 hover:bg-white/35"
+                  }
+                `}
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

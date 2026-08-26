@@ -2,13 +2,14 @@
  * Footer navigation and contact configuration.
  *
  * ─────────────────────────────────────────────────────────────
- * FILL THESE IN — email and social links are intentionally empty.
+ * FILL THESE IN — social links still intentionally empty until real.
  *
- * Nothing here was invented. The codebase contains no contact address and no
- * social profiles, so rather than shipping a plausible-looking placeholder
- * that could end up live, each entry renders only once it has a real value:
+ * Nothing here was invented. The codebase contains no social profiles for
+ * LinkedIn yet, so rather than shipping a plausible-looking placeholder that
+ * could end up live, each entry renders only once it has a real value:
  *
- *   • `EMAIL` empty  → the email line is not rendered
+ *   • `EMAIL` empty  → the email row is not rendered (it sits alongside,
+ *     not instead of, the "Send us a message" link — see Footer.tsx)
  *   • a social `href` empty → that icon is not rendered
  *
  * This mirrors how the About section handles its empty LinkedIn fields.
@@ -17,8 +18,8 @@
  * ─────────────────────────────────────────────────────────────
  */
 
-/** Public contact address, e.g. "hello@afaq.ai". Leave empty to hide. */
-export const EMAIL = "";
+/** Public contact address. Leave empty to hide the email row. */
+export const EMAIL = "afaq.ai.team@gmail.com";
 
 export interface FooterLink {
   label: string;
@@ -47,7 +48,7 @@ export const FOOTER_NAV: FooterGroup[] = [
     heading: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Why Choose AFAQ", href: "/about#why-choose" },
+      { label: "Why Choose AFAQ", href: "/services#why-choose" },
       { label: "Our Process", href: "/about#process" },
     ],
   },

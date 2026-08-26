@@ -21,8 +21,8 @@ const Hero = () => {
           max-w-[1180px]
           px-6
 
-          lg:w-[1000px]
-          lg:max-w-[82vw]
+          lg:w-[min(82vw,1440px)]
+          lg:max-w-none
           lg:px-0
 
           grid

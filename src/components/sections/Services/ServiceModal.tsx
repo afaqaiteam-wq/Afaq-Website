@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { CalendarDays, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import logo from "../../../assets/logo/logo.png";
@@ -79,10 +79,13 @@ const SecondaryButton = ({
       hover:border-violet-400/40 hover:bg-white/[0.06]
     "
   >
+    <ArrowLeft
+      size={16}
+      strokeWidth={2.2}
+      aria-hidden
+      className="transition-[translate] duration-300 group-hover:-translate-x-1"
+    />
     {children}
-    <span className="transition-[translate] duration-300 group-hover:translate-x-1">
-      →
-    </span>
   </button>
 );
 
@@ -301,14 +304,18 @@ const ServiceModal = ({ service, onClose }: ServiceModalProps) => {
                   onClick={onClose}
                   aria-label="Close"
                   className="
-                    group -mr-1 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center
-                    rounded-full border border-white/[0.09] bg-white/[0.03]
-                    text-white/55
+                    group -mr-1 -mt-1 flex h-10 w-10 shrink-0 items-center justify-center
+                    rounded-full border border-violet-400/25 bg-white/[0.05]
+                    text-white/70
                     transition-all duration-300
-                    hover:border-violet-400/35 hover:bg-white/[0.07] hover:text-white
+                    hover:scale-110 hover:border-violet-400/55 hover:bg-violet-500/10
+                    hover:text-white hover:shadow-[0_0_16px_rgba(164,124,237,.5)]
+                    focus-visible:scale-110 focus-visible:border-violet-400/55
+                    focus-visible:text-white focus-visible:shadow-[0_0_16px_rgba(164,124,237,.5)]
+                    focus-visible:ring-2 focus-visible:ring-violet-400/60
                   "
                 >
-                  <X size={16} strokeWidth={2.2} />
+                  <X size={18} strokeWidth={2.2} />
                 </button>
               </div>
 
@@ -321,7 +328,7 @@ const ServiceModal = ({ service, onClose }: ServiceModalProps) => {
               <div className="relative flex flex-col gap-3 border-t border-white/[0.07] px-6 py-6 sm:flex-row sm:items-center sm:gap-4 sm:px-9">
                 <PrimaryButton>Book a Call</PrimaryButton>
                 <SecondaryButton onClick={onClose}>
-                  View Services
+                  Back to Services
                 </SecondaryButton>
               </div>
             </div>

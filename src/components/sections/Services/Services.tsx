@@ -123,18 +123,22 @@ const Services = () => {
         className="
           relative mx-auto w-full
           max-w-[1180px] px-6
-          lg:w-[1000px] lg:max-w-[82vw] lg:px-0
+          lg:w-[min(82vw,1440px)] lg:max-w-none lg:px-0
         "
       >
         {/*
           ── Header ───────────────────────────────────────────
 
-          Optical shift onto the Navbar logo's axis — see the matching note in
-          Technologies.tsx. The Navbar's grid-cols-[300px_auto_380px] puts the
-          logo (380−300)/2 = 40px left of the pill centre. Gated at 1180px
-          rather than lg: below that the navbar grid overflows its pill and the
-          offset stops being −40px. Applied as a transform so layout, widths,
-          the container and the card grid are untouched.
+          Shifted onto the Navbar logo's axis: the Navbar's asymmetric
+          grid-cols-[300px_auto_380px] puts the logo cell (380−300)/2 = 40px
+          left of the pill's (and viewport's) true centre, so matching it
+          means the whole badge/heading/description/divider group moves as
+          one unit rather than sitting on the container's own true centre.
+          Gated at 1180px, not lg: below that the Navbar's grid overflows its
+          pill and the offset stops being a clean −40px. Applied as a
+          transform, so layout, widths, the container and the card grid
+          beneath stay untouched (that grid intentionally keeps its own true
+          centre — only this header tracks the logo).
         */}
         <div className="flex flex-col items-center text-center min-[1180px]:-translate-x-[40px]">
           <motion.span
