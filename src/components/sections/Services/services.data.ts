@@ -1,8 +1,8 @@
 import {
   Blocks,
+  BrainCircuit,
   Bot,
   Code2,
-  Compass,
   MessagesSquare,
   Workflow,
   type LucideIcon,
@@ -70,6 +70,9 @@ export const SERVICES: Service[] = [
     title: "AI Consulting",
     description:
       "Helping businesses identify opportunities and implement AI successfully.",
-    Icon: Compass,
+    // Brain (intelligence/AI) + circuit (systematic, strategic thinking) —
+    // reuses the same mark already established for "AI" in the Hero's
+    // floating icon cards, rather than introducing a new visual motif.
+    Icon: BrainCircuit,
   },
 ];

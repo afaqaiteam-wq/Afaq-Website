@@ -84,10 +84,12 @@ const TeamMemberCard = ({ member, isActive }: TeamMemberCardProps) => {
           className="pointer-events-none absolute left-6 right-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
         />
 
-        {/* Founder badge */}
+        {/* Leadership badge — text defaults to "Founder" when a member
+            doesn't set `leadershipBadge`, so this is byte-identical to
+            before for every existing featured member. */}
         {member.featured && (
           <span className="absolute left-4 top-4 inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/15 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-violet-200 backdrop-blur-md">
-            Founder
+            {member.leadershipBadge ?? "Founder"}
           </span>
         )}
 

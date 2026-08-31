@@ -1,4 +1,5 @@
 import mohamedSaber from "../../../assets/team/mohamed-saber.jpeg";
+import mostafaAboelwafa from "../../../assets/team/mostafa-aboeiwafa.jpeg";
 import ghofranGharsallah from "../../../assets/team/ghofran-gharsallah.jpeg";
 import mahmoudAhmed from "../../../assets/team/mahmoud-ahmed.jpeg";
 import mohamedAlaa from "../../../assets/team/mohamed-alaa.jpeg";
@@ -31,8 +32,13 @@ export interface TeamMember {
   role: string;
   /** Condensed title, used on the card where space is tight. */
   shortRole: string;
-  /** The CEO card is given extra visual weight. */
+  /** Gives the card extra visual weight (leadership badge, "Founder" text
+   * by default — see `leadershipBadge` below to override the wording). */
   featured?: boolean;
+  /** Badge text shown when `featured` is true. Defaults to "Founder" if
+   * omitted, so Mohamed Saber's existing entry (which doesn't set this)
+   * renders exactly as it always has. */
+  leadershipBadge?: string;
   /** Optional portrait — see note above. */
   photo?: string;
   /** Monogram fallback. */
@@ -72,6 +78,37 @@ export const TEAM: TeamMember[] = [
     ],
     quote:
       "Empower businesses with AI that works, so they can focus on what matters most.",
+    linkedin: "",
+  },
+  {
+    id: "mostafa",
+    name: "Mostafa Aboelwafa",
+    role: "Co-CEO & Co-Founder",
+    shortRole: "Co-CEO & Co-Founder",
+    featured: true,
+    leadershipBadge: "Co-Founder",
+    photo: mostafaAboelwafa,
+    initials: "MA",
+    // Skills are a direct restatement of the given positioning line
+    // ("Engineering × Business × AI") and role ("Co-CEO & Co-Founder") —
+    // not new facts. No technologies or highlights were provided, so those
+    // stay empty rather than inventing content; TeamModal.tsx hides those
+    // sections gracefully when empty instead of rendering a blank heading
+    // (see the empty-field notes on Ragab, below, for the same
+    // "don't fabricate" convention).
+    tagline: "Engineering × Business × AI",
+    bio: "Co-CEO and Co-Founder of AFAQ AI, working across engineering, business and AI — shaping technology direction and strategic partnerships alongside product and business growth, connecting technical execution with commercial strategy.",
+    skills: [
+      "Engineering",
+      "Business Strategy",
+      "Technology Strategy",
+      "Business Growth",
+      "Strategic Partnerships",
+    ],
+    tech: [],
+    highlights: [],
+    quote:
+      "Engineering, business and AI work best together when they are built around real impact.",
     linkedin: "",
   },
   {

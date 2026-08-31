@@ -231,7 +231,7 @@ const TeamModal = ({ member, onClose }: TeamModalProps) => {
                 <div className="min-w-0 flex-1">
                   {member.featured && (
                     <span className="mb-2 inline-block rounded-full border border-violet-500/25 bg-violet-500/10 px-3 py-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-violet-300">
-                      Founder
+                      {member.leadershipBadge ?? "Founder"}
                     </span>
                   )}
 
@@ -276,75 +276,101 @@ const TeamModal = ({ member, onClose }: TeamModalProps) => {
                     {member.bio}
                   </p>
 
-                  <div className="grid gap-10 md:grid-cols-2">
-                    <Block label="Core Skills">
-                      <ul className="flex flex-wrap gap-2.5">
-                        {member.skills.map((s) => (
-                          <li
-                            key={s}
-                            className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3.5 py-2 text-[12.5px] font-medium text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,.06)] transition-colors duration-300 hover:border-violet-400/30 hover:text-white"
-                          >
-                            {s}
+                  {/* Core Skills / Technologies — each half only renders
+                      when that member actually has content for it, rather
+                      than showing an empty heading with nothing under it.
+                      When only one side has content it takes the full
+                      width instead of sitting in a half-empty two-column
+                      grid; when both do (every existing member except
+                      Mostafa and Ragab), this is byte-identical to before. */}
+                  {(member.skills.length > 0 || member.tech.length > 0) && (
+                    <div
+                      className={
+                        member.skills.length > 0 && member.tech.length > 0
+                          ? "grid gap-10 md:grid-cols-2"
+                          : undefined
+                      }
+                    >
+                      {member.skills.length > 0 && (
+                        <Block label="Core Skills">
+                          <ul className="flex flex-wrap gap-2.5">
+                            {member.skills.map((s) => (
+                              <li
+                                key={s}
+                                className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3.5 py-2 text-[12.5px] font-medium text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,.06)] transition-colors duration-300 hover:border-violet-400/30 hover:text-white"
+                              >
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        </Block>
+                      )}
+
+                      {member.tech.length > 0 && (
+                        <Block label="Technologies">
+                          <ul className="flex flex-wrap gap-2.5">
+                            {member.tech.map((t) => (
+                              <li
+                                key={t}
+                                className="rounded-full border border-violet-500/20 bg-violet-500/[0.07] px-3.5 py-2 text-[12.5px] font-medium text-violet-200/85 transition-colors duration-300 hover:border-violet-400/35 hover:text-white"
+                              >
+                                {t}
+                              </li>
+                            ))}
+                          </ul>
+                        </Block>
+                      )}
+                    </div>
+                  )}
+
+                  {member.highlights.length > 0 && (
+                    <Block label="Experience Highlights">
+                      <ul className="flex flex-col gap-3.5">
+                        {member.highlights.map((h) => (
+                          <li key={h} className="flex gap-3.5">
+                            <span
+                              aria-hidden
+                              className="mt-[3px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-violet-400/25 bg-violet-500/10"
+                            >
+                              <Check size={11} strokeWidth={3} className="text-violet-300" />
+                            </span>
+                            <span className="text-[14px] leading-[1.7] text-white/65">
+                              {h}
+                            </span>
                           </li>
                         ))}
                       </ul>
                     </Block>
+                  )}
 
-                    <Block label="Technologies">
-                      <ul className="flex flex-wrap gap-2.5">
-                        {member.tech.map((t) => (
-                          <li
-                            key={t}
-                            className="rounded-full border border-violet-500/20 bg-violet-500/[0.07] px-3.5 py-2 text-[12.5px] font-medium text-violet-200/85 transition-colors duration-300 hover:border-violet-400/35 hover:text-white"
-                          >
-                            {t}
-                          </li>
-                        ))}
-                      </ul>
-                    </Block>
-                  </div>
-
-                  <Block label="Experience Highlights">
-                    <ul className="flex flex-col gap-3.5">
-                      {member.highlights.map((h) => (
-                        <li key={h} className="flex gap-3.5">
-                          <span
-                            aria-hidden
-                            className="mt-[3px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-violet-400/25 bg-violet-500/10"
-                          >
-                            <Check size={11} strokeWidth={3} className="text-violet-300" />
-                          </span>
-                          <span className="text-[14px] leading-[1.7] text-white/65">
-                            {h}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Block>
-
-                  {/* Quote — the one moment of scale in the body */}
-                  <figure className="relative overflow-hidden rounded-[20px] border border-white/[0.07] bg-white/[0.025] px-6 py-6 sm:px-8">
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0"
-                      style={{
-                        background:
-                          "radial-gradient(70% 100% at 0% 0%, rgba(117,73,216,.12), transparent 62%)",
-                      }}
-                    />
-                    <Quote
-                      aria-hidden
-                      size={18}
-                      strokeWidth={2}
-                      className="relative text-violet-300/60"
-                    />
-                    <blockquote className="relative mt-3 font-['Space_Grotesk'] text-[16px] font-medium leading-[1.65] tracking-[-0.01em] text-white/85 sm:text-[18px]">
-                      “{member.quote}”
-                    </blockquote>
-                    <figcaption className="relative mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
-                      {member.name}
-                    </figcaption>
-                  </figure>
+                  {/* Quote — the one moment of scale in the body. Gated on
+                      the field actually having a value: a member with no
+                      quote on file (rather than fabricating one) would
+                      otherwise render an empty pair of quotation marks. */}
+                  {member.quote && (
+                    <figure className="relative overflow-hidden rounded-[20px] border border-white/[0.07] bg-white/[0.025] px-6 py-6 sm:px-8">
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          background:
+                            "radial-gradient(70% 100% at 0% 0%, rgba(117,73,216,.12), transparent 62%)",
+                        }}
+                      />
+                      <Quote
+                        aria-hidden
+                        size={18}
+                        strokeWidth={2}
+                        className="relative text-violet-300/60"
+                      />
+                      <blockquote className="relative mt-3 font-['Space_Grotesk'] text-[16px] font-medium leading-[1.65] tracking-[-0.01em] text-white/85 sm:text-[18px]">
+                        “{member.quote}”
+                      </blockquote>
+                      <figcaption className="relative mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                        {member.name}
+                      </figcaption>
+                    </figure>
+                  )}
                 </div>
               </div>
 
