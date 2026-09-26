@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+/*
+ * Afaq AI design tokens — the only place colors, fonts and radii are defined.
+ * Components use these through Tailwind utilities (bg-bg, text-muted, font-display…).
+ */
+@theme {
+  --color-bg: #07060b;
+  --color-surface: #0e0c15;
+  --color-raised: #15121f;
+  --color-ink: #f2f0f7;
+  --color-soft: #b9b4c8;
+  --color-muted: #a9a4b8;
+  --color-dim: #807a93;
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-lav: #c8a8ff;
+  --color-lav-hover: #dcc8ff;
+  --color-violet: #7c4dff;
+  --color-deep: #3f1d8f;
+  --color-on-lav: #120a24;
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-plex-arabic), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-pill: 999px;
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Arabic pages: one Arabic face for body and display text, Latin falls back to Geist. */
+  html[lang="ar"] body {
+    font-family: var(--font-plex-arabic), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  }
+  html[lang="ar"] {
+    --font-display: var(--font-plex-arabic), var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lav);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: rgb(200 168 255 / 0.35);
+    color: #fff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Elements the hero intro reveals stay hidden only when JS is running (html.js). */
+.js [data-intro] {
+  opacity: 0;
+}
+
+/* The logo's own light: a glint on the star and a sweep across the chrome. */
+@keyframes glint {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes sweep {
+  0%,
+  55% {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  85%,
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+@keyframes scroll-hint {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  55% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+@utility animate-glint {
+  animation: glint 3.4s ease-in-out infinite;
+}
+
+@utility animate-sweep {
+  animation: sweep 6.5s cubic-bezier(0.65, 0, 0.35, 1) 2.8s infinite;
+}
+
+@utility animate-scroll-hint {
+  animation: scroll-hint 2.2s ease-in-out infinite;
+}
+
+/* Lenis smooth scrolling hooks. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
