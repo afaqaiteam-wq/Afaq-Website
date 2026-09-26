@@ -196,6 +196,64 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
         </section>
       ))}
 
+      {/* A smaller automation example, after the three projects */}
+      <section id="automation" className="scroll-mt-24 border-t border-line">
+        <div className={`${shell} grid gap-12 py-20 lg:grid-cols-12 lg:items-center lg:py-28`}>
+          <div className="lg:col-span-5">
+            <p data-reveal className="eyebrow">
+              {c.automation.eyebrow}
+            </p>
+            <h2
+              data-reveal
+              style={delay(80)}
+              className="mt-6 font-display text-[clamp(28px,3vw,44px)] font-semibold leading-[1.05] tracking-[-0.03em]"
+            >
+              {c.automation.name}
+            </h2>
+            <p data-reveal style={delay(120)} className="mt-3 text-sm tracking-[0.12em] text-[#c6adff]">
+              {c.automation.category}
+            </p>
+            <p data-reveal style={delay(160)} className="mt-6 text-[17px] leading-relaxed text-soft">
+              {c.automation.body}
+            </p>
+            <ol data-reveal style={delay(200)} className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-3">
+              {c.automation.flow.map((step, j, all) => (
+                <li key={step} className="flex items-center gap-2">
+                  <span className="inline-flex h-8 items-center rounded-pill border border-lav/30 bg-violet/10 px-3.5 text-[13px] text-ink">
+                    {step}
+                  </span>
+                  {j < all.length - 1 && <ArrowIcon className="size-3 text-lav" />}
+                </li>
+              ))}
+            </ol>
+            <div data-reveal style={delay(240)} className="mt-8">
+              <p className={label}>{c.techLabel}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {c.automation.tech.map((t) => (
+                  <ToolPill key={t} name={t} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div data-reveal style={delay(120)} className="relative lg:col-span-7">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-y-8 inset-x-0 rounded-[40px] bg-[radial-gradient(60%_55%_at_50%_50%,rgb(124_77_255/0.3),transparent_75%)] blur-2xl sm:-inset-x-4"
+            />
+            <div className="work-tilt relative rounded-[18px] border border-white/12 bg-surface/80 p-1.5 shadow-[0_40px_100px_-40px_rgb(124_77_255/0.55)] sm:p-2">
+              <Image
+                src={c.automation.image}
+                alt={c.automation.imageAlt}
+                placeholder="blur"
+                sizes="(min-width: 1440px) 760px, (min-width: 1024px) 55vw, calc(100vw - 32px)"
+                className="h-auto w-full rounded-[12px]"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Closing */}
       <section className="border-t border-line">
         <div className={`${shell} flex flex-col items-center py-28 text-center lg:py-36`}>

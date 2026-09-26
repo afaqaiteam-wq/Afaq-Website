@@ -18,6 +18,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 ## Work page (done)
 - `src/app/[lang]/work/page.tsx` + `src/content/work.ts` (EN + AR). There are 3 projects: real estate installments, sales & invoicing (client company unnamed), and MO Finance OS. The traffic project is excluded.
 - Screenshots in `src/assets/work/*.webp` are cropped (no browser chrome or taskbar) and every amount, name, email and company name is blurred. `.work-tilt` in globals.css straightens each frame on reveal.
+- Below the three projects there is a smaller `#automation` section. It shows the n8n YouTube AI Comment Assistant from the old site, as a working automation example rather than a fourth project. The copy covers only what the workflow screenshot shows. The default "I'm a note" sticky and the Execute button were removed from the image.
 - The Sales & Invoicing stack is unknown, so it has no stack block. Add `tech` in `work.ts` once the user confirms it.
 - The user may send demo-data screenshots later. To use them, replace the webp files; the filenames stay the same.
 

@@ -3,6 +3,7 @@ import type { StaticImageData } from "next/image";
 import type { Locale } from "@/i18n/config";
 import financeShot from "@/assets/work/mo-finance-os.webp";
 import estateShot from "@/assets/work/real-estate-installments.webp";
+import youtubeShot from "@/assets/work/n8n-youtube-comment-assistant.webp";
 import salesShot from "@/assets/work/sales-invoicing.webp";
 
 /*
@@ -47,6 +48,17 @@ export interface WorkPage {
   flowLabel: string;
   techLabel: string;
   projects: Project[];
+  /** A smaller automation example shown after the three projects. */
+  automation: {
+    eyebrow: string;
+    name: string;
+    category: string;
+    body: string;
+    flow: string[];
+    tech: string[];
+    image: StaticImageData;
+    imageAlt: string;
+  };
   cta: { title: string; titleAccent: string; lead: string; secondary: string };
 }
 
@@ -146,6 +158,16 @@ const en: WorkPage = {
         "The MO Finance OS overview in Arabic: a salary check-in, a 30-day summary, a daily spending limit and a safe-to-spend figure, with every amount blurred.",
     },
   ],
+  automation: {
+    eyebrow: "We build automations, too",
+    name: "YouTube AI Comment Assistant",
+    category: "AI automation · n8n",
+    body: "An n8n workflow that runs every five minutes. It pulls comments from the YouTube Data API, checks each one against a condition, looks up its video for context, and lets an AI agent write a reply that is posted back to YouTube.",
+    flow: ["Every 5 minutes", "YouTube Data API", "Filter", "Video details", "AI agent", "Reply"],
+    tech: ["n8n", "OpenRouter", "YouTube Data API"],
+    image: youtubeShot,
+    imageAlt: "The n8n canvas: a five-minute schedule, requests to the YouTube API, a filter, a video lookup, an AI agent on an OpenRouter chat model, and a YouTube reply step.",
+  },
   cta: {
     title: "Your process could be",
     titleAccent: "the next system here.",
@@ -249,6 +271,16 @@ const ar: WorkPage = {
         "نظرة عامة في MO Finance OS بالعربية: تسجيل المرتب وخلاصة 30 يومًا وحد الصرف اليومي والمبلغ الآمن للإنفاق، مع تمويه كل المبالغ.",
     },
   ],
+  automation: {
+    eyebrow: "ونبني الأتمتة أيضًا",
+    name: "مساعد الرد على تعليقات يوتيوب",
+    category: "أتمتة بالذكاء الاصطناعي · n8n",
+    body: "مسار عمل على n8n يعمل كل خمس دقائق. يجلب التعليقات من YouTube Data API، ويفحص كل تعليق بشرط محدد، ويجلب بيانات الفيديو للسياق، ثم يكتب وكيل ذكاء اصطناعي ردًّا يُنشر على يوتيوب.",
+    flow: ["كل 5 دقائق", "YouTube Data API", "تصفية", "بيانات الفيديو", "وكيل ذكاء اصطناعي", "الرد"],
+    tech: ["n8n", "OpenRouter", "YouTube Data API"],
+    image: youtubeShot,
+    imageAlt: "مسار العمل في n8n: جدولة كل خمس دقائق، وطلبات إلى YouTube API، وتصفية، وجلب بيانات الفيديو، ووكيل ذكاء اصطناعي على نموذج OpenRouter، وخطوة الرد على يوتيوب.",
+  },
   cta: {
     title: "قد تكون عمليتك",
     titleAccent: "النظام التالي هنا.",
