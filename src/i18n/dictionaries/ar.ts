@@ -60,6 +60,17 @@ export const ar: Dictionary = {
       consulting: "استشارات",
     },
   },
+  home: {
+    servicesEyebrow: "ما نبنيه",
+    servicesTitle: "إلى أين",
+    servicesTitleAccent: "يمكننا أن نأخذك؟",
+    servicesLead: "ست خدمات تعمل وحدها أو معًا. ابدأ بالأقرب لما يعطّلك اليوم.",
+    servicesLink: "كل الخدمات",
+    closingTitle: "ابدأ",
+    closingTitleAccent: "بمكالمة مدتها 30 دقيقة.",
+    closingLead: "دون عروض تقديمية. أحضر العملية التي تبطئك، وسنرسم معًا كيف يمكن أن تبدو.",
+    closingSecondary: "أرسل رسالة",
+  },
   footer: {
     tagline: "آفاق جمعُ أفق، ونحن نبني ما وراء أفقك.",
     company: "الشركة",

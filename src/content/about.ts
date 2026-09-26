@@ -18,7 +18,9 @@ export interface Person {
   role: string;
   line: string;
   photo: StaticImageData;
-  founder?: boolean;
+  /** Place in the org chart: 1 is the CEO (featured with his quote), then 2, 3, 4. */
+  tier: 1 | 2 | 3 | 4;
+  quote?: string;
 }
 
 export interface AboutPage {
@@ -59,12 +61,12 @@ const en: AboutPage = {
     title: "The people",
     titleAccent: "behind the orbit.",
     people: [
-      { name: "Mohamed Saber", role: "Founder & CEO", line: "Sets the direction and ties every project to a real business result.", photo: saber, founder: true },
-      { name: "Mostafa Aboelwafa", role: "Co-CEO & Co-Founder", line: "Connects engineering, business and AI, and leads our partnerships.", photo: mostafa, founder: true },
-      { name: "Ghofran Gharsallah", role: "CTO & Lead Full-Stack Developer", line: "Leads the engineering team and the architecture behind what we ship.", photo: ghofran },
-      { name: "Mahmoud Ahmed", role: "AI Automation Engineer", line: "Builds automations with AI, n8n and APIs, from design to deployment.", photo: mahmoud },
-      { name: "Mohamed Alaa", role: "Growth & Content Lead", line: "Shapes the brand through content, video and design.", photo: alaa },
-      { name: "Mohamed Ragab", role: "Growth & Content Lead", line: "Runs the content strategy and campaigns that grow the brand.", photo: ragab },
+      { name: "Mohamed Saber", role: "Founder & CEO", line: "Sets the direction and ties every project to a real business result.", photo: saber, tier: 1, quote: "Empower businesses with AI that works, so they can focus on what matters most." },
+      { name: "Mostafa Aboelwafa", role: "Co-CEO & Co-Founder", line: "Connects engineering, business and AI, and leads our partnerships.", photo: mostafa, tier: 2 },
+      { name: "Ghofran Gharsallah", role: "CTO & Lead Full-Stack Developer", line: "Leads the engineering team and the architecture behind what we ship.", photo: ghofran, tier: 3 },
+      { name: "Mahmoud Ahmed", role: "AI Automation Engineer", line: "Builds automations with AI, n8n and APIs, from design to deployment.", photo: mahmoud, tier: 4 },
+      { name: "Mohamed Alaa", role: "Growth & Content Lead", line: "Shapes the brand through content, video and design.", photo: alaa, tier: 4 },
+      { name: "Mohamed Ragab", role: "Growth & Content Lead", line: "Runs the content strategy and campaigns that grow the brand.", photo: ragab, tier: 4 },
     ],
   },
   cta: {
@@ -101,12 +103,12 @@ const ar: AboutPage = {
     title: "الأشخاص",
     titleAccent: "خلف المدار.",
     people: [
-      { name: "محمد صابر", role: "المؤسس والرئيس التنفيذي", line: "يحدّد الاتجاه، ويربط كل مشروع بنتيجة حقيقية للعمل.", photo: saber, founder: true },
-      { name: "مصطفى أبو الوفا", role: "الرئيس التنفيذي المشارك والشريك المؤسس", line: "يربط الهندسة بالأعمال والذكاء الاصطناعي، ويقود الشراكات.", photo: mostafa, founder: true },
-      { name: "غفران غرس الله", role: "المديرة التقنية ورئيسة فريق التطوير", line: "تقود فريق الهندسة والبنية التقنية لكل ما نسلّمه.", photo: ghofran },
-      { name: "محمود أحمد", role: "مهندس أتمتة بالذكاء الاصطناعي", line: "يبني أنظمة الأتمتة بالذكاء الاصطناعي وn8n والواجهات البرمجية، من التصميم حتى التشغيل.", photo: mahmoud },
-      { name: "محمد علاء", role: "قائد النمو والمحتوى", line: "يصنع حضور العلامة عبر المحتوى والفيديو والتصميم.", photo: alaa },
-      { name: "محمد رجب", role: "قائد النمو والمحتوى", line: "يقود استراتيجية المحتوى والحملات التي تنمّي العلامة.", photo: ragab },
+      { name: "محمد صابر", role: "المؤسس والرئيس التنفيذي", line: "يحدّد الاتجاه، ويربط كل مشروع بنتيجة حقيقية للعمل.", photo: saber, tier: 1, quote: "نمكّن الشركات بذكاء اصطناعي يعمل فعلًا، لتتفرّغ لما يهمها أكثر." },
+      { name: "مصطفى أبو الوفا", role: "الرئيس التنفيذي المشارك والشريك المؤسس", line: "يربط الهندسة بالأعمال والذكاء الاصطناعي، ويقود الشراكات.", photo: mostafa, tier: 2 },
+      { name: "غفران غرس الله", role: "المديرة التقنية ورئيسة فريق التطوير", line: "تقود فريق الهندسة والبنية التقنية لكل ما نسلّمه.", photo: ghofran, tier: 3 },
+      { name: "محمود أحمد", role: "مهندس أتمتة بالذكاء الاصطناعي", line: "يبني أنظمة الأتمتة بالذكاء الاصطناعي وn8n والواجهات البرمجية، من التصميم حتى التشغيل.", photo: mahmoud, tier: 4 },
+      { name: "محمد علاء", role: "قائد النمو والمحتوى", line: "يصنع حضور العلامة عبر المحتوى والفيديو والتصميم.", photo: alaa, tier: 4 },
+      { name: "محمد رجب", role: "قائد النمو والمحتوى", line: "يقود استراتيجية المحتوى والحملات التي تنمّي العلامة.", photo: ragab, tier: 4 },
     ],
   },
   cta: {

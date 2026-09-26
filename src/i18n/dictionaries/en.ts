@@ -58,6 +58,17 @@ export const en = {
       consulting: "Consulting",
     },
   },
+  home: {
+    servicesEyebrow: "What we build",
+    servicesTitle: "Where we can",
+    servicesTitleAccent: "take you next.",
+    servicesLead: "Six services that work alone or together. Start with the one closest to where you're stuck.",
+    servicesLink: "All services",
+    closingTitle: "Start with",
+    closingTitleAccent: "a 30-minute call.",
+    closingLead: "No pitch deck. Bring the process that slows you down, and we'll sketch what it could look like.",
+    closingSecondary: "Send a message",
+  },
   footer: {
     tagline: "Afaq is Arabic for horizons. We build what lies beyond yours.",
     company: "Company",

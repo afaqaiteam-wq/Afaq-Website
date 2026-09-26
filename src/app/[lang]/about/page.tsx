@@ -25,15 +25,24 @@ const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
  * One team member. Photos get the same treatment (slightly muted, a violet dusk at the
  * bottom) so portraits shot in different light still read as one set.
  */
-function PersonCard({ person, index }: { person: Person; index: number }) {
+/** A vertical line of light between two levels of the org chart. */
+function Connector() {
   return (
-    <figure data-reveal style={delay(80 * index)} className="group">
+    <span aria-hidden="true" className="relative my-2 block h-16 w-px bg-[linear-gradient(180deg,rgba(166,123,255,.15),#a67bff)]">
+      <span className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rounded-full bg-white shadow-[0_0_10px_#c8a8ff,0_0_22px_rgba(140,92,255,.8)]" />
+    </span>
+  );
+}
+
+function PersonCard({ person, index, className = "" }: { person: Person; index: number; className?: string }) {
+  return (
+    <figure data-reveal style={delay(80 * index)} className={`group text-center ${className}`}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-line bg-surface">
         <Image
           src={person.photo}
           alt={person.name}
           fill
-          sizes="(min-width: 1024px) 30vw, 50vw"
+          sizes="(min-width: 640px) 400px, 100vw"
           className="object-cover object-top [filter:saturate(0.8)_contrast(1.04)] transition-[transform,filter] duration-700 ease-out group-hover:scale-[1.03] group-hover:[filter:saturate(1)_contrast(1.04)]"
         />
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(7,6,11,.85))]" />
@@ -43,9 +52,9 @@ function PersonCard({ person, index }: { person: Person; index: number }) {
         />
       </div>
       <figcaption className="mt-5">
-        <p className="font-display text-xl font-semibold tracking-[-0.02em]">{person.name}</p>
+        <p className="font-display text-lg font-semibold tracking-[-0.02em]">{person.name}</p>
         <p className="mt-1 text-sm text-[#c6adff]">{person.role}</p>
-        <p className="mt-3 max-w-[30em] text-[15px] leading-relaxed text-muted">{person.line}</p>
+        <p className="mx-auto mt-3 max-w-[30em] text-[15px] leading-relaxed text-muted">{person.line}</p>
       </figcaption>
     </figure>
   );
@@ -57,6 +66,8 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
   const c = aboutContent[lang];
   const { common } = getDictionary(lang);
   const shell = "mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-14";
+  const tier = (n: Person["tier"]) => c.team.people.filter((p) => p.tier === n);
+  const [lead] = tier(1);
 
   return (
     <>
@@ -137,10 +148,54 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
           >
             {c.team.title} <span className="block"><AccentText text={c.team.titleAccent} /></span>
           </h2>
-          <div className="mt-16 grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16">
-            {c.team.people.map((p, i) => (
-              <PersonCard key={p.name} person={p} index={i % 3} />
+          {lead && (
+            <figure data-reveal className="group mx-auto mt-16 flex max-w-[760px] flex-col items-center text-center">
+              <div className="relative aspect-[4/5] w-full max-w-[460px] overflow-hidden rounded-3xl border border-line bg-surface">
+                <Image
+                  src={lead.photo}
+                  alt={lead.name}
+                  fill
+                  sizes="460px"
+                  className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+                <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,transparent_60%,rgba(7,6,11,.7))]" />
+                <div aria-hidden="true" className="absolute inset-0 rounded-3xl shadow-[inset_0_0_0_1px_rgba(166,123,255,.4),0_0_60px_-20px_rgba(140,92,255,.6)]" />
+              </div>
+              <figcaption className="mt-8">
+                <p className="eyebrow">{lead.role}</p>
+                <p className="mt-4 font-display text-[clamp(34px,4.2vw,60px)] font-semibold leading-[1] tracking-[-0.035em]">{lead.name}</p>
+                {lead.quote && (
+                  <blockquote className="mx-auto mt-8 max-w-[26em] font-display text-[clamp(20px,2vw,28px)] leading-snug tracking-[-0.02em] text-soft">
+                    “{lead.quote}”
+                  </blockquote>
+                )}
+                <p className="mx-auto mt-5 max-w-[34em] text-muted">{lead.line}</p>
+              </figcaption>
+            </figure>
+          )}
+          {/* The rest of the team as an org chart, joined by lines of light */}
+          <div className="flex flex-col items-center">
+            <Connector />
+            {tier(2).map((p) => (
+              <PersonCard key={p.name} person={p} index={0} className="w-full max-w-[370px]" />
             ))}
+            <Connector />
+            {tier(3).map((p) => (
+              <PersonCard key={p.name} person={p} index={0} className="w-full max-w-[310px]" />
+            ))}
+            <Connector />
+            <div className="relative grid w-full max-w-[980px] gap-12 sm:-mt-2 sm:grid-cols-3 sm:gap-8">
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-[16.6%] top-0 hidden h-px bg-[linear-gradient(90deg,rgba(166,123,255,.35),#a67bff,rgba(166,123,255,.35))] sm:block"
+              />
+              {tier(4).map((p, i) => (
+                <div key={p.name} className="flex flex-col items-center">
+                  <span aria-hidden="true" className="hidden h-10 w-px bg-[linear-gradient(180deg,#a67bff,rgba(166,123,255,.2))] sm:block" />
+                  <PersonCard person={p} index={i} className="w-full max-w-[260px]" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

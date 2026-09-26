@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { HeroStory } from "@/components/home/hero/HeroStory";
+import { HomeSections } from "@/components/home/HomeSections";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { pageMetadata } from "@/lib/metadata";
@@ -17,5 +18,10 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   if (!isLocale(lang)) notFound();
   const dict = getDictionary(lang);
 
-  return <HeroStory lang={lang} hero={dict.hero} bookCall={dict.common.bookCall} />;
+  return (
+    <>
+      <HeroStory lang={lang} hero={dict.hero} bookCall={dict.common.bookCall} />
+      <HomeSections lang={lang} dict={dict} />
+    </>
+  );
 }
