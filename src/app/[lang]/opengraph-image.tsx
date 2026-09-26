@@ -65,7 +65,6 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ lan
           fontFamily: font,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={markSrc} width={300} height={300} alt="" />
         <div style={{ display: "flex", flexDirection: "column", gap: 22, flex: 1, alignItems: rtl ? "flex-end" : "flex-start" }}>
           <div style={{ display: "flex", fontSize: rtl ? 30 : 26, color: "#c8a8ff", letterSpacing: rtl ? 0 : 4, textTransform: rtl ? "none" : "uppercase" }}>

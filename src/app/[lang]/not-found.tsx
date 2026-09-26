@@ -8,9 +8,11 @@ import { getDictionary } from "@/i18n/dictionaries";
 export default async function NotFound() {
   const raw = await rootLang();
   const lang = isLocale(raw) ? raw : "en";
-  const { notFound, nav } = getDictionary(lang);
+  const { notFound, nav, meta } = getDictionary(lang);
   return (
     <section className="mx-auto flex min-h-[80vh] max-w-2xl flex-col items-center justify-center px-4 pt-24 text-center">
+      {/* The layout's metadata would title this like the home page; React hoists this into <head>. */}
+      <title>{`${notFound.metaTitle} · ${meta.siteName}`}</title>
       <LogoMark size={96} />
       <p className="eyebrow mt-6">{notFound.eyebrow}</p>
       <h1 className="mt-4 font-display text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">{notFound.title}</h1>

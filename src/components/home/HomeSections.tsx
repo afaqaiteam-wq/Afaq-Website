@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
@@ -5,16 +6,18 @@ import { ProcessTrack } from "@/components/services/ProcessTrack";
 import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
 import { servicesContent } from "@/content/services";
+import { workContent } from "@/content/work";
 import { href, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 import { site } from "@/lib/site";
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-/** What follows the hero story on the home page: the services, how we work, and a closing call. */
+/** What follows the hero story on the home page: the services, selected work, how we work, and a closing call. */
 export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const { home, common } = dict;
   const services = servicesContent[lang];
+  const work = workContent[lang];
   const shell = "mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-14";
   const h2 = "mt-6 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]";
 
@@ -69,6 +72,62 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
           <div data-reveal className="mt-10">
             <Button href={href(lang, "/services")} variant="ghost" arrow>
               {home.servicesLink}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Selected work: the three projects, each linking to its case study */}
+      <section className="border-t border-line">
+        <div className={`${shell} py-24 lg:py-32`}>
+          <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-7">
+              <p data-reveal className="eyebrow">
+                {home.workEyebrow}
+              </p>
+              <h2 data-reveal style={delay(80)} className={h2}>
+                {home.workTitle} <span className="block"><AccentText text={home.workTitleAccent} /></span>
+              </h2>
+            </div>
+            <p data-reveal style={delay(160)} className="max-w-[30em] text-lg text-muted lg:col-span-5">
+              {home.workLead}
+            </p>
+          </div>
+
+          <ul className="mt-16 grid gap-10 md:grid-cols-3 md:gap-6">
+            {work.projects.map((p, i) => (
+              <li key={p.slug} data-reveal style={delay(80 * i)}>
+                <Link href={`${href(lang, "/work")}#${p.slug}`} className="group block">
+                  <div className="relative overflow-hidden rounded-[16px] border border-white/12 bg-surface p-1.5 shadow-[0_30px_80px_-40px_rgb(124_77_255/0.55)] transition-[translate,border-color,box-shadow] duration-500 group-hover:-translate-y-1.5 group-hover:border-lav/40 group-hover:shadow-[0_40px_90px_-36px_rgb(124_77_255/0.8)]">
+                    <div className="relative aspect-[16/10] overflow-hidden rounded-[11px]">
+                      <Image
+                        src={p.image}
+                        alt={p.imageAlt}
+                        fill
+                        placeholder="blur"
+                        sizes="(min-width: 1440px) 440px, (min-width: 768px) 32vw, calc(100vw - 32px)"
+                        className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-6 flex items-center gap-3 text-xs font-medium tracking-[0.16em] text-dim">
+                    <span>{String(i + 1).padStart(2, "0")}</span>
+                    <span aria-hidden="true" className="h-px w-6 bg-[linear-gradient(90deg,transparent,#a67bff)] rtl:-scale-x-100" />
+                    <span className="text-[#c6adff]">{p.category}</span>
+                  </p>
+                  <h3 className="mt-3 flex items-start justify-between gap-4 font-display text-[clamp(22px,1.9vw,28px)] font-semibold leading-tight tracking-[-0.025em] transition-colors group-hover:text-[#d9c6ff]">
+                    {p.name}
+                    <ArrowIcon className="mt-2 text-muted transition-[translate,color] duration-300 group-hover:translate-x-1 group-hover:text-ink rtl:group-hover:-translate-x-1" />
+                  </h3>
+                  <p className="mt-2 text-muted">{p.oneLiner}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div data-reveal className="mt-12">
+            <Button href={href(lang, "/work")} variant="ghost" arrow>
+              {home.workLink}
             </Button>
           </div>
         </div>

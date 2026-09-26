@@ -25,6 +25,12 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - `src/components/motion/PageTransition.tsx` is a React `<ViewTransition>` keyed by pathname and wraps the page in the layout. The CSS lives in globals.css (`page-exit` / `page-enter`). The navbar has `view-transition-name: site-header`, so it stays fixed during the transition. Reduced motion turns it off.
 - `SmoothScroll` now scrolls every new page to the top. Lenis used to keep the old scroll position. Back/forward and `#hash` links are left to the browser.
 
+## Site audit (done)
+- The home page has a "Selected work" section (3 cards → `/work#slug`), placed after the services and before "How we work".
+- The home page has Organization JSON-LD with confirmed details only. The 404 has its own tab title.
+- Every EN/AR page was checked at 1440 and 390: all return 200, no broken links, no horizontal overflow, and axe finds no violations.
+- Known and harmless: from the Arabic pages, a few prefetches of English URLs (e.g. `/services?_rsc=…`) return 404. The client router guesses `/services` = `/[lang]` because the English routes are rewritten in `proxy.ts`, then fetches the correct one. Navigation works normally.
+
 ## Later
 - Contact form setup: Resend keys `RESEND_API_KEY` / `CONTACT_TO_EMAIL`, lead storage, Turnstile.
 - WhatsApp: the real number is needed (the old number opens "Waqar"; it's hidden in `src/lib/site.ts`).
