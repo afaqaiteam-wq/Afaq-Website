@@ -94,9 +94,19 @@
   }
 }
 
-/* Elements the hero intro reveals stay hidden only when JS is running (html.js). */
+/*
+ * Elements the hero intro reveals stay hidden only when JS is running (html.js).
+ * The hero engine removes data-intro after its first frame; if scripts never run,
+ * the failsafe shows everything after 5s.
+ */
 .js [data-intro] {
   opacity: 0;
+  animation: intro-failsafe 0s linear 5s forwards;
+}
+@keyframes intro-failsafe {
+  to {
+    opacity: 1;
+  }
 }
 
 /* The logo's own light: a glint on the star and a sweep across the chrome. */
