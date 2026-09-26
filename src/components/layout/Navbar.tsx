@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
+import { HomeLink } from "@/components/layout/HomeLink";
 import { Button } from "@/components/ui/Button";
 import { href, stripLocale, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
@@ -104,10 +105,10 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
       }`}
     >
       <div className="relative z-10 mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-8 lg:px-14">
-        <Link href={href(lang, "/")} className="flex items-center gap-2.5" aria-label={siteName}>
+        <HomeLink lang={lang} className="flex items-center gap-2.5" label={siteName}>
           <LogoMark size={34} priority />
           <span className="font-display text-lg font-semibold tracking-[-0.02em]">{siteName}</span>
-        </Link>
+        </HomeLink>
 
         <nav aria-label={nav.main} className="hidden lg:block">
           <ul className="flex gap-1 rounded-pill border border-line bg-surface/60 p-1.5 text-sm">

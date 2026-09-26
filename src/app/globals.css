@@ -204,14 +204,50 @@
   animation: menu-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Small label above a heading. Arabic gets a larger, upright, untracked version. */
+/*
+ * Chrome text: the silver of the logo, with a light that sweeps across it now and then.
+ * Put it on each word (the hero splits headings into words); stagger animation-delay
+ * per word so the light travels across the line.
+ */
+@keyframes chrome-sweep {
+  0%,
+  62% {
+    background-position: 140% 0, 0 0;
+  }
+  100% {
+    background-position: -40% 0, 0 0;
+  }
+}
+@utility text-chrome {
+  background-image:
+    linear-gradient(100deg, transparent 40%, rgb(255 255 255 / 0.95) 50%, transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #ebe7f3 36%, #a39db6 64%, #f1eef7 100%);
+  background-size: 280% 100%, 100% 100%;
+  background-position: 140% 0, 0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: chrome-sweep 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Small label above a heading, led by a short horizon line. Arabic gets a larger, upright version. */
 @utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 12px;
   line-height: 1;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-lav);
+  color: var(--color-soft);
+  &::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-lav));
+  }
   html[lang="ar"] & {
     font-size: 14px;
     font-weight: 600;

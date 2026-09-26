@@ -11,25 +11,33 @@ import { site } from "@/lib/site";
 
 import { LABELS } from "./constellation";
 import { startHero, type HeroPanel } from "./engine";
-import { TOOLS } from "./orbits";
+import { BODIES } from "./orbits";
+import { EVENODD, TOOL_LOGOS } from "./toolLogos";
 
 /*
  * The home page opening: one pinned stage, four scenes, driven by scroll.
  *   1. Ignition       a warp through the stars, the logo's star lights, the mark resolves
- *   2. Orbits         the tools we build with orbit the mark, passing behind and in front of it
+ *   2. Orbits         the tools we build with orbit the mark as planets on real (Keplerian) orbits
  *   3. Constellation  the tools fly to stars that draw the A; each service star lights in turn
  *   4. Finale         the lines pull into the guiding star, a flash, the mark returns with the CTA
  * This component only renders the DOM; ./engine.ts animates it.
  */
 
-/** Splits a line into word spans so the engine can reveal them one by one. */
-function Words({ text }: { text: string }) {
+/**
+ * Splits a line into word spans so the engine can reveal them one by one.
+ *  gives the words the logo's silver, with a light sweeping across them in turn.
+ */
+function Words({ text, chrome = false }: { text: string; chrome?: boolean }) {
   const words = text.split(" ");
   return (
     <>
       {words.map((w, i) => (
         <Fragment key={i}>
-          <span data-word className="inline-block will-change-[transform,opacity]">
+          <span
+            data-word
+            className={`inline-block will-change-[transform,opacity] ${chrome ? "text-chrome" : ""}`}
+            style={chrome ? { animationDelay: `${i * 0.09}s` } : undefined}
+          >
             {w}
           </span>
           {i < words.length - 1 ? " " : null}
@@ -73,6 +81,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
         chips: q<HTMLElement>("[data-chip]"),
         chipPills: q<HTMLElement>("[data-pill]"),
         chipLabels: q<HTMLElement>("[data-chip-label]"),
+        chipStars: q<HTMLElement>("[data-star]"),
         labels: q<HTMLElement>("[data-label]"),
         flare: one<SVGGElement>("[data-flare]"),
         waves: q<SVGCircleElement>("[data-wave]"),
@@ -143,20 +152,35 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
 
         <canvas data-layer="front" className={`pointer-events-none absolute inset-0 z-[5] h-full w-full ${underNav}`} aria-hidden="true" />
 
-        {TOOLS.map((tool) => (
+        {BODIES.map((body) => (
           <div
-            key={tool.name}
+            key={body.name}
             data-chip
             aria-hidden="true"
             dir="ltr"
-            className="pointer-events-none absolute left-0 top-0 z-[2] flex h-8 origin-[14.5px_16px] items-center gap-2 whitespace-nowrap ps-[11px] pe-[13px] text-[13.5px] font-medium text-[#ece8f5] opacity-0 will-change-[transform,opacity] [--lit:0]"
+            className="pointer-events-none absolute left-0 top-0 z-[2] size-[34px] opacity-0 will-change-[transform,opacity] [--lit:0]"
           >
-            {/* The pill fades away as the tool becomes a star; the engine hides it completely. */}
-            <span data-pill className="absolute inset-0 rounded-pill border border-lav/25 bg-[rgba(18,14,30,.86)] backdrop-blur-[8px]" />
-            <span className="relative size-[7px] shrink-0 rounded-full bg-[#ede4ff] [box-shadow:0_0_calc(10px_+_var(--lit)*14px)_#c8a8ff,0_0_calc(22px_+_var(--lit)*26px)_rgba(200,168,255,.5)]" />
-            <span data-chip-label className="relative">
-              {tool.name}
+            {/* The planet: a small glass sphere carrying the tool's logo. It fades away as the tool becomes a star. */}
+            <span
+              data-pill
+              className="absolute inset-0 flex items-center justify-center rounded-full border border-white/15 bg-[radial-gradient(circle_at_34%_28%,rgba(255,255,255,.16),rgba(26,20,42,.94)_58%,rgba(10,8,18,.96))] shadow-[inset_0_1px_0_rgba(255,255,255,.2),inset_0_-6px_12px_rgba(0,0,0,.45),0_8px_22px_rgba(0,0,0,.5)]"
+            >
+              <svg viewBox="0 0 24 24" className="size-4 text-[#f1edf8]" fill="currentColor" aria-hidden="true">
+                {TOOL_LOGOS[body.name].map((d, i) => (
+                  <path key={i} d={d} fillRule={EVENODD.has(body.name) ? "evenodd" : "nonzero"} />
+                ))}
+              </svg>
             </span>
+            <span
+              data-chip-label
+              className="absolute left-1/2 top-[40px] -translate-x-1/2 whitespace-nowrap text-[11.5px] font-medium tracking-[0.02em] text-soft"
+            >
+              {body.name}
+            </span>
+            <span
+              data-star
+              className="absolute left-1/2 top-1/2 size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ede4ff] opacity-0 [box-shadow:0_0_calc(10px_+_var(--lit)*14px)_#c8a8ff,0_0_calc(22px_+_var(--lit)*26px)_rgba(200,168,255,.5)]"
+            />
           </div>
         ))}
 
@@ -204,7 +228,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
             {hero.eyebrow}
           </p>
           <h1 className="mx-auto mt-4 max-w-[16em] font-display text-[clamp(34px,4.6vw,64px)] font-semibold leading-[1.04] tracking-[-0.035em]">
-            <Words text={hero.title} />
+            <Words text={hero.title} /> <span className="block"><Words text={hero.titleAccent} chrome /></span>
           </h1>
           <p data-rest className="mx-auto mt-4 max-w-[36em] text-[clamp(16px,1.2vw,18px)] text-muted">
             <span className="hidden sm:inline">{hero.lead}</span>
@@ -226,7 +250,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
             {hero.stack.eyebrow}
           </p>
           <h2 className={h2}>
-            <Words text={hero.stack.title} /> <span className="block text-soft"><Words text={hero.stack.titleSoft} /></span>
+            <Words text={hero.stack.title} /> <span className="block"><Words text={hero.stack.titleSoft} chrome /></span>
           </h2>
           <p data-rest className={lead}>
             {hero.stack.lead}
@@ -239,7 +263,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
             {hero.services.eyebrow}
           </p>
           <h2 className={h2}>
-            <Words text={hero.services.title} /> <span className="block text-soft"><Words text={hero.services.titleSoft} /></span>
+            <Words text={hero.services.title} /> <span className="block"><Words text={hero.services.titleSoft} chrome /></span>
           </h2>
           <p data-rest className={`${lead} hidden min-[1100px]:block`}>
             {hero.services.lead}
@@ -265,7 +289,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
             {hero.finale.eyebrow}
           </p>
           <h2 className={`${h2} mx-auto max-w-[18em]`}>
-            <Words text={hero.finale.title} />
+            <Words text={hero.finale.title} /> <span className="block"><Words text={hero.finale.titleAccent} chrome /></span>
           </h2>
           <p data-rest className="mx-auto mt-4 max-w-[34em] text-muted">
             {hero.finale.lead}

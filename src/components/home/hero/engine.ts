@@ -2,11 +2,10 @@ import gsap from "gsap";
 
 import { LABELS, NODES, NODE_FOR_TOOL, PATH, drawMesh, drawOutline, type Pt } from "./constellation";
 import { makeGlowSprite, stamp } from "./glow";
-import { RINGS, TOOLS, TOOL_PHASE, drawComet, drawRing, project, type RingView } from "./orbits";
+import { BODIES, MAX_A, drawOrbit, drawTrail, eccentricAnomaly, meanAnomaly, projectAt, type Camera } from "./orbits";
 import { Starfield } from "./starfield";
 import {
   T,
-  WARP_GATES,
   at,
   bell,
   clamp,
@@ -45,6 +44,7 @@ export interface HeroElements {
   chips: HTMLElement[];
   chipPills: HTMLElement[];
   chipLabels: HTMLElement[];
+  chipStars: HTMLElement[];
   labels: HTMLElement[];
   flare: SVGGElement;
   waves: SVGCircleElement[];
@@ -68,10 +68,7 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
 
   const state = {
     p: 0,
-    /** scroll speed, in progress per second (smoothed) */
-    sv: 0,
     warp: reduced ? 0 : 1,
-    pulse: 0,
     ignite: reduced ? 1 : 0,
     reveal: reduced ? 1 : 0,
     introText: reduced ? 1 : 0,
@@ -106,10 +103,6 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     scrollable = Math.max(1, el.story.offsetHeight - H);
     el.svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     stars.resize(wide ? 620 : 260);
-  };
-
-  const warpPulse = () => {
-    gsap.fromTo(state, { pulse: 1 }, { pulse: 0, duration: 1.5, ease: "power2.out", overwrite: "auto" });
   };
 
   /** Scroll-scrubbed copy: words rise out of a blur one after another, and leave the same way. */
@@ -151,12 +144,9 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
 
     // ---- scroll progress: eased for small steps, snapped for big jumps (anchors, End key) ----
     const target = clamp((window.scrollY - storyTop) / scrollable);
-    const prevP = state.p;
     state.p =
       reduced || Math.abs(target - state.p) > 0.2 ? target : state.p + (target - state.p) * (1 - Math.exp(-dt * 5.5));
     const p = state.p;
-    state.sv += (Math.abs(p - prevP) / dt - state.sv) * 0.15;
-    if (!reduced) for (const g of WARP_GATES) if (prevP < g !== p < g) warpPulse();
     state.mx += (state.tmx - state.mx) * 0.06;
     state.my += (state.tmy - state.my) * 0.06;
     if (window.scrollY > storyTop + scrollable + H) return; // hero is off screen
@@ -186,9 +176,9 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     el.ignite.style.opacity = (state.ignite * (1 - reveal) * (1 - move)).toFixed(3);
     el.ignite.style.transform = `translate(-50%,-50%) scale(${lerp(0.2, 1.6, state.ignite).toFixed(3)})`;
 
-    // ---- starfield (always drifting towards the viewer; warps on load and between scenes) ----
+    // ---- starfield: a slow drift towards the viewer; the warp only plays on load ----
     const constel = at([0.44, 0.5], p) * (1 - at(T.retract, p));
-    const speed = reduced ? 0 : 0.035 + state.warp * 1.9 + state.pulse * 0.95 + Math.min(1.3, state.sv * 2.4);
+    const speed = reduced ? 0 : 0.035 + state.warp * 1.9;
     bctx.globalCompositeOperation = "source-over";
     fctx.globalCompositeOperation = "source-over";
     bctx.clearRect(0, 0, W, H);
@@ -197,34 +187,34 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     const vy = lerp(H * 0.45, cy, 0.35) + state.my * 12;
     stars.draw(bctx, W, H, vx, vy, t, dt, speed, 1 - 0.35 * constel, white);
 
-    // ---- orbits ----
+    // ---- orbits: a 3D planetary system; the camera rises and turns as the scene scrolls by ----
     bctx.globalCompositeOperation = "lighter";
     fctx.globalCompositeOperation = "lighter";
     const open = easeOutCubic(at(T.ringsOpen, p));
     const out = at(T.ringsOut, p);
     const ringAlpha = open * (1 - out);
-    // On phones keep the outer orbit plus a chip (dot on the orbit, label to its right) on screen.
-    const fit = wide ? 1 : Math.min(1, (W / 2 - 96) / (Ls * RINGS[2].size));
-    // Phones get rounder orbits so the tools spread vertically instead of piling up.
-    const tilt = lerp(1.5, wide ? 1.2 : 1.02, open) + out * 0.2 + state.my * 0.05;
-    const scrollSpin = at([0.08, 0.5], p) * 2.2;
-    const persp = Ls * RINGS[2].size * fit * 7;
-    const views: RingView[] = RINGS.map((ring) => ({
+    const fit = wide ? 1 : Math.min(1, (W / 2 - 26) / (Ls * MAX_A));
+    const D2R = Math.PI / 180;
+    const orbitScene = at([0.1, 0.4], p);
+    const cam: Camera = {
       cx,
       cy,
-      r: Ls * ring.size * fit * lerp(0.84, 1, open) * lerp(1, 1.12, out),
-      tilt,
-      roll: ring.roll + state.mx * 0.04,
-      persp,
-    }));
-    const spins = RINGS.map((ring, k) => ring.dir * ((reduced ? 0 : ring.speed * t) + scrollSpin * (0.8 + k * 0.15)));
+      scale: Ls * fit,
+      elev: (lerp(3, wide ? 26 : 32, open) + out * 12 + state.my * 3) * D2R,
+      azim: (lerp(-38, 28, orbitScene) + state.mx * 6) * D2R,
+      dist: Ls * fit * MAX_A * 4.5,
+    };
+    const radiusScale = lerp(0.82, 1, open) * lerp(1, 1.12, out);
+    // scrolling through the scene also moves time forward a little
+    const tt = reduced ? 0 : t + at([0.08, 0.5], p) * 16;
+    const anomalies = BODIES.map((b) => eccentricAnomaly(meanAnomaly(b, tt), b.e));
     if (ringAlpha > 0.004) {
-      RINGS.forEach((ring, k) => {
-        const drawTo = clamp(open * 1.35 - k * 0.14);
-        const drawFrom = clamp(out * 1.3 - k * 0.1);
-        drawRing(bctx, fctx, views[k], spins[k], ringAlpha, drawFrom, drawTo, wide ? 180 : 120);
-        const head = spins[k] + ring.dir * (reduced ? 0 : t * 0.55 + k * 2.1);
-        drawComet(bctx, fctx, views[k], head, ring.dir, ringAlpha * 0.9 * clamp(drawTo * 1.2 - 0.2), lav);
+      BODIES.forEach((b, j) => {
+        if (!wide && !b.phone) return;
+        const to = clamp(open * 1.4 - j * 0.045);
+        const from = clamp(out * 1.3 - j * 0.03);
+        drawOrbit(bctx, fctx, b, cam, ringAlpha, from, to, wide ? 110 : 72, radiusScale);
+        drawTrail(bctx, fctx, b, anomalies[j], cam, ringAlpha * clamp(to * 1.5 - 0.4), radiusScale, lav);
       });
     }
 
@@ -248,15 +238,17 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
       return i < 0 ? 0 : lit[i];
     };
 
-    // ---- tools: pop onto their orbits, fly along curves to their stars, then gather into the apex ----
+    // ---- tools: planets on their orbits → stars of the A → gathered into the guiding star ----
     const chipsIn = at(T.chipsIn, p);
     const flyP = at(T.chipsFly, p);
-    TOOLS.forEach((tool, j) => {
+    const labelWants: { j: number; x: number; y: number; o: number; depth: number }[] = [];
+    BODIES.forEach((b, j) => {
       const chip = el.chips[j];
       if (!chip) return;
-      const o = project(views[tool.ring], spins[tool.ring] + TOOL_PHASE[j]);
-      const f01 = clamp((o.depth + 1) / 2);
-      const appearRaw = clamp((chipsIn - j * 0.055) / 0.5);
+      const shown = wide || b.phone;
+      const o = projectAt(b, anomalies[j], cam, radiusScale);
+      const f01 = clamp(0.5 + o.depth / 2.4);
+      const appearRaw = clamp((chipsIn - j * 0.05) / 0.5);
       const appear = easeOutBack(appearRaw);
       const fly = easeInOutCubic(clamp((flyP - j * 0.04) / 0.62));
       const node = pts[NODE_FOR_TOOL[j]];
@@ -284,26 +276,42 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
       }
       const glowUp = litOfNode(NODE_FOR_TOOL[j]);
       if (glowUp > 0.01) stamp(fctx, lav, x, y, 14 + 12 * glowUp, glowUp * 0.8);
-      // far side of the orbit: smaller, dimmer and slightly out of focus, so the near side leads
-      const base = wide ? 0.8 + 0.2 * f01 : 0.74 + 0.14 * f01;
-      const scale = lerp(base * Math.max(0.001, appear), 1 + 0.45 * glowUp, fly) * (1 - 0.5 * cj);
-      // on phones the far side of the orbits is left to the rings alone
-      const farFade = wide ? 0.4 + 0.6 * f01 : clamp((f01 - 0.35) * 2.2);
-      const opacity = clamp(appearRaw * 3) * lerp(farFade, 1, fly) * (1 - sstep(0.75, 1, cj));
-      const defocus = (1 - fly) * clamp(-o.depth) * 1.4;
+
+      // perspective size, clamped so near planets never balloon
+      const size = clamp(o.k, 0.8, 1.2) * (wide ? 1 : 0.86);
+      const scale = lerp(size * Math.max(0.001, appear), 1 + 0.45 * glowUp, fly) * (1 - 0.5 * cj);
+      // far side: dimmer and slightly out of focus; phones only keep the near side
+      const farFade = wide ? 0.45 + 0.55 * f01 : clamp((f01 - 0.3) * 2.4);
+      const planetVisible = shown ? 1 : fly;
+      const opacity = clamp(appearRaw * 3) * lerp(farFade, 1, fly) * (1 - sstep(0.75, 1, cj)) * planetVisible;
+      const defocus = (1 - fly) * clamp(-o.depth) * 1.2;
+
       const pill = el.chipPills[j];
       if (pill) {
         pill.style.opacity = (1 - fly).toFixed(3);
         pill.style.visibility = fly > 0.99 ? "hidden" : "visible";
       }
-      const label = el.chipLabels[j];
-      if (label) label.style.opacity = clamp(1 - fly * 1.6).toFixed(3);
+      labelWants.push({ j, x, y, o: clamp(1 - fly * 1.8) * clamp((o.depth - 0.1) * 2.5) * (shown ? 1 : 0), depth: o.depth });
+      const star = el.chipStars[j];
+      if (star) star.style.opacity = fly.toFixed(3);
       chip.style.setProperty("--lit", glowUp.toFixed(3));
-      chip.style.transform = `translate3d(${(x - 14.5).toFixed(1)}px,${(y - 16).toFixed(1)}px,0) scale(${scale.toFixed(3)})`;
+      chip.style.transform = `translate3d(${(x - 17).toFixed(1)}px,${(y - 17).toFixed(1)}px,0) scale(${scale.toFixed(3)})`;
       chip.style.opacity = opacity.toFixed(3);
       chip.style.zIndex = fly > 0.5 || o.depth > 0 ? "6" : "2";
       chip.style.filter = wide && defocus > 0.05 ? `blur(${defocus.toFixed(2)}px)` : "none";
     });
+
+    // Names only for near planets, and never on top of another name: nearest wins.
+    const kept: { x: number; y: number }[] = [];
+    labelWants
+      .sort((a, b) => b.depth - a.depth)
+      .forEach((w) => {
+        const free = kept.every((k) => Math.abs(k.x - w.x) > 78 || Math.abs(k.y - w.y) > 26);
+        const o = free ? w.o : 0;
+        if (o > 0.05) kept.push({ x: w.x, y: w.y });
+        const label = el.chipLabels[w.j];
+        if (label) label.style.opacity = o.toFixed(3);
+      });
 
     // ---- constellation lines, labels, the guiding star, flash and light waves ----
     drawMesh(fctx, pts, at([0.54, 0.62], p) * (1 - retract));

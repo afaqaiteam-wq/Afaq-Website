@@ -2,137 +2,179 @@ import { stamp } from "./glow";
 import { TAU, clamp } from "./timeline";
 
 /*
- * Three orbits around the logo, seen from slightly above. Each ring is a circle tilted
- * away from the viewer (so it reads as a flat ellipse) with a small fixed roll. The rings
- * never drift in orientation: only positions ALONG a ring move over time and with scroll.
+ * A small planetary system around the logo, following real orbital mechanics:
  *
- * Depth is real: every segment knows whether it is behind or in front of the logo and is
- * drawn onto the back or front canvas accordingly, so the orbits pass behind the mark.
+ *  - Each tool has its own Keplerian orbit: an ellipse with the logo at one FOCUS
+ *    (not the centre), defined by semi-major axis a, eccentricity e, inclination i,
+ *    longitude of the ascending node Ω and argument of periapsis ω.
+ *  - Like a real planetary system the orbits are nearly coplanar (inclinations of a degree
+ *    or two) and nested, so they never tangle; depth comes from the camera and perspective.
+ *  - Kepler's 2nd law: a body moves faster near periapsis. We solve Kepler's equation
+ *    M = E − e·sin E for the eccentric anomaly E every frame.
+ *  - Kepler's 3rd law: the period grows as a^1.5, so inner tools circle faster.
+ *
+ * The camera looks at the reference plane from an elevation φ and azimuth θ. Both are
+ * driven by scroll within fixed limits — nothing accumulates, so the view never drifts.
  */
 
-export const RINGS = [
-  { size: 0.8, roll: -0.16, speed: 0.09, dir: 1 },
-  { size: 1.1, roll: 0.1, speed: 0.062, dir: -1 },
-  { size: 1.42, roll: -0.04, speed: 0.045, dir: 1 },
-] as const;
+export interface Body {
+  name: string;
+  /** semi-major axis, in logo sizes */
+  a: number;
+  e: number;
+  /** inclination, degrees */
+  inc: number;
+  /** longitude of the ascending node, degrees */
+  node: number;
+  /** argument of periapsis, degrees */
+  peri: number;
+  /** mean anomaly at t = 0, radians */
+  m0: number;
+  /** shown on phones (fewer orbits fit) */
+  phone: boolean;
+}
 
-export const TOOLS = [
-  { name: "OpenAI", ring: 0 },
-  { name: "n8n", ring: 0 },
-  { name: "Claude", ring: 1 },
-  { name: "Python", ring: 1 },
-  { name: "Next.js", ring: 1 },
-  { name: "Gemini", ring: 2 },
-  { name: "AWS", ring: 2 },
-  { name: "Supabase", ring: 2 },
-  { name: "Docker", ring: 2 },
-] as const;
+/**
+ * Same order as NODE_FOR_TOOL in constellation.ts. Starting positions are spread by the
+ * golden angle (≈2.4 rad) in order of distance, so the planets don't start bunched up.
+ */
+export const BODIES: Body[] = [
+  { name: "OpenAI", a: 0.62, e: 0.03, inc: 1.2, node: 20, peri: 40, m0: 0, phone: true },
+  { name: "n8n", a: 0.82, e: 0.04, inc: -1.5, node: 250, peri: 95, m0: 4.8, phone: true },
+  { name: "Claude", a: 0.72, e: 0.05, inc: 2, node: 140, peri: 210, m0: 2.4, phone: true },
+  { name: "Python", a: 1.02, e: 0.03, inc: -1, node: 195, peri: 20, m0: 3.4, phone: true },
+  { name: "Next.js", a: 1.12, e: 0.05, inc: 1.8, node: 320, peri: 150, m0: 5.8, phone: false },
+  { name: "Gemini", a: 0.92, e: 0.06, inc: -2.2, node: 60, peri: 300, m0: 1, phone: false },
+  { name: "AWS", a: 1.23, e: 0.04, inc: 0.8, node: 100, peri: 260, m0: 2, phone: true },
+  { name: "Supabase", a: 1.34, e: 0.05, inc: -1.4, node: 230, peri: 60, m0: 4.4, phone: false },
+  { name: "Docker", a: 1.45, e: 0.03, inc: 1.1, node: 5, peri: 330, m0: 0.6, phone: true },
+];
 
-/** Evenly spaced starting angle of each tool on its ring (rings offset so chips don't line up). */
-export const TOOL_PHASE: number[] = TOOLS.map((tool) => {
-  const onRing = TOOLS.filter((t) => t.ring === tool.ring);
-  const idx = onRing.findIndex((t) => t.name === tool.name);
-  return (idx / onRing.length) * TAU + tool.ring * 0.75 + 0.4;
-});
+export const MAX_A = Math.max(...BODIES.map((b) => b.a * (1 + b.e)));
 
-export interface RingView {
+/** Orbital period (seconds) of a body with a = 1. */
+const BASE_PERIOD = 34;
+const D2R = Math.PI / 180;
+
+export interface Camera {
   cx: number;
   cy: number;
-  r: number;
-  tilt: number;
-  roll: number;
-  persp: number;
+  /** pixels per logo size */
+  scale: number;
+  /** elevation above the reference plane, radians */
+  elev: number;
+  /** azimuth, radians */
+  azim: number;
+  /** perspective distance, pixels */
+  dist: number;
 }
 
 export interface Projected {
   x: number;
   y: number;
-  /** -1 (far side, behind the logo) … 1 (near side, in front of it) */
+  /** distance towards the viewer, in logo sizes (negative = behind the logo) */
   depth: number;
-  /** perspective scale at this point */
+  /** perspective scale */
   k: number;
 }
 
-export function project(v: RingView, a: number): Projected {
-  const x = Math.cos(a) * v.r;
-  const y0 = Math.sin(a) * v.r;
-  const z = y0 * Math.sin(v.tilt);
-  const y = y0 * Math.cos(v.tilt);
-  const k = v.persp / (v.persp - z);
-  const cr = Math.cos(v.roll);
-  const sr = Math.sin(v.roll);
-  return {
-    x: v.cx + (x * cr - y * sr) * k,
-    y: v.cy + (x * sr + y * cr) * k,
-    depth: z / v.r,
-    k,
-  };
+/** Mean anomaly of a body at time t (seconds). */
+export const meanAnomaly = (b: Body, t: number) => b.m0 + (TAU / (BASE_PERIOD * Math.pow(b.a, 1.5))) * t;
+
+/** Solves Kepler's equation M = E − e·sin E (Newton's method). */
+export function eccentricAnomaly(M: number, e: number) {
+  let E = M;
+  for (let k = 0; k < 6; k++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  return E;
 }
 
-const front01 = (d: number) => clamp((d + 1) / 2);
+/** Position of a body at eccentric anomaly E, projected through the camera. */
+export function projectAt(b: Body, E: number, cam: Camera, radiusScale = 1): Projected {
+  const a = b.a * radiusScale;
+  // in the orbital plane, with the focus (the logo) at the origin
+  const xo = a * (Math.cos(E) - b.e);
+  const yo = a * Math.sqrt(1 - b.e * b.e) * Math.sin(E);
+  // orient the orbit: ω about z, i about x, Ω about z
+  const w = b.peri * D2R;
+  const i = b.inc * D2R;
+  const n = b.node * D2R;
+  const x1 = xo * Math.cos(w) - yo * Math.sin(w);
+  const y1 = xo * Math.sin(w) + yo * Math.cos(w);
+  const y2 = y1 * Math.cos(i);
+  const z2 = y1 * Math.sin(i);
+  const X = x1 * Math.cos(n) - y2 * Math.sin(n);
+  const Y = x1 * Math.sin(n) + y2 * Math.cos(n);
+  const Z = z2;
+  // camera: turn by the azimuth, then look down at the plane from the elevation
+  const xa = X * Math.cos(cam.azim) - Y * Math.sin(cam.azim);
+  const ya = X * Math.sin(cam.azim) + Y * Math.cos(cam.azim);
+  const depth = -ya * Math.cos(cam.elev) + Z * Math.sin(cam.elev);
+  const up = ya * Math.sin(cam.elev) + Z * Math.cos(cam.elev);
+  const k = cam.dist / (cam.dist - depth * cam.scale);
+  return { x: cam.cx + xa * cam.scale * k, y: cam.cy - up * cam.scale * k, depth, k };
+}
 
-/** Draws the part of a ring between `from` and `to` (fractions of the loop), with beads. */
-export function drawRing(
+const front01 = (depth: number) => clamp(0.5 + depth / 2.4);
+
+/** Draws a whole orbit (or the part between `from` and `to`), split behind/in front of the logo. */
+export function drawOrbit(
   back: CanvasRenderingContext2D,
   front: CanvasRenderingContext2D,
-  v: RingView,
-  spin: number,
+  b: Body,
+  cam: Camera,
   alpha: number,
   from: number,
   to: number,
   seg: number,
+  radiusScale: number,
 ) {
   if (alpha < 0.004 || to <= from) return;
   const start = Math.floor(seg * from);
   const end = Math.ceil(seg * to);
-  let prev = project(v, spin + (start / seg) * TAU);
+  let prev = projectAt(b, (start / seg) * TAU, cam, radiusScale);
   for (let i = start + 1; i <= end; i++) {
-    const q = project(v, spin + (i / seg) * TAU);
-    const f = front01((prev.depth + q.depth) / 2);
-    const ctx = prev.depth + q.depth < 0 ? back : front;
-    ctx.strokeStyle = `rgba(200,168,255,${(alpha * (0.14 + 0.52 * f)).toFixed(3)})`;
-    ctx.lineWidth = (0.75 + 0.55 * f) * q.k;
+    const q = projectAt(b, (i / seg) * TAU, cam, radiusScale);
+    const d = (prev.depth + q.depth) / 2;
+    const f = front01(d);
+    const ctx = d < 0 ? back : front;
+    ctx.strokeStyle = `rgba(214,196,255,${(alpha * (0.05 + 0.22 * f)).toFixed(3)})`;
+    ctx.lineWidth = 0.8 * q.k;
     ctx.beginPath();
     ctx.moveTo(prev.x, prev.y);
     ctx.lineTo(q.x, q.y);
     ctx.stroke();
-    if (i % 5 === 0) {
-      ctx.fillStyle = `rgba(234,224,255,${(alpha * (0.18 + 0.6 * f)).toFixed(3)})`;
-      ctx.beginPath();
-      ctx.arc(q.x, q.y, (0.8 + 0.8 * f) * q.k, 0, TAU);
-      ctx.fill();
-    }
     prev = q;
   }
 }
 
-/** A bright comet running along a ring, with a fading tail behind it. */
-export function drawComet(
+/** The bright arc a body leaves behind it along its orbit. */
+export function drawTrail(
   back: CanvasRenderingContext2D,
   front: CanvasRenderingContext2D,
-  v: RingView,
-  head: number,
-  dir: number,
+  b: Body,
+  E: number,
+  cam: Camera,
   alpha: number,
+  radiusScale: number,
   sprite: HTMLCanvasElement,
 ) {
   if (alpha < 0.004) return;
-  const steps = 24;
-  const span = 0.95;
-  let prev = project(v, head);
+  const steps = 16;
+  const span = 0.42;
+  let prev = projectAt(b, E, cam, radiusScale);
   for (let j = 1; j <= steps; j++) {
-    const q = project(v, head - dir * (j / steps) * span);
-    const fade = Math.pow(1 - j / steps, 2);
-    const f = front01((prev.depth + q.depth) / 2);
-    const ctx = prev.depth + q.depth < 0 ? back : front;
-    ctx.strokeStyle = `rgba(238,230,255,${(alpha * fade * (0.3 + 0.7 * f)).toFixed(3)})`;
-    ctx.lineWidth = (0.6 + 1.6 * fade) * q.k;
+    const q = projectAt(b, E - (j / steps) * span, cam, radiusScale);
+    const fade = Math.pow(1 - j / steps, 1.6);
+    const d = (prev.depth + q.depth) / 2;
+    const ctx = d < 0 ? back : front;
+    ctx.strokeStyle = `rgba(240,232,255,${(alpha * fade * (0.18 + 0.45 * front01(d))).toFixed(3)})`;
+    ctx.lineWidth = (0.6 + 1.5 * fade) * q.k;
     ctx.beginPath();
     ctx.moveTo(prev.x, prev.y);
     ctx.lineTo(q.x, q.y);
     ctx.stroke();
     prev = q;
   }
-  const h = project(v, head);
-  stamp(h.depth < 0 ? back : front, sprite, h.x, h.y, 11 * h.k, alpha * (0.35 + 0.65 * front01(h.depth)));
+  const h = projectAt(b, E, cam, radiusScale);
+  stamp(h.depth < 0 ? back : front, sprite, h.x, h.y, 26 * h.k, alpha * 0.22);
 }

@@ -80,7 +80,7 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ lan
               display: "flex",
             }}
           >
-            {rtl ? <Words text={dict.meta.siteName} rtl gap={22} /> : dict.hero.title}
+            {rtl ? <Words text={dict.meta.siteName} rtl gap={22} /> : `${dict.hero.title} ${dict.hero.titleAccent}`}
           </div>
           {!rtl && <div style={{ fontSize: 30, color: "#a9a4b8", display: "flex" }}>{dict.meta.siteName}</div>}
         </div>
