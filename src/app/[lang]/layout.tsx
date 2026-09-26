@@ -6,6 +6,7 @@ import "../globals.css";
 
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { PageTransition } from "@/components/motion/PageTransition";
 import { RevealObserver } from "@/components/motion/RevealObserver";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { dirFor, isLocale, locales } from "@/i18n/config";
@@ -80,7 +81,9 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
         <SmoothScroll />
         <RevealObserver />
         <Navbar lang={lang} nav={dict.nav} common={dict.common} siteName={dict.meta.siteName} />
-        <main id="main">{children}</main>
+        <main id="main">
+          <PageTransition>{children}</PageTransition>
+        </main>
         <Footer lang={lang} dict={dict} />
       </body>
     </html>

@@ -100,6 +100,7 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
 
   return (
     <header
+      style={{ viewTransitionName: "site-header" }}
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled && !open ? "border-b border-line bg-bg/85 backdrop-blur-md" : "border-b border-transparent"
       }`}

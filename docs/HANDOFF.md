@@ -21,8 +21,11 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - The Sales & Invoicing stack is unknown, so it has no stack block. Add `tech` in `work.ts` once the user confirms it.
 - The user may send demo-data screenshots later. To use them, replace the webp files; the filenames stay the same.
 
+## Page transitions (done)
+- `src/components/motion/PageTransition.tsx` is a React `<ViewTransition>` keyed by pathname and wraps the page in the layout. The CSS lives in globals.css (`page-exit` / `page-enter`). The navbar has `view-transition-name: site-header`, so it stays fixed during the transition. Reduced motion turns it off.
+- `SmoothScroll` now scrolls every new page to the top. Lenis used to keep the old scroll position. Back/forward and `#hash` links are left to the browser.
+
 ## Later
-- Page transitions (View Transitions).
 - Contact form setup: Resend keys `RESEND_API_KEY` / `CONTACT_TO_EMAIL`, lead storage, Turnstile.
 - WhatsApp: the real number is needed (the old number opens "Waqar"; it's hidden in `src/lib/site.ts`).
 - Domain and business email.
