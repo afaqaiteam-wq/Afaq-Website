@@ -33,7 +33,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - Known and harmless: from the Arabic pages, a few prefetches of English URLs (e.g. `/services?_rsc=…`) return 404. The client router guesses `/services` = `/[lang]` because the English routes are rewritten in `proxy.ts`, then fetches the correct one. Navigation works normally.
 
 ## Later
-- Contact form setup: Resend keys `RESEND_API_KEY` / `CONTACT_TO_EMAIL`, lead storage, Turnstile.
+- Contact form setup: Resend keys `RESEND_API_KEY` / `CONTACT_TO_EMAIL`, lead storage, Turnstile. Until both keys are set, `/contact` shows an "Email us directly" panel instead of the form. The check happens at build time, so after adding the keys in Vercel, redeploy and the form comes back.
 - WhatsApp: the real number is needed (the old number opens "Waqar"; it's hidden in `src/lib/site.ts`).
 - Domain and business email.
-- Merge to `main` at launch.
+- Merge to `main` at launch (PR opened from `next-rebuild`).

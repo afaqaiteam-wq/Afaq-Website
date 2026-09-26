@@ -90,6 +90,11 @@ export const en = {
     orBook: "Prefer to talk?",
     orBookLead: "Pick a 30-minute slot and we'll walk through it together.",
     emailLabel: "Email",
+    direct: {
+      title: "Email us directly",
+      lead: "Send a few lines on what happens today and what should happen instead, and we'll reply by email.",
+      cta: "Write an email",
+    },
     form: {
       name: "Your name",
       email: "Work email",
