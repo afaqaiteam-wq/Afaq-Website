@@ -1,0 +1,394 @@
+@import "tailwindcss";
+
+/*
+ * Afaq AI design tokens — the only place colors, fonts and radii are defined.
+ * Components use these through Tailwind utilities (bg-bg, text-muted, font-display…).
+ */
+@theme {
+  --color-bg: #07060b;
+  --color-surface: #0e0c15;
+  --color-raised: #15121f;
+  --color-ink: #f2f0f7;
+  --color-soft: #b9b4c8;
+  --color-muted: #a9a4b8;
+  --color-dim: #807a93;
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-lav: #c8a8ff;
+  --color-lav-hover: #dcc8ff;
+  --color-violet: #7c4dff;
+  --color-deep: #3f1d8f;
+  --color-on-lav: #120a24;
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-plex-arabic), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-pill: 999px;
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color-scheme: dark;
+    /* Keeps focused fields and anchor targets clear of the fixed navbar. */
+    scroll-padding-top: 96px;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Arabic pages: one Arabic face for body and display text, Latin falls back to Geist. */
+  html[lang="ar"] body {
+    font-family: var(--font-plex-arabic), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  }
+  html[lang="ar"] {
+    --font-display: var(--font-plex-arabic), var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Arabic is a joined script: Latin tracking pulls letters apart and tight leading crowds the dots. */
+  html[lang="ar"] * {
+    letter-spacing: 0 !important;
+  }
+  html[lang="ar"] :is(h1, h2, h3) {
+    line-height: 1.35 !important;
+    font-weight: 600;
+  }
+  html[lang="ar"] body {
+    line-height: 1.8;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lav);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: rgb(200 168 255 / 0.35);
+    color: #fff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Elements the hero intro reveals stay hidden only when JS is running (html.js).
+ * The hero engine removes data-intro after its first frame; if scripts never run,
+ * the failsafe shows everything after 5s.
+ */
+.js [data-intro] {
+  opacity: 0;
+  animation: intro-failsafe 0s linear 5s forwards;
+}
+@keyframes intro-failsafe {
+  to {
+    opacity: 1;
+  }
+}
+
+/* The logo's own light: a glint on the star and a sweep across the chrome. */
+@keyframes glint {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes sweep {
+  0%,
+  55% {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  85%,
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+@keyframes scroll-hint {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  55% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* Buttons: one system with hover, press, focus and loading states. */
+@layer components {
+  .btn-primary,
+  .btn-ghost {
+    transition:
+      background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      scale 100ms ease-out;
+  }
+  .btn-primary {
+    background: var(--color-lav);
+    color: var(--color-on-lav);
+  }
+  .btn-primary:hover {
+    background: #d6bdff;
+    translate: 0 -1px;
+    box-shadow: 0 8px 24px -8px rgb(200 168 255 / 0.55);
+  }
+  .btn-ghost {
+    border: 1px solid rgb(255 255 255 / 0.16);
+    color: var(--color-ink);
+  }
+  .btn-ghost:hover {
+    border-color: rgb(200 168 255 / 0.55);
+    background: rgb(255 255 255 / 0.04);
+    translate: 0 -1px;
+  }
+  .btn-primary:active,
+  .btn-ghost:active {
+    scale: 0.98;
+    translate: 0 0;
+  }
+  .btn-arrow {
+    transition: translate 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :is(.btn-primary, .btn-ghost):hover .btn-arrow {
+    translate: 3px 0;
+  }
+  [dir="rtl"] :is(.btn-primary, .btn-ghost):hover .btn-arrow {
+    translate: -3px 0;
+  }
+}
+
+/*
+ * Scroll reveals: [data-reveal] elements rise out of a light blur when they enter the view
+ * (RevealObserver marks them data-shown). Hidden only when JS runs; if the observer never
+ * mounts, the failsafe shows everything after 3s.
+ */
+.js [data-reveal] {
+  opacity: 0;
+  translate: 0 22px;
+  filter: blur(6px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms),
+    translate 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms),
+    filter 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms);
+}
+.js [data-reveal][data-shown] {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
+}
+html.js:not([data-reveal-ready]) [data-reveal] {
+  animation: intro-failsafe 0s linear 3s forwards;
+}
+
+/*
+ * Work page screenshots lean back slightly and straighten as their [data-reveal] wrapper
+ * shows. Tilted only once the observer is running, so a page without JS stays flat.
+ */
+.work-tilt {
+  transform-origin: 50% 0;
+  transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+}
+html[data-reveal-ready] [data-reveal]:not([data-shown]) .work-tilt {
+  transform: perspective(1800px) rotateX(12deg) scale(0.95);
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-tilt {
+    transition: none;
+  }
+}
+
+/*
+ * Page transitions (components/motion/PageTransition.tsx). The old page leaves fast and the
+ * new one rises out of a light blur, like the scroll reveals. The navbar stays put above both.
+ */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+::view-transition-old(.page-exit) {
+  animation: page-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(.page-enter) {
+  animation: page-in 520ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+    translate: 0 -10px;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    translate: 0 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* Mobile menu links arrive in a short stagger. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+.menu-item {
+  animation: menu-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/*
+ * Accent text: a vivid violet gradient with a soft glow and a light that sweeps across it
+ * now and then. Put it on each word (the hero splits headings into words) and stagger
+ * animation-delay per word so the light travels along the line.
+ */
+@keyframes accent-sweep {
+  0%,
+  62% {
+    background-position: 140% 0, 0 0;
+  }
+  100% {
+    background-position: -40% 0, 0 0;
+  }
+}
+@utility text-accent {
+  background-image:
+    linear-gradient(100deg, transparent 40%, rgb(255 255 255 / 0.9) 50%, transparent 60%),
+    linear-gradient(95deg, #e4d6ff 0%, #b88fff 28%, #8c5cff 55%, #b690ff 80%, #e6d9ff 100%);
+  background-size: 280% 100%, 100% 100%;
+  background-position: 140% 0, 0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 22px rgb(140 92 255 / 0.45));
+  animation: accent-sweep 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Small label above a heading, led by a short horizon line. Arabic gets a larger, upright version. */
+@utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #bc9dff;
+  &::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #9d74ff);
+  }
+  html[lang="ar"] & {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: none;
+  }
+}
+
+@utility animate-glint {
+  animation: glint 3.4s ease-in-out infinite;
+}
+
+@utility animate-sweep {
+  animation: sweep 6.5s cubic-bezier(0.65, 0, 0.35, 1) 2.8s infinite;
+}
+
+@utility animate-scroll-hint {
+  animation: scroll-hint 2.2s ease-in-out infinite;
+}
+
+/* Lenis smooth scrolling hooks. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Scrollbar in the site's colours: a slim violet thumb on the night background. */
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #6b45d9 #07060b;
+  }
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #07060b;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8c5cff, #4b26b3);
+  border: 3px solid #07060b;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #b88fff, #6b45d9);
+}
