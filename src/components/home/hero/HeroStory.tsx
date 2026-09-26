@@ -35,7 +35,7 @@ function Words({ text, chrome = false }: { text: string; chrome?: boolean }) {
         <Fragment key={i}>
           <span
             data-word
-            className={`inline-block will-change-[transform,opacity] ${chrome ? "text-chrome" : ""}`}
+            className={`inline-block will-change-[transform,opacity] ${chrome ? "text-accent" : ""}`}
             style={chrome ? { animationDelay: `${i * 0.09}s` } : undefined}
           >
             {w}

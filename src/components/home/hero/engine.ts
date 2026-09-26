@@ -121,7 +121,7 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
       const o = wi * (1 - wo);
       w.style.opacity = o.toFixed(3);
       w.style.transform = `translate3d(0,${((1 - wi) * 26 - wo * 18).toFixed(1)}px,0)`;
-      w.style.filter = wide && o < 0.995 ? `blur(${((1 - wi) * 8 + wo * 6).toFixed(1)}px)` : "none";
+      w.style.filter = wide && o < 0.995 ? `blur(${((1 - wi) * 8 + wo * 6).toFixed(1)}px)` : "";
     });
 
     panel.rest.forEach((r, j) => {
@@ -200,8 +200,8 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
       cx,
       cy,
       scale: Ls * fit,
-      elev: (lerp(3, wide ? 26 : 32, open) + out * 12 + state.my * 3) * D2R,
-      azim: (lerp(-38, 28, orbitScene) + state.mx * 6) * D2R,
+      elev: (lerp(3, wide ? 22 : 30, open) + out * 12 + state.my * 3) * D2R,
+      azim: (lerp(-20, 16, orbitScene) + state.mx * 5) * D2R,
       dist: Ls * fit * MAX_A * 4.5,
     };
     const radiusScale = lerp(0.82, 1, open) * lerp(1, 1.12, out);
@@ -211,9 +211,10 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     if (ringAlpha > 0.004) {
       BODIES.forEach((b, j) => {
         if (!wide && !b.phone) return;
-        const to = clamp(open * 1.4 - j * 0.045);
-        const from = clamp(out * 1.3 - j * 0.03);
-        drawOrbit(bctx, fctx, b, cam, ringAlpha, from, to, wide ? 110 : 72, radiusScale);
+        const to = clamp(open * 1.35 - b.ring * 0.14);
+        const from = clamp(out * 1.3 - b.ring * 0.1);
+        // draw each shared orbit once, from its first body
+        if (BODIES.findIndex((o) => o.ring === b.ring) === j) drawOrbit(bctx, fctx, b, cam, ringAlpha, from, to, wide ? 160 : 100, radiusScale);
         drawTrail(bctx, fctx, b, anomalies[j], cam, ringAlpha * clamp(to * 1.5 - 0.4), radiusScale, lav);
       });
     }

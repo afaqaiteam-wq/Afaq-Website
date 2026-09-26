@@ -37,7 +37,8 @@ export function Footer({ lang, dict }: FooterProps) {
   const linkCls = "inline-flex min-h-8 items-center text-sm text-muted transition-colors hover:text-ink";
 
   return (
-    <footer className="border-t border-line">
+    <footer className="relative">
+      <div aria-hidden="true" className="h-px bg-[linear-gradient(90deg,transparent,rgba(140,92,255,.55)_50%,transparent)]" />
       <div className="mx-auto grid max-w-[1440px] gap-12 px-4 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-12 lg:px-14">
         <div className="lg:col-span-5">
           <HomeLink lang={lang} className="inline-flex items-center gap-2.5" label={meta.siteName}>
@@ -94,15 +95,6 @@ export function Footer({ lang, dict }: FooterProps) {
             </li>
           </ul>
         </div>
-      </div>
-
-      {/* The name on the horizon: a glowing line and the wordmark rising from behind it. */}
-      <div aria-hidden="true" className="relative overflow-hidden">
-        <div className="mx-auto h-px max-w-[1440px] bg-[linear-gradient(90deg,transparent,rgba(200,168,255,.7),transparent)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-24 max-w-3xl bg-[radial-gradient(ellipse_at_top,rgba(124,77,255,.22),transparent_70%)]" />
-        <p className="select-none bg-[linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.02)_78%)] bg-clip-text pt-2 text-center font-display text-[clamp(84px,19vw,300px)] font-semibold leading-[0.9] tracking-[-0.05em] text-transparent">
-          {lang === "ar" ? "آفاق" : "AFAQ"}
-        </p>
       </div>
 
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 border-t border-line px-4 py-6 text-sm text-dim sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-14">

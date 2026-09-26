@@ -7,8 +7,7 @@ import { TAU, clamp } from "./timeline";
  *  - Each tool has its own Keplerian orbit: an ellipse with the logo at one FOCUS
  *    (not the centre), defined by semi-major axis a, eccentricity e, inclination i,
  *    longitude of the ascending node Ω and argument of periapsis ω.
- *  - Like a real planetary system the orbits are nearly coplanar (inclinations of a degree
- *    or two) and nested, so they never tangle; depth comes from the camera and perspective.
+ *  - Each orbit lies in its own plane (different i and Ω), so the system reads in 3D.
  *  - Kepler's 2nd law: a body moves faster near periapsis. We solve Kepler's equation
  *    M = E − e·sin E for the eccentric anomaly E every frame.
  *  - Kepler's 3rd law: the period grows as a^1.5, so inner tools circle faster.
@@ -19,6 +18,8 @@ import { TAU, clamp } from "./timeline";
 
 export interface Body {
   name: string;
+  /** which orbit the body shares (orbits are drawn once) */
+  ring: number;
   /** semi-major axis, in logo sizes */
   a: number;
   e: number;
@@ -34,20 +35,27 @@ export interface Body {
   phone: boolean;
 }
 
-/**
- * Same order as NODE_FOR_TOOL in constellation.ts. Starting positions are spread by the
- * golden angle (≈2.4 rad) in order of distance, so the planets don't start bunched up.
+/*
+ * Three orbits, each in its own gently inclined plane, with the tools spaced along them
+ * (bodies sharing an orbit share its period, so their spacing holds). Inner orbits are
+ * faster (Kepler's 3rd law); every body speeds up near periapsis (2nd law).
+ * Same order as NODE_FOR_TOOL in constellation.ts.
  */
+const INNER = { ring: 0, a: 0.8, e: 0.05, inc: 9, node: 10, peri: 10 };
+const MIDDLE = { ring: 1, a: 1.1, e: 0.05, inc: -7, node: 100, peri: 60 };
+const OUTER = { ring: 2, a: 1.42, e: 0.04, inc: 4, node: 200, peri: 120 };
+const Q = Math.PI / 2;
+const THIRD = (Math.PI * 2) / 3;
 export const BODIES: Body[] = [
-  { name: "OpenAI", a: 0.62, e: 0.03, inc: 1.2, node: 20, peri: 40, m0: 0, phone: true },
-  { name: "n8n", a: 0.82, e: 0.04, inc: -1.5, node: 250, peri: 95, m0: 4.8, phone: true },
-  { name: "Claude", a: 0.72, e: 0.05, inc: 2, node: 140, peri: 210, m0: 2.4, phone: true },
-  { name: "Python", a: 1.02, e: 0.03, inc: -1, node: 195, peri: 20, m0: 3.4, phone: true },
-  { name: "Next.js", a: 1.12, e: 0.05, inc: 1.8, node: 320, peri: 150, m0: 5.8, phone: false },
-  { name: "Gemini", a: 0.92, e: 0.06, inc: -2.2, node: 60, peri: 300, m0: 1, phone: false },
-  { name: "AWS", a: 1.23, e: 0.04, inc: 0.8, node: 100, peri: 260, m0: 2, phone: true },
-  { name: "Supabase", a: 1.34, e: 0.05, inc: -1.4, node: 230, peri: 60, m0: 4.4, phone: false },
-  { name: "Docker", a: 1.45, e: 0.03, inc: 1.1, node: 5, peri: 330, m0: 0.6, phone: true },
+  { name: "OpenAI", ...INNER, m0: 0.3, phone: true },
+  { name: "n8n", ...INNER, m0: 0.3 + Math.PI, phone: true },
+  { name: "Claude", ...MIDDLE, m0: 1.1, phone: true },
+  { name: "Python", ...MIDDLE, m0: 1.1 + THIRD, phone: true },
+  { name: "Next.js", ...MIDDLE, m0: 1.1 + 2 * THIRD, phone: false },
+  { name: "Gemini", ...OUTER, m0: 0.6, phone: true },
+  { name: "AWS", ...OUTER, m0: 0.6 + Q, phone: true },
+  { name: "Supabase", ...OUTER, m0: 0.6 + 2 * Q, phone: false },
+  { name: "Docker", ...OUTER, m0: 0.6 + 3 * Q, phone: true },
 ];
 
 export const MAX_A = Math.max(...BODIES.map((b) => b.a * (1 + b.e)));
@@ -137,8 +145,8 @@ export function drawOrbit(
     const d = (prev.depth + q.depth) / 2;
     const f = front01(d);
     const ctx = d < 0 ? back : front;
-    ctx.strokeStyle = `rgba(214,196,255,${(alpha * (0.05 + 0.22 * f)).toFixed(3)})`;
-    ctx.lineWidth = 0.8 * q.k;
+    ctx.strokeStyle = `rgba(200,168,255,${(alpha * (0.12 + 0.5 * f)).toFixed(3)})`;
+    ctx.lineWidth = (0.8 + 0.5 * f) * q.k;
     ctx.beginPath();
     ctx.moveTo(prev.x, prev.y);
     ctx.lineTo(q.x, q.y);
