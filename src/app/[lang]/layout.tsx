@@ -6,6 +6,7 @@ import "../globals.css";
 
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { RevealObserver } from "@/components/motion/RevealObserver";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { dirFor, isLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -77,6 +78,7 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
           {dict.common.skipToContent}
         </a>
         <SmoothScroll />
+        <RevealObserver />
         <Navbar lang={lang} nav={dict.nav} common={dict.common} siteName={dict.meta.siteName} />
         <main id="main">{children}</main>
         <Footer lang={lang} dict={dict} />

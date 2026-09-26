@@ -193,6 +193,29 @@
   }
 }
 
+/*
+ * Scroll reveals: [data-reveal] elements rise out of a light blur when they enter the view
+ * (RevealObserver marks them data-shown). Hidden only when JS runs; if the observer never
+ * mounts, the failsafe shows everything after 3s.
+ */
+.js [data-reveal] {
+  opacity: 0;
+  translate: 0 22px;
+  filter: blur(6px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms),
+    translate 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms),
+    filter 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms);
+}
+.js [data-reveal][data-shown] {
+  opacity: 1;
+  translate: 0 0;
+  filter: none;
+}
+html.js:not([data-reveal-ready]) [data-reveal] {
+  animation: intro-failsafe 0s linear 3s forwards;
+}
+
 /* Mobile menu links arrive in a short stagger. */
 @keyframes menu-in {
   from {
