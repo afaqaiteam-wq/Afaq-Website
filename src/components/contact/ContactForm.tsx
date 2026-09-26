@@ -135,7 +135,7 @@ export function ContactForm({ lang, form, services, bookCall }: ContactFormProps
 
       <div>
         <label htmlFor={`${id}-company`} className={label}>
-          {form.company}
+          {form.company} <span className="font-normal text-dim">({form.optional})</span>
         </label>
         <input
           id={`${id}-company`}
@@ -204,7 +204,7 @@ export function ContactForm({ lang, form, services, bookCall }: ContactFormProps
         />
       </div>
 
-      <div className="sm:col-span-2">
+      <div className="mt-2 sm:col-span-2">
         {status === "error" && (
           <div role="alert" className="mb-5 rounded-2xl border border-rose-400/30 bg-rose-400/5 p-4 text-sm text-rose-100">
             <p>{failure === "rate" ? form.errorRate : form.errorGeneric}</p>
@@ -221,10 +221,13 @@ export function ContactForm({ lang, form, services, bookCall }: ContactFormProps
         <button
           type="submit"
           disabled={status === "sending"}
-          className="inline-flex h-12 items-center gap-2.5 rounded-pill bg-lav px-7 text-[15px] font-medium text-on-lav transition-colors hover:bg-lav-hover disabled:cursor-wait disabled:opacity-70"
+          className="btn-primary inline-flex h-12 items-center gap-2.5 rounded-pill px-7 text-[15px] font-medium disabled:cursor-wait disabled:opacity-60"
         >
+          {status === "sending" && (
+            <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-on-lav/30 border-t-on-lav" />
+          )}
           {status === "sending" ? form.sending : form.submit}
-          {status !== "sending" && <ArrowIcon />}
+          {status !== "sending" && <ArrowIcon className="btn-arrow" />}
         </button>
       </div>
     </form>

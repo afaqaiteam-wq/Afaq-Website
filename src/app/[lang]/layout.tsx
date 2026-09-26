@@ -19,9 +19,9 @@ const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-arabic",
   weight: ["400", "500", "600"],
   display: "swap",
+  // Only Arabic pages render Arabic text; don't preload it on English pages.
+  preload: false,
 });
-
-export const dynamicParams = false;
 
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -38,18 +38,18 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   const { meta } = getDictionary(lang);
   return {
     metadataBase: new URL(site.url),
-    title: { default: meta.title, template: `%s · ${meta.siteName}` },
+    title: { default: `${meta.tagline} · ${meta.siteName}`, template: `%s · ${meta.siteName}` },
     description: meta.description,
     applicationName: meta.siteName,
     ...pageMetadata(lang, "/", { description: meta.description }),
     openGraph: {
       siteName: meta.siteName,
-      title: meta.title,
+      title: `${meta.tagline} · ${meta.siteName}`,
       description: meta.description,
       locale: lang === "ar" ? "ar_EG" : "en_US",
       type: "website",
     },
-    twitter: { card: "summary_large_image", title: meta.title, description: meta.description },
+    twitter: { card: "summary_large_image", title: `${meta.tagline} · ${meta.siteName}`, description: meta.description },
   };
 }
 

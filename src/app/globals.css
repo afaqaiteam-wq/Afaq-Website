@@ -30,6 +30,8 @@
   html {
     background: var(--color-bg);
     color-scheme: dark;
+    /* Keeps focused fields and anchor targets clear of the fixed navbar. */
+    scroll-padding-top: 96px;
   }
 
   body {
@@ -46,6 +48,18 @@
   }
   html[lang="ar"] {
     --font-display: var(--font-plex-arabic), var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Arabic is a joined script: Latin tracking pulls letters apart and tight leading crowds the dots. */
+  html[lang="ar"] * {
+    letter-spacing: 0 !important;
+  }
+  html[lang="ar"] :is(h1, h2, h3) {
+    line-height: 1.35 !important;
+    font-weight: 600;
+  }
+  html[lang="ar"] body {
+    line-height: 1.8;
   }
 
   h1,
@@ -121,6 +135,77 @@
   100% {
     transform: scaleY(1);
     opacity: 0;
+  }
+}
+
+/* Buttons: one system with hover, press, focus and loading states. */
+@layer components {
+  .btn-primary,
+  .btn-ghost {
+    transition:
+      background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      scale 100ms ease-out;
+  }
+  .btn-primary {
+    background: var(--color-lav);
+    color: var(--color-on-lav);
+  }
+  .btn-primary:hover {
+    background: #d6bdff;
+    translate: 0 -1px;
+    box-shadow: 0 8px 24px -8px rgb(200 168 255 / 0.55);
+  }
+  .btn-ghost {
+    border: 1px solid rgb(255 255 255 / 0.16);
+    color: var(--color-ink);
+  }
+  .btn-ghost:hover {
+    border-color: rgb(200 168 255 / 0.55);
+    background: rgb(255 255 255 / 0.04);
+    translate: 0 -1px;
+  }
+  .btn-primary:active,
+  .btn-ghost:active {
+    scale: 0.98;
+    translate: 0 0;
+  }
+  .btn-arrow {
+    transition: translate 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :is(.btn-primary, .btn-ghost):hover .btn-arrow {
+    translate: 3px 0;
+  }
+  [dir="rtl"] :is(.btn-primary, .btn-ghost):hover .btn-arrow {
+    translate: -3px 0;
+  }
+}
+
+/* Mobile menu links arrive in a short stagger. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+.menu-item {
+  animation: menu-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Small label above a heading. Arabic gets a larger, upright, untracked version. */
+@utility eyebrow {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-lav);
+  html[lang="ar"] & {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: none;
   }
 }
 

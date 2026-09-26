@@ -4,12 +4,11 @@ import type { ReactNode } from "react";
 type Variant = "primary" | "ghost";
 type Size = "md" | "sm";
 
-const base =
-  "inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-pill font-medium transition-colors duration-200";
+const base = "inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-pill font-medium";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-lav text-on-lav hover:bg-lav-hover",
-  ghost: "border border-white/15 text-ink hover:border-lav/55",
+  primary: "btn-primary",
+  ghost: "btn-ghost",
 };
 
 const sizes: Record<Size, string> = {
@@ -43,7 +42,7 @@ export function Button({
   const content = (
     <>
       {children}
-      {arrow && <ArrowIcon />}
+      {arrow && <ArrowIcon className="btn-arrow" />}
     </>
   );
 

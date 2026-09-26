@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LogoMark } from "@/components/brand/LogoMark";
+import { Button } from "@/components/ui/Button";
 import { href, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 import { site, whatsappUrl } from "@/lib/site";
@@ -32,7 +33,7 @@ export function Footer({ lang, dict }: FooterProps) {
     },
   ];
 
-  const linkCls = "text-sm text-muted transition-colors hover:text-ink";
+  const linkCls = "inline-flex min-h-8 items-center text-sm text-muted transition-colors hover:text-ink";
 
   return (
     <footer className="border-t border-line">
@@ -40,9 +41,12 @@ export function Footer({ lang, dict }: FooterProps) {
         <div className="lg:col-span-5">
           <Link href={href(lang, "/")} className="inline-flex items-center gap-2.5">
             <LogoMark size={30} />
-            <span className="font-display text-lg font-medium tracking-[-0.02em]">{meta.siteName}</span>
+            <span className="font-display text-lg font-semibold tracking-[-0.02em]">{meta.siteName}</span>
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">{footer.tagline}</p>
+          <Button href={site.bookingUrl} external arrow size="sm" className="mt-6">
+            {dict.common.bookCall}
+          </Button>
         </div>
 
         {groups.map((g) => (
@@ -66,11 +70,6 @@ export function Footer({ lang, dict }: FooterProps) {
             <li>
               <a href={`mailto:${site.email}`} className={linkCls} dir="ltr">
                 {site.email}
-              </a>
-            </li>
-            <li>
-              <a href={site.bookingUrl} target="_blank" rel="noopener noreferrer" className={linkCls}>
-                {dict.common.bookCall}
               </a>
             </li>
             {site.whatsapp && (
@@ -100,7 +99,7 @@ export function Footer({ lang, dict }: FooterProps) {
         <p>
           © {year} {meta.siteName}. {footer.rights}
         </p>
-        <a href="#main" className="transition-colors hover:text-ink">
+        <a href="#main" className="inline-flex min-h-8 items-center transition-colors hover:text-ink">
           {footer.backToTop}
         </a>
       </div>
