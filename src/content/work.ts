@@ -1,0 +1,260 @@
+import type { StaticImageData } from "next/image";
+
+import type { Locale } from "@/i18n/config";
+import financeShot from "@/assets/work/mo-finance-os.webp";
+import estateShot from "@/assets/work/real-estate-installments.webp";
+import salesShot from "@/assets/work/sales-invoicing.webp";
+
+/*
+ * Case studies for the Work page, in both languages.
+ * Only what the founder confirmed or what the screenshots show. No invented metrics or results.
+ * Figures, names and emails in the screenshots are blurred on purpose.
+ */
+
+export interface Project {
+  /** URL anchor, e.g. /work#finance */
+  slug: string;
+  category: string;
+  name: string;
+  /** One line: what the system is. */
+  oneLiner: string;
+  /** Who it was built for, when we can say. */
+  client?: string;
+  problem: string;
+  built: string;
+  capabilities: string[];
+  /** How data moves through the system, shown as a chip row. */
+  flow?: string[];
+  /** Omitted when the stack isn't confirmed. */
+  tech?: string[];
+  image: StaticImageData;
+  imageAlt: string;
+}
+
+export interface WorkPage {
+  metaTitle: string;
+  metaDescription: string;
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  lead: string;
+  blurNote: string;
+  jumpTo: string;
+  clientLabel: string;
+  problemLabel: string;
+  builtLabel: string;
+  capabilitiesLabel: string;
+  flowLabel: string;
+  techLabel: string;
+  projects: Project[];
+  cta: { title: string; titleAccent: string; lead: string; secondary: string };
+}
+
+const en: WorkPage = {
+  metaTitle: "Work",
+  metaDescription:
+    "Real systems built by Afaq AI: a real estate installment manager, a multi-company sales and invoicing platform, and a personal finance operating system.",
+  eyebrow: "Selected work",
+  title: "Three systems,",
+  titleAccent: "three wider horizons.",
+  lead: "Each one started as a process held together by spreadsheets, memory or habit. Here is what we built, shown with its real screens.",
+  blurNote: "Figures, names and emails in the screenshots are blurred to protect the people who use them.",
+  jumpTo: "Projects",
+  clientLabel: "Client",
+  problemLabel: "The problem",
+  builtLabel: "What we built",
+  capabilitiesLabel: "Inside the system",
+  flowLabel: "How the data flows",
+  techLabel: "Built with",
+  projects: [
+    {
+      slug: "real-estate",
+      category: "Business software · Real estate",
+      name: "Real Estate Installment Management",
+      oneLiner: "Buildings, owners, contracts and every installment, in one place.",
+      client: "Dr. Mohamed Elshiwi",
+      problem:
+        "Apartments, owners, contracts and installment payments lived across scattered Excel files. Knowing where a single unit stood meant opening several sheets and trusting they agreed.",
+      built:
+        "A database-backed system that links every record, from the building down to each payment. We designed it as an operational dashboard, not a bare admin panel, and made it Arabic first.",
+      capabilities: [
+        "Dashboard with key figures and a collection-progress ring",
+        "Buildings, apartments, owners and contracts, all linked",
+        "Installment schedules generated in one step",
+        "Customer payments, project payments and payment parties",
+        "A suggested next action, such as reviewing overdue installments",
+        "Daily summary: collected today, due today, overdue, due within 7 days",
+        "Quick actions: add an apartment or owner, new contract, record a payment",
+        "Search by apartment, owner, phone number or building",
+        "Excel import and export, backup and restore",
+        "Admin sign-in and an Arabic-first dark interface",
+      ],
+      flow: ["Buildings", "Apartments", "Owners", "Contracts", "Installments", "Payments"],
+      tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
+      image: estateShot,
+      imageAlt:
+        "The installment management dashboard in Arabic: quick actions, a collection-progress ring and today's summary, with amounts blurred.",
+    },
+    {
+      slug: "sales",
+      category: "Multi-company SaaS · Sales",
+      name: "Sales & Invoicing Platform",
+      oneLiner: "Quotations, invoices, sales and payments for several companies, from one account.",
+      problem:
+        "Quotations, invoices, sales and collections are easy to lose track of when they live in separate tools, and harder still across more than one company. The owner needs to see, at a glance, who still owes what.",
+      built:
+        "A multi-company SaaS platform with a company switcher, so each company keeps its own customers, products and numbers. The dashboard answers the questions that matter each month: what we sold, what we collected and what is still due.",
+      capabilities: [
+        "Quotations, invoices, sales and payments",
+        "Companies, customers and account statements",
+        "Products, team members and subscription plans",
+        "Switching between companies from the top bar",
+        "Dashboard: sales count, total sales, total payments, amount due",
+        "Sales against collection over the last 6 months",
+        "Top debts, top customers and payment methods",
+        "A “this month” filter across the dashboard",
+        "Arabic and English, with dark mode",
+      ],
+      image: salesShot,
+      imageAlt:
+        "The sales dashboard in Arabic: sales, payments and amount due, and a six-month sales-versus-collection chart, with the company name and figures blurred.",
+    },
+    {
+      slug: "finance",
+      category: "Financial intelligence",
+      name: "MO Finance OS",
+      oneLiner: "A personal financial operating system built on a ledger, not a budget sheet.",
+      problem:
+        "Bank balances don't tell the whole story. A card statement can mix your own spending with expenses you carried for other people, and a shortfall shows up only when a due date arrives.",
+      built:
+        "A ledger-based system that reads bank statements, reconciles them and turns them into one financial picture: what you really owe, what's coming in, and what could hurt you in the next 30 days. It runs locally, so the data stays on the device, and it was built in phases with an automated test suite behind the numbers.",
+      capabilities: [
+        "Parses CIB and BDC statements: periods, closing balances, due dates, minimum payments",
+        "Reconciles the statement balance against your real share and other people's exposure",
+        "Alert engine, credit guard, cash-flow guardian and spending-leak detector",
+        "A 30-day summary: cash on hand, confirmed income, dues and the gap",
+        "A daily spending limit, split by category",
+        "Spending analytics with weekly and monthly reviews",
+        "Scenario engine, debt strategy engine and close-the-gap planning",
+        "Accounts, cards, people, receivables, recurring payments, savings circles and gold",
+        "Arabic and English interface",
+      ],
+      flow: ["Data", "Reconciliation", "Analysis", "Risk detection", "Planning", "Action"],
+      tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
+      image: financeShot,
+      imageAlt:
+        "The MO Finance OS overview in Arabic: a salary check-in, a 30-day summary, a daily spending limit and a safe-to-spend figure, with every amount blurred.",
+    },
+  ],
+  cta: {
+    title: "Your process could be",
+    titleAccent: "the next system here.",
+    lead: "Show us the spreadsheet, the inbox or the habit that holds your work together. We'll tell you honestly what a system would change.",
+    secondary: "Send a message",
+  },
+};
+
+const ar: WorkPage = {
+  metaTitle: "أعمالنا",
+  metaDescription:
+    "أنظمة حقيقية من بناء آفاق AI: نظام لإدارة العقارات والأقساط، ومنصة مبيعات وفواتير متعددة الشركات، ونظام تشغيل مالي شخصي.",
+  eyebrow: "من أعمالنا",
+  title: "ثلاثة أنظمة،",
+  titleAccent: "وثلاثة آفاق أوسع.",
+  lead: "بدأ كل منها بعملية تقوم على جداول متفرقة أو على الذاكرة والعادة. هذا ما بنيناه، بشاشاته الحقيقية.",
+  blurNote: "الأرقام والأسماء والبريد الإلكتروني في الصور مموّهة حفاظًا على خصوصية مستخدميها.",
+  jumpTo: "المشاريع",
+  clientLabel: "العميل",
+  problemLabel: "المشكلة",
+  builtLabel: "ما بنيناه",
+  capabilitiesLabel: "داخل النظام",
+  flowLabel: "مسار البيانات",
+  techLabel: "بُني بـ",
+  projects: [
+    {
+      slug: "real-estate",
+      category: "برمجيات أعمال · عقارات",
+      name: "نظام إدارة العقارات والأقساط",
+      oneLiner: "المباني والملّاك والعقود وكل قسط، في مكان واحد.",
+      client: "د. محمد الشيوي",
+      problem:
+        "كانت الشقق والملّاك والعقود ودفعات الأقساط موزعة على ملفات Excel متفرقة. ولمعرفة وضع وحدة واحدة كان عليك فتح أكثر من ملف والثقة بأنها متطابقة.",
+      built:
+        "نظام مبني على قاعدة بيانات يربط كل سجل، من المبنى حتى آخر دفعة. صمّمناه كلوحة تشغيل حقيقية لا كلوحة إدارة مجردة، وبالعربية أولًا.",
+      capabilities: [
+        "لوحة تحكم بالأرقام الأساسية ومؤشر دائري لنسبة التحصيل",
+        "المباني والشقق والملّاك والعقود، مرتبطة ببعضها",
+        "توليد جدول الأقساط بخطوة واحدة",
+        "دفعات العملاء، ومدفوعات المشاريع، وجهات الدفع",
+        "إجراء تالٍ مقترح، مثل مراجعة الأقساط المتأخرة",
+        "ملخص يومي: المحصّل اليوم، والمستحق اليوم، والمتأخرات، وما يستحق خلال 7 أيام",
+        "إجراءات سريعة: إضافة شقة أو مالك، وعقد جديد، وتسجيل دفعة",
+        "بحث بالشقة أو المالك أو رقم الهاتف أو المبنى",
+        "استيراد وتصدير Excel، ونسخ احتياطي واستعادة",
+        "تسجيل دخول للمسؤول وواجهة داكنة بالعربية أولًا",
+      ],
+      flow: ["المباني", "الشقق", "الملّاك", "العقود", "الأقساط", "الدفعات"],
+      tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
+      image: estateShot,
+      imageAlt: "لوحة تحكم نظام الأقساط بالعربية: إجراءات سريعة ومؤشر التحصيل وملخص اليوم، مع تمويه المبالغ.",
+    },
+    {
+      slug: "sales",
+      category: "منصة SaaS متعددة الشركات · مبيعات",
+      name: "منصة المبيعات والفواتير",
+      oneLiner: "عروض الأسعار والفواتير والمبيعات والمدفوعات لأكثر من شركة، من حساب واحد.",
+      problem:
+        "يسهل أن تضيع عروض الأسعار والفواتير والمبيعات والتحصيل حين تتوزع على أدوات منفصلة، ويصعب الأمر أكثر مع أكثر من شركة. وصاحب العمل يحتاج أن يرى بنظرة واحدة من لا يزال عليه مستحقات.",
+      built:
+        "منصة SaaS متعددة الشركات مع مبدّل للشركات، فتحتفظ كل شركة بعملائها ومنتجاتها وأرقامها. وتجيب لوحة التحكم عن أسئلة كل شهر: كم بعنا، وكم حصّلنا، وكم بقي مستحقًا.",
+      capabilities: [
+        "عروض الأسعار والفواتير والمبيعات والمدفوعات",
+        "الشركات والعملاء وكشوف الحساب",
+        "المنتجات والفريق وخطط الاشتراك",
+        "التنقل بين الشركات من الشريط العلوي",
+        "لوحة تحكم: عدد عمليات البيع، وإجمالي المبيعات، وإجمالي المدفوعات، والمبلغ المستحق",
+        "المبيعات مقابل التحصيل لآخر 6 أشهر",
+        "أعلى المديونيات، وأفضل العملاء، وطرق الدفع",
+        "فلتر «هذا الشهر» على لوحة التحكم",
+        "بالعربية والإنجليزية، مع الوضع الداكن",
+      ],
+      image: salesShot,
+      imageAlt:
+        "لوحة تحكم المبيعات بالعربية: المبيعات والمدفوعات والمبلغ المستحق ورسم المبيعات مقابل التحصيل لستة أشهر، مع تمويه اسم الشركة والأرقام.",
+    },
+    {
+      slug: "finance",
+      category: "ذكاء مالي",
+      name: "MO Finance OS",
+      oneLiner: "نظام تشغيل مالي شخصي مبني على دفتر أستاذ، لا على جدول ميزانية.",
+      problem:
+        "رصيد البنك لا يحكي القصة كاملة. قد يخلط كشف البطاقة بين مصروفاتك ومصروفات دفعتها عن آخرين، ولا يظهر العجز إلا عندما يحلّ موعد السداد.",
+      built:
+        "نظام قائم على دفتر أستاذ يقرأ كشوف الحساب البنكية ويطابقها ويحوّلها إلى صورة مالية واحدة: ما عليك فعلًا، وما سيصلك، وما قد يضرّك خلال الثلاثين يومًا القادمة. ويعمل محليًا فتبقى البيانات على الجهاز، وبُني على مراحل مع اختبارات آلية تتحقق من الأرقام.",
+      capabilities: [
+        "قراءة كشوف CIB وBDC: الفترات، والرصيد الختامي، ومواعيد الاستحقاق، والحد الأدنى للسداد",
+        "مطابقة رصيد الكشف مع نصيبك الفعلي وما يخص الآخرين",
+        "محرك تنبيهات، وحارس للائتمان، وحارس للتدفق النقدي، وكاشف لتسرّب الإنفاق",
+        "خلاصة 30 يومًا: النقد المتاح، والدخل المؤكد، والمستحقات، والعجز",
+        "حد يومي للصرف مقسّم حسب الفئة",
+        "تحليلات للإنفاق مع مراجعات أسبوعية وشهرية",
+        "محرك سيناريوهات، ومحرك لاستراتيجية الديون، وخطة لسدّ العجز",
+        "الحسابات والبطاقات والأشخاص والمستحقات والمدفوعات المتكررة والجمعيات والذهب",
+        "واجهة بالعربية والإنجليزية",
+      ],
+      flow: ["البيانات", "المطابقة", "التحليل", "رصد المخاطر", "التخطيط", "التنفيذ"],
+      tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
+      image: financeShot,
+      imageAlt:
+        "نظرة عامة في MO Finance OS بالعربية: تسجيل المرتب وخلاصة 30 يومًا وحد الصرف اليومي والمبلغ الآمن للإنفاق، مع تمويه كل المبالغ.",
+    },
+  ],
+  cta: {
+    title: "قد تكون عمليتك",
+    titleAccent: "النظام التالي هنا.",
+    lead: "أرِنا الجدول أو صندوق البريد أو العادة التي يقوم عليها عملك، وسنخبرك بصدق ما الذي سيغيّره نظام حقيقي.",
+    secondary: "أرسل رسالة",
+  },
+};
+
+export const workContent: Record<Locale, WorkPage> = { en, ar };

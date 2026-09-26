@@ -216,6 +216,23 @@ html.js:not([data-reveal-ready]) [data-reveal] {
   animation: intro-failsafe 0s linear 3s forwards;
 }
 
+/*
+ * Work page screenshots lean back slightly and straighten as their [data-reveal] wrapper
+ * shows. Tilted only once the observer is running, so a page without JS stays flat.
+ */
+.work-tilt {
+  transform-origin: 50% 0;
+  transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+}
+html[data-reveal-ready] [data-reveal]:not([data-shown]) .work-tilt {
+  transform: perspective(1800px) rotateX(12deg) scale(0.95);
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-tilt {
+    transition: none;
+  }
+}
+
 /* Mobile menu links arrive in a short stagger. */
 @keyframes menu-in {
   from {

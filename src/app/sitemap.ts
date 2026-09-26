@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { href } from "@/i18n/config";
 import { site } from "@/lib/site";
 
-const PATHS = ["/", "/services", "/about", "/contact"];
+const PATHS = ["/", "/services", "/work", "/about", "/contact"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return PATHS.map((path) => ({
