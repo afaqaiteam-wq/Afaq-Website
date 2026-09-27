@@ -85,15 +85,18 @@ export const en = {
   contact: {
     metaTitle: "Contact",
     eyebrow: "Contact",
-    title: "Tell us where you want to go.",
+    title: "Tell us",
+    titleAccent: "where you want to go.",
     lead: "Tell us what happens today and what should happen instead. We reply by email.",
     orBook: "Prefer to talk?",
     orBookLead: "Pick a 30-minute slot and we'll walk through it together.",
     emailLabel: "Email",
     direct: {
       title: "Email us directly",
-      lead: "Send a few lines on what happens today and what should happen instead, and we'll reply by email.",
+      lead: "One email is enough: a few lines on the process you want to change.",
       cta: "Write an email",
+      copy: "Copy email",
+      copied: "Copied",
     },
     form: {
       name: "Your name",

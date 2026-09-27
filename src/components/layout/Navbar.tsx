@@ -84,9 +84,11 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
   }, [open]);
 
   const isActive = (p: string) => (p === "/" ? path === "/" : path.startsWith(p));
+  // On a 404 there is no matching page in the other language, so switch to its home instead.
+  const known = LINKS.some((l) => l.path === path);
   const langSwitch = (extra: string) => (
     <Link
-      href={href(otherLang, path)}
+      href={href(otherLang, known ? path : "/")}
       hrefLang={otherLang}
       lang={otherLang}
       aria-label={common.switchLanguageLabel}
@@ -101,7 +103,7 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
   return (
     <header
       style={{ viewTransitionName: "site-header" }}
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-colors duration-300 ${
         scrolled && !open ? "border-b border-line bg-bg/85 backdrop-blur-md" : "border-b border-transparent"
       }`}
     >
@@ -130,8 +132,9 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {langSwitch("hidden sm:inline-flex")}
-          <Button href={site.bookingUrl} external size="sm" className="hidden sm:inline-flex">
+          {/* On phones the header keeps only the logo and the menu; both of these live in the menu there. */}
+          {langSwitch("max-sm:hidden")}
+          <Button href={site.bookingUrl} external size="sm" className="max-sm:hidden">
             {common.bookCall}
           </Button>
           <button
@@ -157,30 +160,39 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
           role="dialog"
           aria-modal="true"
           aria-label={nav.main}
-          className="fixed inset-0 flex flex-col bg-bg/95 px-4 pb-8 pt-[88px] backdrop-blur-xl sm:px-8 lg:hidden"
+          className="fixed inset-0 flex flex-col bg-bg px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[calc(88px+env(safe-area-inset-top))] backdrop-blur-xl sm:px-8 lg:hidden"
         >
           <nav aria-label={nav.main} className="flex-1 overflow-y-auto">
             <ul className="flex flex-col">
               {LINKS.map((l, i) => (
-                <li key={l.key} className="menu-item" style={{ animationDelay: `${i * 40}ms` }}>
+                <li key={l.key} className="menu-item" style={{ animationDelay: `${i * 50}ms` }}>
                   <Link
                     href={href(lang, l.path)}
                     aria-current={isActive(l.path) ? "page" : undefined}
-                    className={`block border-b border-line py-5 font-display text-[28px] font-medium ${
+                    className={`group flex items-center gap-4 border-b border-line py-5 font-display text-[28px] font-medium ${
                       isActive(l.path) ? "text-ink" : "text-muted"
                     }`}
                   >
-                    {nav[l.key]}
+                    <span className="w-6 font-sans text-xs tracking-[0.2em] text-dim">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="flex-1">{nav[l.key]}</span>
+                    {isActive(l.path) && (
+                      <span aria-hidden="true" className="size-2 rounded-full bg-lav shadow-[0_0_10px_#a67bff]" />
+                    )}
                   </Link>
                 </li>
               ))}
             </ul>
           </nav>
-          <div className="flex items-center justify-between gap-4 pt-6">
-            {langSwitch("border border-line")}
-            <Button href={site.bookingUrl} external arrow className="flex-1">
-              {common.bookCall}
-            </Button>
+          <div className="menu-item flex flex-col gap-4 pt-6" style={{ animationDelay: `${LINKS.length * 50}ms` }}>
+            <a href={`mailto:${site.email}`} dir="ltr" className="inline-flex min-h-11 items-center self-start text-muted">
+              {site.email}
+            </a>
+            <div className="flex items-center gap-3">
+              {langSwitch("border border-line")}
+              <Button href={site.bookingUrl} external arrow className="flex-1">
+                {common.bookCall}
+              </Button>
+            </div>
           </div>
         </div>
       )}

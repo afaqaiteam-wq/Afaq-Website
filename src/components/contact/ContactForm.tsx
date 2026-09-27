@@ -224,7 +224,7 @@ export function ContactForm({ lang, form, services, bookCall }: ContactFormProps
           className="btn-primary inline-flex h-12 items-center gap-2.5 rounded-pill px-7 text-[15px] font-medium disabled:cursor-wait disabled:opacity-60"
         >
           {status === "sending" && (
-            <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-on-lav/30 border-t-on-lav" />
+            <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
           )}
           {status === "sending" ? form.sending : form.submit}
           {status !== "sending" && <ArrowIcon className="btn-arrow" />}

@@ -6,6 +6,7 @@ import "../globals.css";
 
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { MotionFX } from "@/components/motion/MotionFX";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { RevealObserver } from "@/components/motion/RevealObserver";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
@@ -32,6 +33,8 @@ export function generateStaticParams() {
 export const viewport: Viewport = {
   themeColor: "#07060b",
   colorScheme: "dark",
+  // Edge to edge on iPhone; globals.css and the navbar pad for the safe areas.
+  viewportFit: "cover",
 };
 
 export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Promise<Metadata> {
@@ -80,6 +83,7 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
         </a>
         <SmoothScroll />
         <RevealObserver />
+        <MotionFX />
         <Navbar lang={lang} nav={dict.nav} common={dict.common} siteName={dict.meta.siteName} />
         <main id="main">
           <PageTransition>{children}</PageTransition>

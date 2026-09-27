@@ -65,8 +65,8 @@ const en: AboutPage = {
       { name: "Mostafa Aboelwafa", role: "Co-CEO & Co-Founder", line: "Connects engineering, business and AI, and leads our partnerships.", photo: mostafa, tier: 2 },
       { name: "Ghofran Gharsallah", role: "CTO & Lead Full-Stack Developer", line: "Leads the engineering team and the architecture behind what we ship.", photo: ghofran, tier: 3 },
       { name: "Mahmoud Ahmed", role: "AI Automation Engineer", line: "Builds automations with AI, n8n and APIs, from design to deployment.", photo: mahmoud, tier: 4 },
-      { name: "Mohamed Alaa", role: "Growth & Content Lead", line: "Shapes the brand through content, video and design.", photo: alaa, tier: 4 },
-      { name: "Mohamed Ragab", role: "Growth & Content Lead", line: "Runs the content strategy and campaigns that grow the brand.", photo: ragab, tier: 4 },
+      { name: "Mohamed Alaa", role: "Creative & Video Lead", line: "Shapes the brand through content, video and design.", photo: alaa, tier: 4 },
+      { name: "Mohamed Ragab", role: "Social Media & Growth Lead", line: "Runs the content strategy and campaigns that grow the brand.", photo: ragab, tier: 4 },
     ],
   },
   cta: {
@@ -107,8 +107,8 @@ const ar: AboutPage = {
       { name: "مصطفى أبو الوفا", role: "الرئيس التنفيذي المشارك والشريك المؤسس", line: "يربط الهندسة بالأعمال والذكاء الاصطناعي، ويقود الشراكات.", photo: mostafa, tier: 2 },
       { name: "غفران غرس الله", role: "المديرة التقنية ورئيسة فريق التطوير", line: "تقود فريق الهندسة والبنية التقنية لكل ما نسلّمه.", photo: ghofran, tier: 3 },
       { name: "محمود أحمد", role: "مهندس أتمتة بالذكاء الاصطناعي", line: "يبني أنظمة الأتمتة بالذكاء الاصطناعي وn8n والواجهات البرمجية، من التصميم حتى التشغيل.", photo: mahmoud, tier: 4 },
-      { name: "محمد علاء", role: "قائد النمو والمحتوى", line: "يصنع حضور العلامة عبر المحتوى والفيديو والتصميم.", photo: alaa, tier: 4 },
-      { name: "محمد رجب", role: "قائد النمو والمحتوى", line: "يقود استراتيجية المحتوى والحملات التي تنمّي العلامة.", photo: ragab, tier: 4 },
+      { name: "محمد علاء", role: "قائد الإبداع والفيديو", line: "يصنع حضور العلامة عبر المحتوى والفيديو والتصميم.", photo: alaa, tier: 4 },
+      { name: "محمد رجب", role: "قائد السوشيال ميديا والنمو", line: "يقود استراتيجية المحتوى والحملات التي تنمّي العلامة.", photo: ragab, tier: 4 },
     ],
   },
   cta: {

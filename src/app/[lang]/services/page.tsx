@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 
 import { ProcessTrack } from "@/components/services/ProcessTrack";
+import { ServiceChips } from "@/components/services/ServiceChips";
 import { AccentText } from "@/components/ui/AccentText";
 import { Button } from "@/components/ui/Button";
 import { StarBackdrop } from "@/components/ui/StarBackdrop";
@@ -40,7 +41,7 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
             {c.eyebrow}
           </p>
           <h1
-            data-reveal
+            data-reveal="rise"
             style={delay(80)}
             className="mt-6 font-display text-[clamp(44px,6.4vw,96px)] font-semibold leading-[0.98] tracking-[-0.04em]"
           >
@@ -72,9 +73,11 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
         </nav>
       </section>
 
+      <ServiceChips items={c.services.map((s) => ({ slug: s.slug, name: s.name }))} label={c.eyebrow} />
+
       {/* The six services */}
       {c.services.map((s, i) => (
-        <section key={s.slug} id={s.slug} className="scroll-mt-24 border-t border-line">
+        <section key={s.slug} id={s.slug} className="scroll-mt-40 border-t border-line lg:scroll-mt-24">
           <div className={`${shell} grid gap-12 py-20 lg:grid-cols-12 lg:py-28`}>
             <div className="lg:col-span-5">
               <div className="lg:sticky lg:top-32">
@@ -82,13 +85,13 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
                   {String(i + 1).padStart(2, "0")} / {String(c.services.length).padStart(2, "0")}
                 </p>
                 <h2
-                  data-reveal
+                  data-reveal="rise"
                   style={delay(80)}
                   className="mt-4 font-display text-[clamp(32px,3.8vw,56px)] font-semibold leading-[1.02] tracking-[-0.035em]"
                 >
                   {s.name}
                 </h2>
-                <p data-reveal style={delay(140)} className="mt-4 max-w-[22em] text-xl text-[#c6adff]">
+                <p data-reveal style={delay(140)} className="mt-4 max-w-[22em] text-xl text-lav">
                   {s.promise}
                 </p>
                 <div data-reveal style={delay(200)} className="mt-8">
@@ -147,7 +150,7 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
             {c.process.eyebrow}
           </p>
           <h2
-            data-reveal
+            data-reveal="rise"
             style={delay(80)}
             className="mt-6 max-w-[18em] font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]"
           >
@@ -161,7 +164,7 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
       <section className="border-t border-line">
         <div className={`${shell} flex flex-col items-center py-28 text-center lg:py-36`}>
           <h2
-            data-reveal
+            data-reveal="rise"
             className="max-w-[16em] font-display text-[clamp(34px,4.8vw,72px)] font-semibold leading-[1.02] tracking-[-0.035em]"
           >
             {c.cta.title} <span className="block"><AccentText text={c.cta.titleAccent} /></span>

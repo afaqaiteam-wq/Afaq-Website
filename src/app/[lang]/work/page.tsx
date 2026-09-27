@@ -7,6 +7,7 @@ import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
 import { StarBackdrop } from "@/components/ui/StarBackdrop";
 import { ToolPill } from "@/components/ui/ToolPill";
+import { ZoomImage } from "@/components/work/ZoomImage";
 import { workContent } from "@/content/work";
 import { href, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -41,7 +42,7 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
             {c.eyebrow}
           </p>
           <h1
-            data-reveal
+            data-reveal="rise"
             style={delay(80)}
             className="mt-6 font-display text-[clamp(44px,6.4vw,96px)] font-semibold leading-[0.98] tracking-[-0.04em]"
           >
@@ -72,6 +73,19 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
                 </a>
               </li>
             ))}
+            <li className="border-b border-line">
+              <a
+                href="#automation"
+                className="group flex items-center gap-4 py-3.5 text-sm text-dim transition-colors hover:text-ink"
+              >
+                <span aria-hidden="true" className="w-6 text-xs">+</span>
+                <span className="flex-1">{c.automationJump}</span>
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-lav/25 transition-[background-color,box-shadow] group-hover:bg-lav group-hover:shadow-[0_0_10px_#a67bff]"
+                />
+              </a>
+            </li>
           </ol>
         </nav>
       </section>
@@ -87,16 +101,16 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
                     {String(i + 1).padStart(2, "0")} / {String(c.projects.length).padStart(2, "0")}
                   </span>
                   <span aria-hidden="true" className="h-px w-8 bg-[linear-gradient(90deg,transparent,#a67bff)] rtl:-scale-x-100" />
-                  <span className="tracking-[0.12em] text-[#c6adff]">{p.category}</span>
+                  <span className="tracking-[0.12em] text-lav">{p.category}</span>
                 </p>
                 <h2
-                  data-reveal
+                  data-reveal="rise"
                   style={delay(80)}
                   className="mt-4 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]"
                 >
                   {p.name}
                 </h2>
-                <p data-reveal style={delay(140)} className="mt-4 max-w-[28em] text-xl text-[#c6adff]">
+                <p data-reveal style={delay(140)} className="mt-4 max-w-[28em] text-xl text-lav">
                   {p.oneLiner}
                 </p>
               </div>
@@ -119,14 +133,24 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
                   aria-hidden="true"
                   className="absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,#c8a8ff,transparent)]"
                 />
-                <Image
-                  src={p.image}
-                  alt={p.imageAlt}
-                  placeholder="blur"
-                  sizes="(min-width: 1440px) 1330px, calc(100vw - 32px)"
-                  priority={i === 0}
-                  className="h-auto w-full rounded-[12px] sm:rounded-[16px]"
-                />
+                <ZoomImage full={p.image} alt={p.imageAlt} hint={c.zoomHint} close={c.closeLabel}>
+                  {/* phones: a readable detail of the same screen; larger screens: the whole dashboard */}
+                  <Image
+                    src={p.mobileImage}
+                    alt={p.imageAlt}
+                    placeholder="blur"
+                    sizes="calc(100vw - 32px)"
+                    className="h-auto w-full rounded-[12px] md:hidden"
+                  />
+                  <Image
+                    src={p.image}
+                    alt={p.imageAlt}
+                    placeholder="blur"
+                    sizes="(min-width: 1440px) 1330px, calc(100vw - 64px)"
+                    priority={i === 0}
+                    className="hidden h-auto w-full rounded-[16px] md:block"
+                  />
+                </ZoomImage>
               </div>
             </div>
 
@@ -180,13 +204,15 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
             {p.flow && (
               <div data-reveal className="mt-14">
                 <h3 className={label}>{c.flowLabel}</h3>
-                <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-3">
+                <ol className="mt-4 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-3">
                   {p.flow.map((step, j, all) => (
-                    <li key={step} className="flex items-center gap-2">
+                    <li key={step} className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
                       <span className="inline-flex h-9 items-center rounded-pill border border-lav/30 bg-violet/10 px-4 text-[14px] text-ink shadow-[inset_0_0_12px_rgb(124_77_255/0.15)]">
                         {step}
                       </span>
-                      {j < all.length - 1 && <ArrowIcon className="size-3.5 text-lav" />}
+                      {j < all.length - 1 && (
+                        <ArrowIcon className="size-3.5 text-lav max-sm:rotate-90 max-sm:rtl:-rotate-90" />
+                      )}
                     </li>
                   ))}
                 </ol>
@@ -204,25 +230,25 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
               {c.automation.eyebrow}
             </p>
             <h2
-              data-reveal
+              data-reveal="rise"
               style={delay(80)}
               className="mt-6 font-display text-[clamp(28px,3vw,44px)] font-semibold leading-[1.05] tracking-[-0.03em]"
             >
               {c.automation.name}
             </h2>
-            <p data-reveal style={delay(120)} className="mt-3 text-sm tracking-[0.12em] text-[#c6adff]">
+            <p data-reveal style={delay(120)} className="mt-3 text-sm tracking-[0.12em] text-lav">
               {c.automation.category}
             </p>
             <p data-reveal style={delay(160)} className="mt-6 text-[17px] leading-relaxed text-soft">
               {c.automation.body}
             </p>
-            <ol data-reveal style={delay(200)} className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-3">
+            <ol data-reveal style={delay(200)} className="mt-8 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-3">
               {c.automation.flow.map((step, j, all) => (
-                <li key={step} className="flex items-center gap-2">
+                <li key={step} className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
                   <span className="inline-flex h-8 items-center rounded-pill border border-lav/30 bg-violet/10 px-3.5 text-[13px] text-ink">
                     {step}
                   </span>
-                  {j < all.length - 1 && <ArrowIcon className="size-3 text-lav" />}
+                  {j < all.length - 1 && <ArrowIcon className="size-3 text-lav max-sm:rotate-90 max-sm:rtl:-rotate-90" />}
                 </li>
               ))}
             </ol>
@@ -242,13 +268,15 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
               className="pointer-events-none absolute -inset-y-8 inset-x-0 rounded-[40px] bg-[radial-gradient(60%_55%_at_50%_50%,rgb(124_77_255/0.3),transparent_75%)] blur-2xl sm:-inset-x-4"
             />
             <div className="work-tilt relative rounded-[18px] border border-white/12 bg-surface/80 p-1.5 shadow-[0_40px_100px_-40px_rgb(124_77_255/0.55)] sm:p-2">
-              <Image
-                src={c.automation.image}
-                alt={c.automation.imageAlt}
-                placeholder="blur"
-                sizes="(min-width: 1440px) 760px, (min-width: 1024px) 55vw, calc(100vw - 32px)"
-                className="h-auto w-full rounded-[12px]"
-              />
+              <ZoomImage full={c.automation.image} alt={c.automation.imageAlt} hint={c.zoomHint} close={c.closeLabel}>
+                <Image
+                  src={c.automation.image}
+                  alt={c.automation.imageAlt}
+                  placeholder="blur"
+                  sizes="(min-width: 1440px) 760px, (min-width: 1024px) 55vw, calc(100vw - 32px)"
+                  className="h-auto w-full rounded-[12px]"
+                />
+              </ZoomImage>
             </div>
           </div>
         </div>
@@ -258,7 +286,7 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
       <section className="border-t border-line">
         <div className={`${shell} flex flex-col items-center py-28 text-center lg:py-36`}>
           <h2
-            data-reveal
+            data-reveal="rise"
             className="max-w-[16em] font-display text-[clamp(34px,4.8vw,72px)] font-semibold leading-[1.02] tracking-[-0.035em]"
           >
             {c.cta.title} <span className="block"><AccentText text={c.cta.titleAccent} /></span>
