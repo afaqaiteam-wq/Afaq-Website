@@ -28,7 +28,7 @@ const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 /** A vertical line of light between two levels of the org chart. */
 function Connector() {
   return (
-    <span aria-hidden="true" className="relative my-2 block h-16 w-px bg-[linear-gradient(180deg,rgba(166,123,255,.15),#a67bff)]">
+    <span aria-hidden="true" data-reveal="line-y" className="relative my-2 block h-12 w-px bg-[linear-gradient(180deg,rgba(166,123,255,.15),#a67bff)] sm:h-16">
       <span className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rounded-full bg-white shadow-[0_0_10px_#c8a8ff,0_0_22px_rgba(140,92,255,.8)]" />
     </span>
   );
@@ -37,12 +37,12 @@ function Connector() {
 function PersonCard({ person, index, className = "" }: { person: Person; index: number; className?: string }) {
   return (
     <figure data-reveal style={delay(80 * index)} className={`group text-center ${className}`}>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-line bg-surface">
+      <div data-spotlight className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-line bg-surface sm:rounded-3xl">
         <Image
           src={person.photo}
           alt={person.name}
           fill
-          sizes="(min-width: 640px) 400px, 100vw"
+          sizes="(min-width: 640px) 400px, 50vw"
           className="object-cover object-top [filter:saturate(0.8)_contrast(1.04)] transition-[transform,filter] duration-700 ease-out group-hover:scale-[1.03] group-hover:[filter:saturate(1)_contrast(1.04)]"
         />
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(7,6,11,.85))]" />
@@ -51,10 +51,10 @@ function PersonCard({ person, index, className = "" }: { person: Person; index: 
           className="absolute inset-0 rounded-3xl opacity-0 shadow-[inset_0_0_0_1px_rgba(166,123,255,.55),inset_0_-40px_80px_-40px_rgba(140,92,255,.5)] transition-opacity duration-500 group-hover:opacity-100"
         />
       </div>
-      <figcaption className="mt-5">
-        <p className="font-display text-lg font-semibold tracking-[-0.02em]">{person.name}</p>
-        <p className="mt-1 text-sm text-[#c6adff]">{person.role}</p>
-        <p className="mx-auto mt-3 max-w-[30em] text-[15px] leading-relaxed text-muted">{person.line}</p>
+      <figcaption className="mt-4 sm:mt-5">
+        <p className="font-display text-base font-semibold tracking-[-0.02em] sm:text-lg">{person.name}</p>
+        <p className="mt-1 text-[13px] text-lav sm:text-sm">{person.role}</p>
+        <p className="mx-auto mt-2 max-w-[30em] text-[13px] leading-relaxed text-muted sm:mt-3 sm:text-[15px]">{person.line}</p>
       </figcaption>
     </figure>
   );
@@ -79,7 +79,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
           {c.eyebrow}
         </p>
         <h1
-          data-reveal
+          data-reveal="rise"
           style={delay(80)}
           className="mt-6 max-w-[14em] font-display text-[clamp(44px,6.4vw,96px)] font-semibold leading-[0.98] tracking-[-0.04em]"
         >
@@ -87,7 +87,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
         </h1>
         {/* the horizon itself: a thin line of light under the name */}
         <div
-          data-reveal
+          data-reveal="line"
           style={delay(160)}
           aria-hidden="true"
           className="mt-14 h-px w-full bg-[linear-gradient(90deg,transparent,rgba(166,123,255,.8)_50%,transparent)] shadow-[0_0_24px_rgba(140,92,255,.6)]"
@@ -113,7 +113,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
             {c.principles.eyebrow}
           </p>
           <h2
-            data-reveal
+            data-reveal="rise"
             style={delay(80)}
             className="mt-6 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]"
           >
@@ -142,7 +142,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
             {c.team.eyebrow}
           </p>
           <h2
-            data-reveal
+            data-reveal="rise"
             style={delay(80)}
             className="mt-6 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]"
           >
@@ -150,7 +150,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
           </h2>
           {lead && (
             <figure data-reveal className="group mx-auto mt-16 flex max-w-[760px] flex-col items-center text-center">
-              <div className="relative aspect-[4/5] w-full max-w-[460px] overflow-hidden rounded-3xl border border-line bg-surface">
+              <div data-spotlight className="relative aspect-[4/5] w-full max-w-[300px] overflow-hidden rounded-3xl border border-line bg-surface sm:max-w-[460px]">
                 <Image
                   src={lead.photo}
                   alt={lead.name}
@@ -177,20 +177,21 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
           <div className="flex flex-col items-center">
             <Connector />
             {tier(2).map((p) => (
-              <PersonCard key={p.name} person={p} index={0} className="w-full max-w-[370px]" />
+              <PersonCard key={p.name} person={p} index={0} className="w-full max-w-[250px] sm:max-w-[370px]" />
             ))}
             <Connector />
             {tier(3).map((p) => (
-              <PersonCard key={p.name} person={p} index={0} className="w-full max-w-[310px]" />
+              <PersonCard key={p.name} person={p} index={0} className="w-full max-w-[220px] sm:max-w-[310px]" />
             ))}
             <Connector />
-            <div className="relative grid w-full max-w-[980px] gap-12 sm:-mt-2 sm:grid-cols-3 sm:gap-8">
+            <div className="relative grid w-full max-w-[980px] grid-cols-2 gap-x-4 gap-y-10 sm:-mt-2 sm:grid-cols-3 sm:gap-8">
               <span
                 aria-hidden="true"
+                data-reveal="line"
                 className="absolute inset-x-[16.6%] top-0 hidden h-px bg-[linear-gradient(90deg,rgba(166,123,255,.35),#a67bff,rgba(166,123,255,.35))] sm:block"
               />
               {tier(4).map((p, i) => (
-                <div key={p.name} className="flex flex-col items-center">
+                <div key={p.name} className="flex flex-col items-center max-sm:last:col-span-2 max-sm:last:mx-auto max-sm:last:w-1/2">
                   <span aria-hidden="true" className="hidden h-10 w-px bg-[linear-gradient(180deg,#a67bff,rgba(166,123,255,.2))] sm:block" />
                   <PersonCard person={p} index={i} className="w-full max-w-[260px]" />
                 </div>
@@ -204,7 +205,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
       <section className="border-t border-line">
         <div className={`${shell} flex flex-col items-center py-28 text-center lg:py-36`}>
           <h2
-            data-reveal
+            data-reveal="rise"
             className="max-w-[16em] font-display text-[clamp(34px,4.8vw,72px)] font-semibold leading-[1.02] tracking-[-0.035em]"
           >
             {c.cta.title} <span className="block"><AccentText text={c.cta.titleAccent} /></span>

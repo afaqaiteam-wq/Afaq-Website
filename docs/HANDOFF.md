@@ -32,6 +32,27 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - Every EN/AR page was checked at 1440 and 390: all return 200, no broken links, no horizontal overflow, and axe finds no violations.
 - Known and harmless: from the Arabic pages, a few prefetches of English URLs (e.g. `/services?_rsc=…`) return 404. The client router guesses `/services` = `/[lang]` because the English routes are rewritten in `proxy.ts`, then fetches the correct one. Navigation works normally.
 
+## Premium + mobile pass (after the QA report)
+- **Primary button:** a vivid violet gradient with white text (4.8:1) and a light sweep on hover.
+- **Motion system in globals.css**, all on `data-reveal`:
+  - `rise` (headings out of a mask; it must start partly open, because IntersectionObserver counts clip-path);
+  - `image`;
+  - `line` / `line-y` (drawn lines, the org chart connectors);
+  - eyebrow lines that draw in.
+- **`MotionFX`:** a reading-progress hairline, a slow star parallax, and a pointer spotlight on `[data-spotlight]` cards. Blur reveals are off on phones.
+- **Phones:**
+  - The header shows only the logo and the menu. The old `hidden sm:inline-flex` lost to the Button's own `inline-flex`; now `max-sm:hidden`.
+  - The menu is solid and has the email, the language switch and the CTA. Safe areas are handled (`viewportFit: cover`).
+  - The home hero is `330vh` on phones only; the intro is untouched.
+  - The work screenshots use `*-mobile.webp` detail crops, with a `ZoomImage` lightbox.
+  - Services has sticky `ServiceChips`.
+  - About shows the team in two columns.
+  - The footer is two columns with 44px links.
+- **Home order:** hero → selected work → services → closing. "How we work" now lives only on /services.
+- **Contact:** an accent title line, equal cards, one primary (Book a call), and Copy email.
+- **Team titles:** Mohamed Alaa is now "Creative & Video Lead", and Mohamed Ragab is "Social Media & Growth Lead". The founder photo is intentionally different.
+- **Every page** now has the share image and the brand in og:title. The 404 language switch goes to the other home.
+
 ## Later
 - Contact form setup: Resend keys `RESEND_API_KEY` / `CONTACT_TO_EMAIL`, lead storage, Turnstile. Until both keys are set, `/contact` shows an "Email us directly" panel instead of the form. The check happens at build time, so after adding the keys in Vercel, redeploy and the form comes back.
 - WhatsApp: the real number is needed (the old number opens "Waqar"; it's hidden in `src/lib/site.ts`).

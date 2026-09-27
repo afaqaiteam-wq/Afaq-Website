@@ -103,7 +103,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
   const underNav = "[mask-image:linear-gradient(to_bottom,transparent_0,black_120px)]";
 
   return (
-    <section ref={storyRef} className="relative h-[440vh]" aria-label={hero.eyebrow}>
+    <section ref={storyRef} className="relative h-[330vh] sm:h-[440vh]" aria-label={hero.eyebrow}>
       <div
         ref={stageRef}
         className="sticky top-0 h-svh overflow-hidden [--logo-size:min(58vw,28vh)] [--logo-y:30%] min-[1100px]:[--logo-size:min(32vh,300px)] min-[1100px]:[--logo-y:36%]"

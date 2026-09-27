@@ -1,9 +1,12 @@
 import type { StaticImageData } from "next/image";
 
 import type { Locale } from "@/i18n/config";
+import financeMobile from "@/assets/work/mo-finance-os-mobile.webp";
 import financeShot from "@/assets/work/mo-finance-os.webp";
+import estateMobile from "@/assets/work/real-estate-installments-mobile.webp";
 import estateShot from "@/assets/work/real-estate-installments.webp";
 import youtubeShot from "@/assets/work/n8n-youtube-comment-assistant.webp";
+import salesMobile from "@/assets/work/sales-invoicing-mobile.webp";
 import salesShot from "@/assets/work/sales-invoicing.webp";
 
 /*
@@ -29,6 +32,8 @@ export interface Project {
   /** Omitted when the stack isn't confirmed. */
   tech?: string[];
   image: StaticImageData;
+  /** A readable detail crop of the same screen, shown on phones instead of the full dashboard. */
+  mobileImage: StaticImageData;
   imageAlt: string;
 }
 
@@ -47,6 +52,9 @@ export interface WorkPage {
   capabilitiesLabel: string;
   flowLabel: string;
   techLabel: string;
+  zoomHint: string;
+  closeLabel: string;
+  automationJump: string;
   projects: Project[];
   /** A smaller automation example shown after the three projects. */
   automation: {
@@ -78,6 +86,9 @@ const en: WorkPage = {
   capabilitiesLabel: "Inside the system",
   flowLabel: "How the data flows",
   techLabel: "Built with",
+  zoomHint: "View full screen",
+  closeLabel: "Close",
+  automationJump: "Plus: an n8n automation",
   projects: [
     {
       slug: "real-estate",
@@ -104,6 +115,7 @@ const en: WorkPage = {
       flow: ["Buildings", "Apartments", "Owners", "Contracts", "Installments", "Payments"],
       tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
       image: estateShot,
+      mobileImage: estateMobile,
       imageAlt:
         "The installment management dashboard in Arabic: quick actions, a collection-progress ring and today's summary, with amounts blurred.",
     },
@@ -128,6 +140,7 @@ const en: WorkPage = {
         "Arabic and English, with dark mode",
       ],
       image: salesShot,
+      mobileImage: salesMobile,
       imageAlt:
         "The sales dashboard in Arabic: sales, payments and amount due, and a six-month sales-versus-collection chart, with the company name and figures blurred.",
     },
@@ -154,6 +167,7 @@ const en: WorkPage = {
       flow: ["Data", "Reconciliation", "Analysis", "Risk detection", "Planning", "Action"],
       tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
       image: financeShot,
+      mobileImage: financeMobile,
       imageAlt:
         "The MO Finance OS overview in Arabic: a salary check-in, a 30-day summary, a daily spending limit and a safe-to-spend figure, with every amount blurred.",
     },
@@ -192,6 +206,9 @@ const ar: WorkPage = {
   capabilitiesLabel: "داخل النظام",
   flowLabel: "مسار البيانات",
   techLabel: "بُني بـ",
+  zoomHint: "عرض بالحجم الكامل",
+  closeLabel: "إغلاق",
+  automationJump: "وأيضًا: أتمتة على n8n",
   projects: [
     {
       slug: "real-estate",
@@ -218,6 +235,7 @@ const ar: WorkPage = {
       flow: ["المباني", "الشقق", "الملّاك", "العقود", "الأقساط", "الدفعات"],
       tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
       image: estateShot,
+      mobileImage: estateMobile,
       imageAlt: "لوحة تحكم نظام الأقساط بالعربية: إجراءات سريعة ومؤشر التحصيل وملخص اليوم، مع تمويه المبالغ.",
     },
     {
@@ -241,6 +259,7 @@ const ar: WorkPage = {
         "بالعربية والإنجليزية، مع الوضع الداكن",
       ],
       image: salesShot,
+      mobileImage: salesMobile,
       imageAlt:
         "لوحة تحكم المبيعات بالعربية: المبيعات والمدفوعات والمبلغ المستحق ورسم المبيعات مقابل التحصيل لستة أشهر، مع تمويه اسم الشركة والأرقام.",
     },
@@ -267,6 +286,7 @@ const ar: WorkPage = {
       flow: ["البيانات", "المطابقة", "التحليل", "رصد المخاطر", "التخطيط", "التنفيذ"],
       tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
       image: financeShot,
+      mobileImage: financeMobile,
       imageAlt:
         "نظرة عامة في MO Finance OS بالعربية: تسجيل المرتب وخلاصة 30 يومًا وحد الصرف اليومي والمبلغ الآمن للإنفاق، مع تمويه كل المبالغ.",
     },
