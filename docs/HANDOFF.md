@@ -53,8 +53,16 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - **Team titles:** Mohamed Alaa is now "Creative & Video Lead", and Mohamed Ragab is "Social Media & Growth Lead". The founder photo is intentionally different.
 - **Every page** now has the share image and the brand in og:title. The 404 language switch goes to the other home.
 
+## Domain and email (done)
+- **Domain:** `afaqai.dev` was registered on Cloudflare (account afaq.ai.team@gmail.com, owned by Mohamed Saber). Auto-renew is on and it renews at $12.20/yr. `.dev` is HTTPS-only.
+- **Email:** Cloudflare Email Routing forwards incoming mail to Gmail, receive only:
+  - `info@` goes to the team Gmail. It is the public address on the site.
+  - `mohamed@`, `mostafa@` and `ghofran@` each go to the person's own Gmail.
+  - Catch-all is disabled.
+- **Sending as @afaqai.dev** needs a real mailbox, e.g. Google Workspace. Moving to a mailbox provider means turning Email Routing off, because only one provider can receive.
+- **Code:** `site.url` defaults to https://afaqai.dev and `site.email` is info@afaqai.dev. If `NEXT_PUBLIC_SITE_URL` is set in Vercel, it overrides the default.
+
 ## Later
 - Contact form setup: Resend keys `RESEND_API_KEY` / `CONTACT_TO_EMAIL`, lead storage, Turnstile. Until both keys are set, `/contact` shows an "Email us directly" panel instead of the form. The check happens at build time, so after adding the keys in Vercel, redeploy and the form comes back.
 - WhatsApp: the real number is needed (the old number opens "Waqar"; it's hidden in `src/lib/site.ts`).
-- Domain and business email.
 - Merge to `main` at launch (PR opened from `next-rebuild`).
