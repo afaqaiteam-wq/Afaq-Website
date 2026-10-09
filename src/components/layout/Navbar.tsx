@@ -92,7 +92,8 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
       href={href(otherLang, known ? path : "/")}
       hrefLang={otherLang}
       lang={otherLang}
-      aria-label={common.switchLanguageLabel}
+      // The spoken name starts with the visible word, so voice control ("click English") still works.
+      aria-label={`${common.switchLanguage}: ${common.switchLanguageLabel}`}
       className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-pill px-3 text-sm text-muted transition-colors hover:text-ink ${
         otherLang === "ar" ? "font-arabic" : "font-sans"
       } ${extra}`}
