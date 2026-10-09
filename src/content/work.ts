@@ -1,6 +1,7 @@
 import type { StaticImageData } from "next/image";
 
 import type { Locale } from "@/i18n/config";
+import type { WorkSlug } from "@/content/work-slugs";
 import financeMobile from "@/assets/work/mo-finance-os-mobile.webp";
 import financeShot from "@/assets/work/mo-finance-os.webp";
 import estateMobile from "@/assets/work/real-estate-installments-mobile.webp";
@@ -16,8 +17,8 @@ import salesShot from "@/assets/work/sales-invoicing.webp";
  */
 
 export interface Project {
-  /** URL anchor, e.g. /work#finance */
-  slug: string;
+  /** URL segment of the project's own page, e.g. /work/finance. Must be listed in work-slugs.ts. */
+  slug: WorkSlug;
   category: string;
   name: string;
   /** One line: what the system is. */
@@ -31,6 +32,8 @@ export interface Project {
   flow?: string[];
   /** Omitted when the stack isn't confirmed. */
   tech?: string[];
+  /** Interface languages, as stated in the capabilities list. */
+  languages: string;
   image: StaticImageData;
   /** A readable detail crop of the same screen, shown on phones instead of the full dashboard. */
   mobileImage: StaticImageData;
@@ -55,6 +58,18 @@ export interface WorkPage {
   zoomHint: string;
   closeLabel: string;
   automationJump: string;
+  /** Link from a project on the Work page to its own page. */
+  readCaseStudy: string;
+  /** Link from a project page back to the Work page. */
+  allWork: string;
+  /** Label above the link to the following project. */
+  nextProject: string;
+  /** Eyebrow on a project page, before its number. */
+  caseStudyLabel: string;
+  /** The project's field, in the facts row of a project page. */
+  fieldLabel: string;
+  /** Label for the interface languages in the facts row. */
+  languagesLabel: string;
   projects: Project[];
   /** A smaller automation example shown after the three projects. */
   automation: {
@@ -89,6 +104,12 @@ const en: WorkPage = {
   zoomHint: "View full screen",
   closeLabel: "Close",
   automationJump: "Plus: an n8n automation",
+  readCaseStudy: "Read the case study",
+  allWork: "All work",
+  nextProject: "Next project",
+  caseStudyLabel: "Case study",
+  fieldLabel: "Field",
+  languagesLabel: "Interface",
   projects: [
     {
       slug: "real-estate",
@@ -116,6 +137,7 @@ const en: WorkPage = {
       tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
       image: estateShot,
       mobileImage: estateMobile,
+      languages: "Arabic first",
       imageAlt:
         "The installment management dashboard in Arabic: quick actions, a collection-progress ring and today's summary, with amounts blurred.",
     },
@@ -141,6 +163,7 @@ const en: WorkPage = {
       ],
       image: salesShot,
       mobileImage: salesMobile,
+      languages: "Arabic and English",
       imageAlt:
         "The sales dashboard in Arabic: sales, payments and amount due, and a six-month sales-versus-collection chart, with the company name and figures blurred.",
     },
@@ -152,7 +175,7 @@ const en: WorkPage = {
       problem:
         "Bank balances don't tell the whole story. A card statement can mix your own spending with expenses you carried for other people, and a shortfall shows up only when a due date arrives.",
       built:
-        "A ledger-based system that reads bank statements, reconciles them and turns them into one financial picture: what you really owe, what's coming in, and what could hurt you in the next 30 days. It runs locally, so the data stays on the device, and it was built in phases with an automated test suite behind the numbers.",
+        "A ledger-based system that reads bank statements, reconciles them and turns them into one financial picture: what you really owe, what's coming in, and what could hurt you in the next 30 days. It was built in phases, with an automated test suite behind the numbers.",
       capabilities: [
         "Parses CIB and BDC statements: periods, closing balances, due dates, minimum payments",
         "Reconciles the statement balance against your real share and other people's exposure",
@@ -168,6 +191,7 @@ const en: WorkPage = {
       tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
       image: financeShot,
       mobileImage: financeMobile,
+      languages: "Arabic and English",
       imageAlt:
         "The MO Finance OS overview in Arabic: a salary check-in, a 30-day summary, a daily spending limit and a safe-to-spend figure, with every amount blurred.",
     },
@@ -205,10 +229,16 @@ const ar: WorkPage = {
   builtLabel: "ما بنيناه",
   capabilitiesLabel: "داخل النظام",
   flowLabel: "مسار البيانات",
-  techLabel: "بُني بـ",
+  techLabel: "التقنيات",
   zoomHint: "عرض بالحجم الكامل",
   closeLabel: "إغلاق",
   automationJump: "وأيضًا: أتمتة على n8n",
+  readCaseStudy: "اقرأ دراسة الحالة",
+  allWork: "كل الأعمال",
+  nextProject: "المشروع التالي",
+  caseStudyLabel: "دراسة حالة",
+  fieldLabel: "المجال",
+  languagesLabel: "الواجهة",
   projects: [
     {
       slug: "real-estate",
@@ -217,12 +247,12 @@ const ar: WorkPage = {
       oneLiner: "المباني والملّاك والعقود وكل قسط، في مكان واحد.",
       client: "د. محمد الشيوي",
       problem:
-        "كانت الشقق والملّاك والعقود ودفعات الأقساط موزعة على ملفات Excel متفرقة. ولمعرفة وضع وحدة واحدة كان عليك فتح أكثر من ملف والثقة بأنها متطابقة.",
+        "كانت الشقق والملّاك والعقود ودفعات الأقساط موزعة على ملفات Excel متفرقة. ولمعرفة وضع شقة واحدة كان عليك أن تفتح أكثر من ملف، وأن تثق بأنها متطابقة.",
       built:
-        "نظام مبني على قاعدة بيانات يربط كل سجل، من المبنى حتى آخر دفعة. صمّمناه كلوحة تشغيل حقيقية لا كلوحة إدارة مجردة، وبالعربية أولًا.",
+        "نظام مبني على قاعدة بيانات يربط كل سجل، من المبنى حتى آخر دفعة. صمّمناه لوحةَ تشغيل حقيقية لا لوحة إدارة شكلية، وبالعربية أولًا.",
       capabilities: [
         "لوحة تحكم بالأرقام الأساسية ومؤشر دائري لنسبة التحصيل",
-        "المباني والشقق والملّاك والعقود، مرتبطة ببعضها",
+        "المباني والشقق والملّاك والعقود، مرتبطة بعضها ببعض",
         "توليد جدول الأقساط بخطوة واحدة",
         "دفعات العملاء، ومدفوعات المشاريع، وجهات الدفع",
         "إجراء تالٍ مقترح، مثل مراجعة الأقساط المتأخرة",
@@ -236,6 +266,7 @@ const ar: WorkPage = {
       tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
       image: estateShot,
       mobileImage: estateMobile,
+      languages: "العربية أولًا",
       imageAlt: "لوحة تحكم نظام الأقساط بالعربية: إجراءات سريعة ومؤشر التحصيل وملخص اليوم، مع تمويه المبالغ.",
     },
     {
@@ -244,9 +275,9 @@ const ar: WorkPage = {
       name: "منصة المبيعات والفواتير",
       oneLiner: "عروض الأسعار والفواتير والمبيعات والمدفوعات لأكثر من شركة، من حساب واحد.",
       problem:
-        "يسهل أن تضيع عروض الأسعار والفواتير والمبيعات والتحصيل حين تتوزع على أدوات منفصلة، ويصعب الأمر أكثر مع أكثر من شركة. وصاحب العمل يحتاج أن يرى بنظرة واحدة من لا يزال عليه مستحقات.",
+        "يسهل أن تضيع عروض الأسعار والفواتير والمبيعات والتحصيل حين تتوزع على أدوات منفصلة، ويصعب الأمر أكثر مع أكثر من شركة. وصاحب العمل يحتاج إلى أن يرى بنظرة واحدة من لا تزال عليه مستحقات.",
       built:
-        "منصة SaaS متعددة الشركات مع مبدّل للشركات، فتحتفظ كل شركة بعملائها ومنتجاتها وأرقامها. وتجيب لوحة التحكم عن أسئلة كل شهر: كم بعنا، وكم حصّلنا، وكم بقي مستحقًا.",
+        "منصة SaaS متعددة الشركات تتيح التنقل بينها، وتحتفظ كل شركة بعملائها ومنتجاتها وأرقامها. وتجيب لوحة التحكم عن أسئلة كل شهر: كم بعنا، وكم حصّلنا، وكم بقي مستحقًا.",
       capabilities: [
         "عروض الأسعار والفواتير والمبيعات والمدفوعات",
         "الشركات والعملاء وكشوف الحساب",
@@ -255,11 +286,12 @@ const ar: WorkPage = {
         "لوحة تحكم: عدد عمليات البيع، وإجمالي المبيعات، وإجمالي المدفوعات، والمبلغ المستحق",
         "المبيعات مقابل التحصيل لآخر 6 أشهر",
         "أعلى المديونيات، وأفضل العملاء، وطرق الدفع",
-        "فلتر «هذا الشهر» على لوحة التحكم",
+        "تصفية «هذا الشهر» في لوحة التحكم",
         "بالعربية والإنجليزية، مع الوضع الداكن",
       ],
       image: salesShot,
       mobileImage: salesMobile,
+      languages: "العربية والإنجليزية",
       imageAlt:
         "لوحة تحكم المبيعات بالعربية: المبيعات والمدفوعات والمبلغ المستحق ورسم المبيعات مقابل التحصيل لستة أشهر، مع تمويه اسم الشركة والأرقام.",
     },
@@ -271,7 +303,7 @@ const ar: WorkPage = {
       problem:
         "رصيد البنك لا يحكي القصة كاملة. قد يخلط كشف البطاقة بين مصروفاتك ومصروفات دفعتها عن آخرين، ولا يظهر العجز إلا عندما يحلّ موعد السداد.",
       built:
-        "نظام قائم على دفتر أستاذ يقرأ كشوف الحساب البنكية ويطابقها ويحوّلها إلى صورة مالية واحدة: ما عليك فعلًا، وما سيصلك، وما قد يضرّك خلال الثلاثين يومًا القادمة. ويعمل محليًا فتبقى البيانات على الجهاز، وبُني على مراحل مع اختبارات آلية تتحقق من الأرقام.",
+        "نظام قائم على دفتر أستاذ يقرأ كشوف الحساب البنكية ويطابقها ويحوّلها إلى صورة مالية واحدة: ما عليك فعلًا، وما سيصلك، وما قد يضرّك خلال الثلاثين يومًا القادمة. وبُني على مراحل، مع اختبارات آلية تتحقق من الأرقام.",
       capabilities: [
         "قراءة كشوف CIB وBDC: الفترات، والرصيد الختامي، ومواعيد الاستحقاق، والحد الأدنى للسداد",
         "مطابقة رصيد الكشف مع نصيبك الفعلي وما يخص الآخرين",
@@ -287,6 +319,7 @@ const ar: WorkPage = {
       tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
       image: financeShot,
       mobileImage: financeMobile,
+      languages: "العربية والإنجليزية",
       imageAlt:
         "نظرة عامة في MO Finance OS بالعربية: تسجيل المرتب وخلاصة 30 يومًا وحد الصرف اليومي والمبلغ الآمن للإنفاق، مع تمويه كل المبالغ.",
     },

@@ -82,7 +82,10 @@ export default async function ServicesPage({ params }: PageProps<"/[lang]/servic
             <div className="lg:col-span-5">
               <div className="lg:sticky lg:top-32">
                 <p data-reveal className="text-xs font-medium tracking-[0.2em] text-dim">
-                  {String(i + 1).padStart(2, "0")} / {String(c.services.length).padStart(2, "0")}
+                  {/* "01 / 06" must read left to right in Arabic too, or it shows as "06 / 01". */}
+                  <span dir="ltr">
+                    {String(i + 1).padStart(2, "0")} / {String(c.services.length).padStart(2, "0")}
+                  </span>
                 </p>
                 <h2
                   data-reveal="rise"

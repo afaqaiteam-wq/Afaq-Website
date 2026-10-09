@@ -18,7 +18,7 @@ export interface Person {
   role: string;
   line: string;
   photo: StaticImageData;
-  /** Place in the org chart: 1 is the CEO (featured with his quote), then 2, 3, 4. */
+  /** Seniority: 1 is the founder (featured with his quote); the rest are shown in tier order. */
   tier: 1 | 2 | 3 | 4;
   quote?: string;
 }
@@ -85,7 +85,7 @@ const ar: AboutPage = {
   titleAccent: "من الأفق.",
   story: [
     "آفاق جمعُ أُفُق: الخط الذي يلتقي عنده ما تراه بما هو قادم.",
-    "نبني وكلاء ذكاء اصطناعي وأنظمة أتمتة وبرمجيات تدفع هذا الخط أبعد للشركات. حين تعمل المهام المتكررة وحدها، يجد الفريق مساحة ليرى أبعد.",
+    "نبني للشركات وكلاء ذكاء اصطناعي وأنظمة أتمتة وبرمجيات تدفع هذا الخط إلى الأمام. حين تعمل المهام المتكررة وحدها، يجد الفريق مساحة ليرى أبعد.",
   ],
   principles: {
     eyebrow: "ما نؤمن به",
@@ -100,8 +100,8 @@ const ar: AboutPage = {
   },
   team: {
     eyebrow: "الفريق",
-    title: "الأشخاص",
-    titleAccent: "خلف المدار.",
+    title: "مَن يقف",
+    titleAccent: "وراء المدار.",
     people: [
       { name: "محمد صابر", role: "المؤسس والرئيس التنفيذي", line: "يحدّد الاتجاه، ويربط كل مشروع بنتيجة حقيقية للعمل.", photo: saber, tier: 1, quote: "نمكّن الشركات بذكاء اصطناعي يعمل فعلًا، لتتفرّغ لما يهمها أكثر." },
       { name: "مصطفى أبو الوفا", role: "الرئيس التنفيذي المشارك والشريك المؤسس", line: "يربط الهندسة بالأعمال والذكاء الاصطناعي، ويقود الشراكات.", photo: mostafa, tier: 2 },

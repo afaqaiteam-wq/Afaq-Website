@@ -159,44 +159,52 @@
       translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
       scale 100ms ease-out;
   }
-  /* Vivid violet with white text (4.8:1 at the lightest stop), a hairline highlight on top and a
-     light that crosses the button on hover. */
+  /* Brushed silver, like the logo: a pearl gradient with dark ink text (17:1), a bright top edge,
+     a soft shadow underneath and a light that crosses it on hover. The violet stays for accents. */
   .btn-primary {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    background: linear-gradient(135deg, #8454ff 0%, #7c4dff 45%, #6a35f0 100%);
-    color: #fff;
+    background: linear-gradient(180deg, #ffffff 0%, #ecebf2 52%, #d9d6e3 100%);
+    color: #0b0912;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.28),
-      0 10px 28px -12px rgb(124 77 255 / 0.75);
+      inset 0 1px 0 rgb(255 255 255 / 0.95),
+      inset 0 -1px 0 rgb(40 30 70 / 0.16),
+      0 1px 2px rgb(0 0 0 / 0.5),
+      0 12px 32px -16px rgb(200 168 255 / 0.45);
   }
   .btn-primary::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.28) 50%, transparent 65%);
+    background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.9) 50%, transparent 65%);
     translate: -120% 0;
-    transition: translate 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: translate 800ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   .btn-primary:hover {
     translate: 0 -1px;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.32),
-      0 14px 36px -12px rgb(124 77 255 / 0.95),
-      0 0 0 1px rgb(200 168 255 / 0.35);
+      inset 0 1px 0 rgb(255 255 255 / 1),
+      inset 0 -1px 0 rgb(40 30 70 / 0.16),
+      0 0 0 1px rgb(200 168 255 / 0.45),
+      0 16px 40px -14px rgb(200 168 255 / 0.6);
   }
   .btn-primary:hover::after {
     translate: 120% 0;
   }
+  /* Frosted glass: a faint fill, a hairline border and a lit top edge. */
   .btn-ghost {
-    border: 1px solid rgb(255 255 255 / 0.16);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(255 255 255 / 0.035);
     color: var(--color-ink);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
   .btn-ghost:hover {
-    border-color: rgb(200 168 255 / 0.55);
-    background: rgb(255 255 255 / 0.04);
+    border-color: rgb(255 255 255 / 0.3);
+    background: rgb(255 255 255 / 0.07);
     translate: 0 -1px;
   }
   .btn-primary:active,
