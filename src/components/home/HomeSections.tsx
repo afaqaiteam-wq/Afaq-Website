@@ -51,7 +51,7 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
             {work.projects.map((p, i) => (
               <li key={p.slug} data-reveal style={delay(90 * i)}>
                 <Link
-                  href={`${href(lang, "/work")}#${p.slug}`}
+                  href={href(lang, `/work/${p.slug}`)}
                   className="group grid gap-6 md:grid-cols-2 md:items-center md:gap-8 lg:block"
                 >
                   <div

@@ -1,6 +1,7 @@
 import type { StaticImageData } from "next/image";
 
 import type { Locale } from "@/i18n/config";
+import type { WorkSlug } from "@/content/work-slugs";
 import financeMobile from "@/assets/work/mo-finance-os-mobile.webp";
 import financeShot from "@/assets/work/mo-finance-os.webp";
 import estateMobile from "@/assets/work/real-estate-installments-mobile.webp";
@@ -16,8 +17,8 @@ import salesShot from "@/assets/work/sales-invoicing.webp";
  */
 
 export interface Project {
-  /** URL anchor, e.g. /work#finance */
-  slug: string;
+  /** URL segment of the project's own page, e.g. /work/finance. Must be listed in work-slugs.ts. */
+  slug: WorkSlug;
   category: string;
   name: string;
   /** One line: what the system is. */
@@ -55,6 +56,12 @@ export interface WorkPage {
   zoomHint: string;
   closeLabel: string;
   automationJump: string;
+  /** Link from a project on the Work page to its own page. */
+  readCaseStudy: string;
+  /** Link from a project page back to the Work page. */
+  allWork: string;
+  /** Label above the link to the following project. */
+  nextProject: string;
   projects: Project[];
   /** A smaller automation example shown after the three projects. */
   automation: {
@@ -89,6 +96,9 @@ const en: WorkPage = {
   zoomHint: "View full screen",
   closeLabel: "Close",
   automationJump: "Plus: an n8n automation",
+  readCaseStudy: "Read the case study",
+  allWork: "All work",
+  nextProject: "Next project",
   projects: [
     {
       slug: "real-estate",
@@ -209,6 +219,9 @@ const ar: WorkPage = {
   zoomHint: "عرض بالحجم الكامل",
   closeLabel: "إغلاق",
   automationJump: "وأيضًا: أتمتة على n8n",
+  readCaseStudy: "اقرأ دراسة الحالة",
+  allWork: "كل الأعمال",
+  nextProject: "المشروع التالي",
   projects: [
     {
       slug: "real-estate",

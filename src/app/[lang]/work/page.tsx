@@ -7,6 +7,7 @@ import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
 import { StarBackdrop } from "@/components/ui/StarBackdrop";
 import { ToolPill } from "@/components/ui/ToolPill";
+import { ProjectShot } from "@/components/work/ProjectShot";
 import { ZoomImage } from "@/components/work/ZoomImage";
 import { workContent } from "@/content/work";
 import { href, isLocale } from "@/i18n/config";
@@ -122,102 +123,26 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
               )}
             </div>
 
-            {/* Screenshot: a subtle tilt that straightens as it reveals (globals.css .work-tilt) */}
-            <div data-reveal style={delay(120)} className="relative mt-12 lg:mt-16">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -inset-y-10 inset-x-0 rounded-[48px] sm:-inset-x-6 bg-[radial-gradient(60%_55%_at_50%_45%,rgb(124_77_255/0.38),transparent_75%)] blur-2xl"
-              />
-              <div className="work-tilt relative rounded-[18px] border border-white/12 bg-surface/80 p-1.5 shadow-[0_50px_120px_-40px_rgb(124_77_255/0.6),0_0_0_1px_rgb(200_168_255/0.08)] sm:rounded-[22px] sm:p-2">
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,#c8a8ff,transparent)]"
-                />
-                <ZoomImage full={p.image} alt={p.imageAlt} hint={c.zoomHint} close={c.closeLabel}>
-                  {/* phones: a readable detail of the same screen; larger screens: the whole dashboard */}
-                  <Image
-                    src={p.mobileImage}
-                    alt={p.imageAlt}
-                    placeholder="blur"
-                    sizes="calc(100vw - 32px)"
-                    className="h-auto w-full rounded-[12px] md:hidden"
-                  />
-                  <Image
-                    src={p.image}
-                    alt={p.imageAlt}
-                    placeholder="blur"
-                    sizes="(min-width: 1440px) 1330px, calc(100vw - 64px)"
-                    priority={i === 0}
-                    className="hidden h-auto w-full rounded-[16px] md:block"
-                  />
-                </ZoomImage>
-              </div>
+            <div data-reveal style={delay(120)} className="mt-12 lg:mt-16">
+              <ProjectShot project={p} zoomHint={c.zoomHint} closeLabel={c.closeLabel} priority={i === 0} />
             </div>
 
-            <div className="mt-16 grid gap-12 lg:mt-20 lg:grid-cols-12">
-              <div className="lg:col-span-5">
+            {/* The full story lives on the project's own page. */}
+            <div className="mt-12 grid gap-8 lg:mt-16 lg:grid-cols-12 lg:items-end">
+              <div className="lg:col-span-7">
                 <h3 data-reveal className={label}>
                   {c.problemLabel}
                 </h3>
                 <p data-reveal style={delay(60)} className="mt-4 text-[17px] leading-relaxed text-muted">
                   {p.problem}
                 </p>
-                <h3 data-reveal className={`${label} mt-10`}>
-                  {c.builtLabel}
-                </h3>
-                <p data-reveal style={delay(60)} className="mt-4 text-[clamp(18px,1.4vw,20px)] leading-relaxed text-soft">
-                  {p.built}
-                </p>
-
-                {p.tech && (
-                  <div data-reveal className="mt-10">
-                    <p className={label}>{c.techLabel}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {p.tech.map((t) => (
-                        <ToolPill key={t} name={t} />
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
-
-              <div className="lg:col-span-6 lg:col-start-7">
-                <h3 data-reveal className={label}>
-                  {c.capabilitiesLabel}
-                </h3>
-                <ul className="mt-4 border-t border-line">
-                  {p.capabilities.map((cap, j) => (
-                    <li
-                      key={cap}
-                      data-reveal
-                      style={delay(50 * j)}
-                      className="flex gap-4 border-b border-line py-3.5 text-[16px] text-ink"
-                    >
-                      <span aria-hidden="true" className="mt-[9px] size-1.5 shrink-0 rounded-full bg-lav shadow-[0_0_8px_#a67bff]" />
-                      {cap}
-                    </li>
-                  ))}
-                </ul>
+              <div data-reveal style={delay(120)} className="lg:col-span-4 lg:col-start-9 lg:text-end">
+                <Button href={href(lang, `/work/${p.slug}`)} arrow>
+                  {c.readCaseStudy}
+                </Button>
               </div>
             </div>
-
-            {p.flow && (
-              <div data-reveal className="mt-14">
-                <h3 className={label}>{c.flowLabel}</h3>
-                <ol className="mt-4 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-3">
-                  {p.flow.map((step, j, all) => (
-                    <li key={step} className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
-                      <span className="inline-flex h-9 items-center rounded-pill border border-lav/30 bg-violet/10 px-4 text-[14px] text-ink shadow-[inset_0_0_12px_rgb(124_77_255/0.15)]">
-                        {step}
-                      </span>
-                      {j < all.length - 1 && (
-                        <ArrowIcon className="size-3.5 text-lav max-sm:rotate-90 max-sm:rtl:-rotate-90" />
-                      )}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
           </div>
         </section>
       ))}

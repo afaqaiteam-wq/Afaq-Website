@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { HomeLink } from "@/components/layout/HomeLink";
 import { Button } from "@/components/ui/Button";
+import { isWorkSlug } from "@/content/work-slugs";
 import { href, stripLocale, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 import { site } from "@/lib/site";
@@ -85,7 +86,7 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
 
   const isActive = (p: string) => (p === "/" ? path === "/" : path.startsWith(p));
   // On a 404 there is no matching page in the other language, so switch to its home instead.
-  const known = LINKS.some((l) => l.path === path);
+  const known = LINKS.some((l) => l.path === path) || (path.startsWith("/work/") && isWorkSlug(path.slice(6)));
   const langSwitch = (extra: string) => (
     <Link
       href={href(otherLang, known ? path : "/")}
