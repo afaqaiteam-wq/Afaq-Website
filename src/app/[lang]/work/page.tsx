@@ -98,7 +98,7 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
             <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
               <div className="lg:col-span-8">
                 <p data-reveal className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium tracking-[0.2em] text-dim">
-                  <span>
+                  <span dir="ltr">
                     {String(i + 1).padStart(2, "0")} / {String(c.projects.length).padStart(2, "0")}
                   </span>
                   <span aria-hidden="true" className="h-px w-8 bg-[linear-gradient(90deg,transparent,#a67bff)] rtl:-scale-x-100" />

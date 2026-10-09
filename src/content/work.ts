@@ -32,6 +32,8 @@ export interface Project {
   flow?: string[];
   /** Omitted when the stack isn't confirmed. */
   tech?: string[];
+  /** Interface languages, as stated in the capabilities list. */
+  languages: string;
   image: StaticImageData;
   /** A readable detail crop of the same screen, shown on phones instead of the full dashboard. */
   mobileImage: StaticImageData;
@@ -62,6 +64,12 @@ export interface WorkPage {
   allWork: string;
   /** Label above the link to the following project. */
   nextProject: string;
+  /** Eyebrow on a project page, before its number. */
+  caseStudyLabel: string;
+  /** The project's field, in the facts row of a project page. */
+  fieldLabel: string;
+  /** Label for the interface languages in the facts row. */
+  languagesLabel: string;
   projects: Project[];
   /** A smaller automation example shown after the three projects. */
   automation: {
@@ -99,6 +107,9 @@ const en: WorkPage = {
   readCaseStudy: "Read the case study",
   allWork: "All work",
   nextProject: "Next project",
+  caseStudyLabel: "Case study",
+  fieldLabel: "Field",
+  languagesLabel: "Interface",
   projects: [
     {
       slug: "real-estate",
@@ -126,6 +137,7 @@ const en: WorkPage = {
       tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
       image: estateShot,
       mobileImage: estateMobile,
+      languages: "Arabic first",
       imageAlt:
         "The installment management dashboard in Arabic: quick actions, a collection-progress ring and today's summary, with amounts blurred.",
     },
@@ -151,6 +163,7 @@ const en: WorkPage = {
       ],
       image: salesShot,
       mobileImage: salesMobile,
+      languages: "Arabic and English",
       imageAlt:
         "The sales dashboard in Arabic: sales, payments and amount due, and a six-month sales-versus-collection chart, with the company name and figures blurred.",
     },
@@ -178,6 +191,7 @@ const en: WorkPage = {
       tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
       image: financeShot,
       mobileImage: financeMobile,
+      languages: "Arabic and English",
       imageAlt:
         "The MO Finance OS overview in Arabic: a salary check-in, a 30-day summary, a daily spending limit and a safe-to-spend figure, with every amount blurred.",
     },
@@ -222,6 +236,9 @@ const ar: WorkPage = {
   readCaseStudy: "اقرأ دراسة الحالة",
   allWork: "كل الأعمال",
   nextProject: "المشروع التالي",
+  caseStudyLabel: "دراسة حالة",
+  fieldLabel: "المجال",
+  languagesLabel: "الواجهة",
   projects: [
     {
       slug: "real-estate",
@@ -249,6 +266,7 @@ const ar: WorkPage = {
       tech: ["Django", "Python", "SQLite", "HTML/CSS/JS"],
       image: estateShot,
       mobileImage: estateMobile,
+      languages: "العربية أولًا",
       imageAlt: "لوحة تحكم نظام الأقساط بالعربية: إجراءات سريعة ومؤشر التحصيل وملخص اليوم، مع تمويه المبالغ.",
     },
     {
@@ -273,6 +291,7 @@ const ar: WorkPage = {
       ],
       image: salesShot,
       mobileImage: salesMobile,
+      languages: "العربية والإنجليزية",
       imageAlt:
         "لوحة تحكم المبيعات بالعربية: المبيعات والمدفوعات والمبلغ المستحق ورسم المبيعات مقابل التحصيل لستة أشهر، مع تمويه اسم الشركة والأرقام.",
     },
@@ -300,6 +319,7 @@ const ar: WorkPage = {
       tech: ["Next.js", "TypeScript", "Tailwind CSS", "Prisma", "SQLite", "Vitest"],
       image: financeShot,
       mobileImage: financeMobile,
+      languages: "العربية والإنجليزية",
       imageAlt:
         "نظرة عامة في MO Finance OS بالعربية: تسجيل المرتب وخلاصة 30 يومًا وحد الصرف اليومي والمبلغ الآمن للإنفاق، مع تمويه كل المبالغ.",
     },

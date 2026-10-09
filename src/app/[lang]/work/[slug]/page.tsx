@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
@@ -39,6 +40,19 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/work/[slug
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
+/**
+ * Widens a card or two so the capability grid never ends with a card on its own:
+ * two columns on tablets, three on wide screens.
+ */
+function capabilitySpan(i: number, n: number) {
+  const tablet = n % 2 === 1 && i === 0;
+  const wide = (n % 3 === 1 && (i === 0 || i === n - 2)) || (n % 3 === 2 && i === 0);
+  return [tablet && "sm:col-span-2", wide ? "xl:col-span-2" : tablet && "xl:col-span-1"].filter(Boolean).join(" ");
+}
+
+// Wide screens show every fact in one row; written out so Tailwind keeps the classes.
+const factCols: Record<number, string> = { 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4" };
+
 export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[slug]">) {
   const { lang: rawLang, slug } = await params;
   const found = findProject(rawLang, slug);
@@ -48,6 +62,26 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
   const { common, nav } = getDictionary(lang);
   const shell = "mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-14";
   const label = "text-xs font-medium uppercase tracking-[0.2em] text-dim";
+  const factText = "text-[17px] text-ink";
+  const facts = [
+    ...(p.client ? [{ label: c.clientLabel, value: <span className={factText}>{p.client}</span> }] : []),
+    { label: c.fieldLabel, value: <span className={factText}>{p.category}</span> },
+    { label: c.languagesLabel, value: <span className={factText}>{p.languages}</span> },
+    ...(p.tech
+      ? [
+          {
+            label: c.techLabel,
+            value: (
+              <span className="flex flex-wrap gap-2">
+                {p.tech.map((t) => (
+                  <ToolPill key={t} name={t} />
+                ))}
+              </span>
+            ),
+          },
+        ]
+      : []),
+  ];
 
   // Breadcrumbs for search results: Home › Work › this project.
   const abs = (path: string) => new URL(href(lang, path), site.url).toString();
@@ -70,11 +104,19 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
       <StarBackdrop />
 
       {/* Opening */}
-      <section className={`${shell} pb-16 pt-36 lg:pb-20 lg:pt-40`}>
+      <section className={`${shell} relative pb-14 pt-36 lg:pb-16 lg:pt-40`}>
+        {/* The project's number, large and faint behind the title. */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute end-4 top-24 select-none font-display text-[clamp(160px,22vw,340px)] font-semibold leading-none tracking-[-0.06em] text-transparent [-webkit-text-stroke:1px_rgb(200_168_255/0.14)] max-md:hidden sm:end-8 lg:end-14"
+        >
+          {String(index + 1).padStart(2, "0")}
+        </span>
+
         <Link
           href={href(lang, "/work")}
           data-reveal
-          className="group inline-flex min-h-11 items-center gap-2 text-sm text-muted transition-colors hover:text-ink"
+          className="group relative inline-flex min-h-11 items-center gap-2 text-sm text-muted transition-colors hover:text-ink"
         >
           {/* The arrow points back: left in English, right in Arabic (ArrowIcon already mirrors for RTL). */}
           <span className="inline-flex -scale-x-100 transition-[translate] group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5">
@@ -83,33 +125,41 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
           {c.allWork}
         </Link>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-8">
-            <p data-reveal className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium tracking-[0.2em] text-dim">
-              <span>
-                {String(index + 1).padStart(2, "0")} / {String(c.projects.length).padStart(2, "0")}
-              </span>
-              <span aria-hidden="true" className="h-px w-8 bg-[linear-gradient(90deg,transparent,#a67bff)] rtl:-scale-x-100" />
-              <span className="tracking-[0.12em] text-lav">{p.category}</span>
-            </p>
-            <h1
-              data-reveal="rise"
-              style={delay(80)}
-              className="mt-5 font-display text-[clamp(38px,5.6vw,84px)] font-semibold leading-[1] tracking-[-0.04em]"
-            >
-              {p.name}
-            </h1>
-            <p data-reveal style={delay(140)} className="mt-5 max-w-[28em] text-xl text-lav">
-              {p.oneLiner}
-            </p>
-          </div>
-          {p.client && (
-            <div data-reveal style={delay(200)} className="lg:col-span-4 lg:text-end">
-              <p className={label}>{c.clientLabel}</p>
-              <p className="mt-2 text-lg text-ink">{p.client}</p>
-            </div>
-          )}
+        <div className="relative mt-8 max-w-[62rem]">
+          <p data-reveal className="eyebrow">
+            {c.caseStudyLabel} ·{" "}
+            <span dir="ltr">
+              {String(index + 1).padStart(2, "0")} / {String(c.projects.length).padStart(2, "0")}
+            </span>
+          </p>
+          <h1
+            data-reveal="rise"
+            style={delay(80)}
+            className="mt-6 font-display text-[clamp(40px,6vw,92px)] font-semibold leading-[0.98] tracking-[-0.04em]"
+          >
+            {p.name}
+          </h1>
+          <p data-reveal style={delay(140)} className="mt-6 max-w-[30em] text-[clamp(18px,1.6vw,22px)] leading-snug text-lav">
+            {p.oneLiner}
+          </p>
         </div>
+
+        {/* Facts: who it was for, the field, the interface and the stack, each only when we can say it. */}
+        <dl
+          data-reveal
+          style={delay(200)}
+          className={`relative mt-12 grid gap-px overflow-hidden rounded-[20px] border border-line bg-line sm:grid-cols-2 lg:mt-14 ${factCols[facts.length]}`}
+        >
+          {facts.map((f, j) => (
+            <div
+              key={f.label}
+              className={`bg-bg p-5 sm:p-6 ${facts.length % 2 === 1 && j === facts.length - 1 ? "sm:col-span-2 lg:col-span-1" : ""}`}
+            >
+              <dt className={label}>{f.label}</dt>
+              <dd className="mt-2.5">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className={`${shell} pb-20 lg:pb-28`}>
@@ -119,88 +169,127 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/work/[s
         <p data-reveal className="mt-6 text-sm text-dim">
           {c.blurNote}
         </p>
-
-        <div className="mt-16 grid gap-12 lg:mt-20 lg:grid-cols-12">
-          <div className="lg:col-span-5">
-            <h2 data-reveal className={label}>
-              {c.problemLabel}
-            </h2>
-            <p data-reveal style={delay(60)} className="mt-4 text-[17px] leading-relaxed text-muted">
-              {p.problem}
-            </p>
-            <h2 data-reveal className={`${label} mt-10`}>
-              {c.builtLabel}
-            </h2>
-            <p data-reveal style={delay(60)} className="mt-4 text-[clamp(18px,1.4vw,20px)] leading-relaxed text-soft">
-              {p.built}
-            </p>
-
-            {p.tech && (
-              <div data-reveal className="mt-10">
-                <p className={label}>{c.techLabel}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {p.tech.map((t) => (
-                    <ToolPill key={t} name={t} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="lg:col-span-6 lg:col-start-7">
-            <h2 data-reveal className={label}>
-              {c.capabilitiesLabel}
-            </h2>
-            <ul className="mt-4 border-t border-line">
-              {p.capabilities.map((cap, j) => (
-                <li
-                  key={cap}
-                  data-reveal
-                  style={delay(50 * j)}
-                  className="flex gap-4 border-b border-line py-3.5 text-[16px] text-ink"
-                >
-                  <span aria-hidden="true" className="mt-[9px] size-1.5 shrink-0 rounded-full bg-lav shadow-[0_0_8px_#a67bff]" />
-                  {cap}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {p.flow && (
-          <div data-reveal className="mt-14">
-            <h2 className={label}>{c.flowLabel}</h2>
-            <ol className="mt-4 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-3">
-              {p.flow.map((step, j, all) => (
-                <li key={step} className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
-                  <span className="inline-flex h-9 items-center rounded-pill border border-lav/30 bg-violet/10 px-4 text-[14px] text-ink shadow-[inset_0_0_12px_rgb(124_77_255/0.15)]">
-                    {step}
-                  </span>
-                  {j < all.length - 1 && <ArrowIcon className="size-3.5 text-lav max-sm:rotate-90 max-sm:rtl:-rotate-90" />}
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
       </section>
 
-      {/* Next project */}
+      {/* The story: the problem, then what we built, in large type */}
+      <section className={`${shell} pb-20 lg:pb-28`}>
+        {[
+          { n: "01", title: c.problemLabel, body: p.problem, tone: "text-muted" },
+          { n: "02", title: c.builtLabel, body: p.built, tone: "text-ink" },
+        ].map((row) => (
+          <div key={row.n} className="grid gap-4 border-t border-line py-10 lg:grid-cols-12 lg:gap-8 lg:py-14">
+            <h2 data-reveal className={`${label} flex items-baseline gap-3 lg:col-span-3`}>
+              <span className="text-lav">{row.n}</span>
+              {row.title}
+            </h2>
+            <p
+              data-reveal
+              style={delay(80)}
+              className={`text-[clamp(20px,2.1vw,30px)] leading-[1.45] tracking-[-0.01em] lg:col-span-8 lg:col-start-5 ${row.tone}`}
+            >
+              {row.body}
+            </p>
+          </div>
+        ))}
+      </section>
+
+      {/* Inside the system */}
       <section className="border-t border-line">
-        <Link
-          href={href(lang, `/work/${next.slug}`)}
-          className={`${shell} group flex flex-col gap-3 py-16 sm:flex-row sm:items-center sm:justify-between lg:py-20`}
-        >
-          <span>
-            <span className={label}>{c.nextProject}</span>
-            <span className="mt-3 block font-display text-[clamp(26px,3.2vw,44px)] font-semibold leading-[1.1] tracking-[-0.03em] transition-colors group-hover:text-lav">
-              {next.name}
+        <div className={`${shell} py-20 lg:py-28`}>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2
+              data-reveal="rise"
+              className="font-display text-[clamp(28px,3.4vw,48px)] font-semibold leading-[1.05] tracking-[-0.035em]"
+            >
+              {c.capabilitiesLabel}
+            </h2>
+            <p data-reveal className="font-display text-[clamp(28px,3.4vw,48px)] font-semibold leading-none text-lav/60">
+              {String(p.capabilities.length).padStart(2, "0")}
+            </p>
+          </div>
+          <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:mt-14 xl:grid-cols-3">
+            {p.capabilities.map((cap, j) => (
+              <li
+                key={cap}
+                data-reveal
+                data-spotlight
+                style={delay(40 * (j % 6))}
+                className={`relative flex flex-col justify-between gap-4 overflow-hidden rounded-[18px] border border-line bg-white/[0.02] p-5 transition-colors hover:border-lav/30 sm:min-h-[132px] sm:gap-6 sm:p-6 ${capabilitySpan(j, p.capabilities.length)}`}
+              >
+                <span className="text-xs font-medium tracking-[0.2em] text-lav">{String(j + 1).padStart(2, "0")}</span>
+                <span className="text-[16px] leading-snug text-ink">{cap}</span>
+              </li>
+            ))}
+          </ul>
+
+          {p.flow && (
+            <div className="mt-20 lg:mt-24">
+              <h3 data-reveal className={label}>
+                {c.flowLabel}
+              </h3>
+              {/* A pipeline: numbered stops joined by a line, across on wide screens and down on phones. */}
+              <ol data-reveal className="mt-8 grid md:auto-cols-fr md:grid-flow-col">
+                {p.flow.map((step, j, all) => (
+                  <li key={step} className="relative flex items-center gap-4 pb-6 md:flex-col md:items-start md:gap-4 md:pb-0">
+                    {j < all.length - 1 && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute start-5 top-10 bottom-0 w-px bg-lav/25 md:start-10 md:end-0 md:top-5 md:bottom-auto md:h-px md:w-auto"
+                      />
+                    )}
+                    <span className="relative z-[1] inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-lav/40 bg-surface text-[13px] font-medium text-lav shadow-[0_0_24px_-6px_rgb(124_77_255/0.7)]">
+                      {String(j + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-[15px] text-ink md:pe-4">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Next project, with its screen */}
+      <section className="border-t border-line">
+        <div className={`${shell} py-20 lg:py-24`}>
+          <p data-reveal className={label}>
+            {c.nextProject}
+          </p>
+          <Link
+            href={href(lang, `/work/${next.slug}`)}
+            data-reveal
+            data-spotlight
+            style={delay(80)}
+            className="group mt-6 grid overflow-hidden rounded-[24px] border border-line bg-surface/60 transition-[border-color,box-shadow] duration-500 hover:border-lav/40 hover:shadow-[0_40px_100px_-50px_rgb(124_77_255/0.8)] md:grid-cols-2"
+          >
+            <span className="flex flex-col justify-between gap-10 p-7 sm:p-10">
+              <span>
+                <span className="text-xs font-medium tracking-[0.12em] text-lav">{next.category}</span>
+                <span className="mt-4 block font-display text-[clamp(28px,3.2vw,46px)] font-semibold leading-[1.05] tracking-[-0.035em]">
+                  {next.name}
+                </span>
+                <span className="mt-4 block max-w-[26em] text-muted">{next.oneLiner}</span>
+              </span>
+              <span className="inline-flex items-center gap-3 text-sm font-medium text-ink">
+                {c.readCaseStudy}
+                <span className="inline-flex size-10 items-center justify-center rounded-full border border-line transition-[border-color,background-color] group-hover:border-lav/50 group-hover:bg-violet/15">
+                  <ArrowIcon className="size-4 text-lav transition-[translate] group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+                </span>
+              </span>
             </span>
-            <span className="mt-2 block text-muted">{next.oneLiner}</span>
-          </span>
-          <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-full border border-line transition-[border-color,background-color] group-hover:border-lav/50 group-hover:bg-violet/10">
-            <ArrowIcon className="size-5 text-lav transition-[translate] group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
-          </span>
-        </Link>
+            <span className="relative block aspect-[16/10] overflow-hidden border-line max-md:border-t md:aspect-auto md:min-h-[320px] md:border-s">
+              <Image
+                src={next.image}
+                alt=""
+                fill
+                placeholder="blur"
+                sizes="(min-width: 768px) 50vw, calc(100vw - 32px)"
+                className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+              />
+              <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgb(7_6_11/0.6))]" />
+            </span>
+          </Link>
+        </div>
       </section>
 
       {/* Closing */}
