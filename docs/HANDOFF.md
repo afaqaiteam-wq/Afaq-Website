@@ -5,7 +5,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 
 ## Done (all pushed)
 - Hero engine (`src/components/home/hero/`): the warp starfield plays on EVERY load and ONLY on load, never on scroll. There are 3 nested, slightly inclined Kepler orbits with tool-logo planets, a constellation "A", and a GSAP intro. The user accepted it; don't cut any motion he liked.
-- Home sections below the hero (`src/components/home/HomeSections.tsx`), the Services page and the About page. The About team is an org chart: CEO → Mostafa → Ghofran → a row of 3, using the `tier` field in `src/content/about.ts`.
+- Home sections below the hero (`src/components/home/HomeSections.tsx`), the Services page and the About page. The About team is a founder spotlight (photo beside his quote), then the other five in one row joined by a line of light, in `tier` order from `src/content/about.ts`.
 - Shared components: `AccentText`, `ToolPill` (logos in `hero/toolLogos.ts`), `StarBackdrop`, `Button`, and `RevealObserver` (`data-reveal` + `--d` delay).
 
 ## Hard rules
@@ -46,7 +46,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
   - The home hero is `330vh` on phones only; the intro is untouched.
   - The work screenshots use `*-mobile.webp` detail crops, with a `ZoomImage` lightbox.
   - Services has sticky `ServiceChips`.
-  - About shows the team in two columns.
+  - About shows the team in two columns (the fifth card centred).
   - The footer is two columns with 44px links.
 - **Home order:** hero → selected work → services → closing. "How we work" now lives only on /services.
 - **Contact:** an accent title line, equal cards, one primary (Book a call), and Copy email.
