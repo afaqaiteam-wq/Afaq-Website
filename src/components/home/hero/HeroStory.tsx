@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Fragment, useEffect, useRef } from "react";
 
 import logo from "@/assets/brand/logo.png";
+// The sweep only needs the logo's shape, so its mask uses a small copy instead of the 1.4 MB original.
+import logoMask from "@/assets/brand/logo-mask.webp";
 import { Button } from "@/components/ui/Button";
 import { href, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
@@ -126,8 +128,8 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 overflow-hidden"
             style={{
-              maskImage: `url(${logo.src})`,
-              WebkitMaskImage: `url(${logo.src})`,
+              maskImage: `url(${logoMask.src})`,
+              WebkitMaskImage: `url(${logoMask.src})`,
               maskSize: "contain",
               WebkitMaskSize: "contain",
               maskRepeat: "no-repeat",
