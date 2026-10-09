@@ -83,6 +83,7 @@ export const ar: Dictionary = {
     talk: "تواصل معنا",
     rights: "جميع الحقوق محفوظة.",
     backToTop: "العودة للأعلى",
+    wordmark: "آفاق",
   },
   contact: {
     metaTitle: "تواصل معنا",

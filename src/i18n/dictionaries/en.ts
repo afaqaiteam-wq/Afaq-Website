@@ -81,6 +81,8 @@ export const en = {
     talk: "Talk to us",
     rights: "All rights reserved.",
     backToTop: "Back to top",
+    // The large faded name at the very bottom of the footer.
+    wordmark: "Afaq AI",
   },
   contact: {
     metaTitle: "Contact",

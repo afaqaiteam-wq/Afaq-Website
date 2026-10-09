@@ -98,6 +98,13 @@ export function Footer({ lang, dict }: FooterProps) {
         </div>
       </div>
 
+      {/* The name, large and fading into the page: the last thing on every page */}
+      <div aria-hidden="true" className="pointer-events-none mx-auto max-w-[1440px] select-none overflow-hidden px-4 sm:px-8 lg:px-14">
+        <p className="-mb-[0.2em] whitespace-nowrap bg-[linear-gradient(180deg,rgb(200_168_255/0.2),rgb(200_168_255/0)_80%)] bg-clip-text text-center font-display text-[clamp(72px,16.5vw,240px)] font-semibold leading-none tracking-[-0.05em] text-transparent rtl:tracking-normal">
+          {footer.wordmark}
+        </p>
+      </div>
+
       <div className="mx-auto flex max-w-[1440px] flex-col gap-1 border-t border-line px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 text-sm text-dim sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-14">
         <p>
           © {year} {meta.siteName}. {footer.rights}

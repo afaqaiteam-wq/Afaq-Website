@@ -21,10 +21,6 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/about">): 
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-/**
- * One team member. Photos get the same treatment (slightly muted, a violet dusk at the
- * bottom) so portraits shot in different light still read as one set.
- */
 /** A vertical line of light between two levels of the org chart. */
 function Connector() {
   return (
@@ -34,6 +30,10 @@ function Connector() {
   );
 }
 
+/**
+ * One team member. Photos get the same treatment (slightly muted, a violet dusk at the
+ * bottom) so portraits shot in different light still read as one set.
+ */
 function PersonCard({ person, index, className = "" }: { person: Person; index: number; className?: string }) {
   return (
     <figure data-reveal style={delay(80 * index)} className={`group text-center ${className}`}>
@@ -74,7 +74,16 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
       <StarBackdrop />
 
       {/* The name */}
-      <section className={`${shell} pb-24 pt-40 lg:pb-32`}>
+      <section className={`${shell} relative pb-24 pt-40 lg:pb-32`}>
+        {/* The name itself, drawn faintly in the empty half of the opening on large screens */}
+        <span
+          aria-hidden="true"
+          data-reveal
+          style={delay(200)}
+          className="pointer-events-none absolute end-14 top-36 select-none bg-[linear-gradient(180deg,rgb(200_168_255/0.09),transparent_85%)] bg-clip-text font-arabic text-[clamp(170px,17vw,260px)] font-semibold leading-none text-transparent [-webkit-text-stroke:1px_rgb(200_168_255/0.18)] max-lg:hidden"
+        >
+          آفاق
+        </span>
         <p data-reveal className="eyebrow">
           {c.eyebrow}
         </p>
@@ -106,32 +115,48 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
         </div>
       </section>
 
-      {/* Principles */}
+      {/* Principles: the heading stays in view while the four lines scroll past */}
       <section className="border-t border-line">
-        <div className={`${shell} py-24 lg:py-32`}>
-          <p data-reveal className="eyebrow">
-            {c.principles.eyebrow}
-          </p>
-          <h2
-            data-reveal="rise"
-            style={delay(80)}
-            className="mt-6 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]"
-          >
-            {c.principles.title} <span className="block"><AccentText text={c.principles.titleAccent} /></span>
-          </h2>
-          <ul className="mt-16 grid border-t border-line sm:grid-cols-2">
+        <div className={`${shell} grid gap-12 py-24 lg:grid-cols-12 lg:gap-16 lg:py-32`}>
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-32">
+              <p data-reveal className="eyebrow">
+                {c.principles.eyebrow}
+              </p>
+              <h2
+                data-reveal="rise"
+                style={delay(80)}
+                className="mt-6 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]"
+              >
+                {c.principles.title} <span className="block"><AccentText text={c.principles.titleAccent} /></span>
+              </h2>
+            </div>
+          </div>
+          <ol className="border-t border-line lg:col-span-7">
             {c.principles.items.map((item, i) => (
               <li
                 key={item.title}
                 data-reveal
                 style={delay(70 * i)}
-                className="border-b border-line py-10 sm:odd:pe-10 sm:even:border-s sm:even:ps-10"
+                className="group relative grid grid-cols-[2.75rem_1fr] gap-x-3 border-b border-line py-8 sm:grid-cols-[4.5rem_1fr] sm:gap-x-4 sm:py-10"
               >
-                <h3 className="font-display text-2xl font-semibold tracking-[-0.02em]">{item.title}</h3>
-                <p className="mt-3 max-w-[28em] text-muted">{item.body}</p>
+                <span dir="ltr" className="pt-1.5 font-display text-sm tabular-nums tracking-[0.12em] text-lav/70 sm:pt-2.5">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="font-display text-[clamp(22px,2.2vw,30px)] font-semibold leading-tight tracking-[-0.02em]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 max-w-[32em] text-[17px] leading-relaxed text-muted">{item.body}</p>
+                </div>
+                {/* a line of light that runs along the row on hover */}
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-px start-0 h-px w-0 bg-[linear-gradient(90deg,#a67bff,transparent)] transition-[width] duration-700 ease-out group-hover:w-full rtl:bg-[linear-gradient(270deg,#a67bff,transparent)]"
+                />
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
       </section>
 
