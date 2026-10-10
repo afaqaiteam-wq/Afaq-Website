@@ -153,7 +153,10 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
 
     // ---- where the system (logo + orbits + constellation) sits ----
     const c1 = { x: W / 2, y: H * (wide ? 0.36 : 0.3) }; // must match --logo-y
-    const c2 = wide ? { x: W * (rtl ? 0.3 : 0.7), y: H * 0.52 } : c1;
+    // Beside the text column, inside the same 1440px frame as the navbar (56px gutters).
+    const edge = Math.max(56, (W - 1440) / 2 + 56);
+    const span = W - 2 * edge;
+    const c2 = wide ? { x: rtl ? edge + span * 0.3 : W - edge - span * 0.3, y: H * 0.52 } : c1;
     const c4 = { x: W / 2, y: H * (wide ? 0.38 : 0.3) };
     const move = easeInOutCubic(at(T.logoToSide, p));
     const home = easeInOutCubic(at(T.logoCenter, p));

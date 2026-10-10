@@ -366,6 +366,14 @@ html.js:not([data-reveal-ready]) [data-reveal="draw"] :is(.draw-x, .draw-y, .dra
   animation: reveal-failsafe 0s linear 3s forwards;
 }
 
+/* The sun on the closing card's planet (components/ui/PlanetHorizon.tsx) breathes slowly. */
+@keyframes sunrise-breathe {
+  50% {
+    opacity: 0.82;
+    scale: 0.96;
+  }
+}
+
 /* An eyebrow's horizon line draws in after its words arrive. */
 .js .eyebrow[data-reveal]::before {
   width: 0;

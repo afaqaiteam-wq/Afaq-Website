@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { CopyEmail } from "@/components/contact/CopyEmail";
 import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
+import { PlanetHorizon } from "@/components/ui/PlanetHorizon";
 import { ToolPill } from "@/components/ui/ToolPill";
 import { aboutContent } from "@/content/about";
 import { servicesContent } from "@/content/services";
@@ -298,18 +299,20 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
         </div>
       </section>
 
-      {/* Closing: one card with the horizon rising from its floor */}
+      {/* Closing: one card over the curve of a planet at sunrise */}
       <section>
         <div className={`${shell} pb-20 pt-4 lg:pb-28`}>
           <div
             data-reveal
-            className={`${card} flex flex-col items-center border-lav/25 px-6 pb-32 pt-16 text-center [--cap:84px] sm:px-10 lg:pb-44 lg:pt-24 lg:[--cap:130px]`}
+            className={`${card} flex flex-col items-center border-lav/25 px-6 pb-36 pt-16 text-center sm:px-10 lg:pb-52 lg:pt-24`}
           >
             <div aria-hidden="true" className={topLight} />
+            {/* a few far stars over the planet */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute bottom-0 left-1/2 aspect-square w-[150%] -translate-x-1/2 translate-y-[calc(100%_-_var(--cap))] rounded-full border-t border-lav/40 bg-[radial-gradient(circle_at_50%_0%,rgb(124_77_255/0.32),transparent_45%)] shadow-[0_-12px_60px_-12px_rgb(140_92_255/0.6)] sm:w-[120%]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(1px_1px_at_14%_22%,rgba(255,255,255,.5),transparent),radial-gradient(1px_1px_at_31%_64%,rgba(255,255,255,.3),transparent),radial-gradient(1.5px_1.5px_at_47%_12%,rgba(226,214,255,.45),transparent),radial-gradient(1px_1px_at_68%_38%,rgba(255,255,255,.35),transparent),radial-gradient(1px_1px_at_86%_18%,rgba(255,255,255,.4),transparent),radial-gradient(1px_1px_at_92%_58%,rgba(255,255,255,.25),transparent),radial-gradient(1px_1px_at_6%_52%,rgba(255,255,255,.3),transparent)] bg-[length:520px_420px] opacity-70"
             />
+            <PlanetHorizon id="home-planet" className="absolute inset-x-0 bottom-0 h-[150px] w-full lg:h-[230px]" />
             <h2 className="relative max-w-[16em] font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.04] tracking-[-0.035em]">
               {home.closingTitle} <span className="block"><AccentText text={home.closingTitleAccent} /></span>
             </h2>

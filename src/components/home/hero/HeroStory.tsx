@@ -97,8 +97,10 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
   }, [rtl]);
 
   const panel = "absolute z-[8]";
-  // Scenes 2 and 3 share one text column with a fixed top, so the eyebrow never jumps.
-  const sidePanel = `${panel} invisible inset-x-4 top-[56%] text-center min-[1100px]:top-[28%] min-[1100px]:w-[min(520px,36vw)] min-[1100px]:text-start min-[1100px]:start-[5vw] min-[1100px]:end-auto`;
+  // Scenes 2 and 3 share one text column with a fixed top, so the eyebrow never jumps. On wide
+  // screens it starts on the navbar's edge and its middle sits level with the system beside it
+  // (52% of the stage, see c2 in engine.ts).
+  const sidePanel = `${panel} invisible inset-x-4 top-[56%] text-center min-[1100px]:top-[calc(52%_-_7rem)] min-[1100px]:w-[min(520px,36vw)] min-[1100px]:text-start min-[1100px]:start-[max(3.5rem,calc((100%_-_1440px)/2_+_3.5rem))] min-[1100px]:end-auto`;
   const h2 = "mt-4 font-display text-[clamp(28px,3.4vw,48px)] font-semibold leading-[1.08] tracking-[-0.035em]";
   const lead = "mt-4 text-[clamp(15px,1.15vw,18px)] text-muted";
   // Drawing layers fade out under the navbar instead of being cut by it.
