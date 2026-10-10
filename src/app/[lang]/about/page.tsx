@@ -120,20 +120,44 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
           >
             {c.principles.title} <span className="block"><AccentText text={c.principles.titleAccent} /></span>
           </h2>
-          <ol className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2 lg:mt-20 lg:grid-cols-4">
+          {/* Four lines, literally: the frame and the dividers draw in, then each cell's words arrive */}
+          <ol data-reveal="draw" className="relative mt-14 grid sm:grid-cols-2 lg:mt-20 lg:grid-cols-4">
+            <span aria-hidden="true" className="draw-x absolute inset-x-0 top-0 h-px bg-lav/30" />
+            <span aria-hidden="true" className="draw-x from-end absolute inset-x-0 bottom-0 h-px bg-lav/30 [--ld:300ms]" />
+            <span aria-hidden="true" className="draw-y absolute inset-y-0 start-0 w-px bg-lav/30 [--ld:150ms]" />
+            <span aria-hidden="true" className="draw-y from-end absolute inset-y-0 end-0 w-px bg-lav/30 [--ld:150ms]" />
             {c.principles.items.map((item, i) => (
-              <li key={item.title} data-reveal style={delay(70 * i)} data-spotlight className="group relative bg-bg p-7 sm:p-8 lg:min-h-[260px]">
+              <li key={item.title} data-spotlight className="group relative p-7 sm:p-8 lg:min-h-[260px]">
+                {/* dividers: between rows on phones, a 2×2 cross on tablets, columns on desktop */}
+                {i > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className={`draw-x absolute inset-x-0 top-0 h-px bg-lav/20 [--ld:450ms] ${i === 1 ? "sm:hidden" : "lg:hidden"}`}
+                  />
+                )}
+                {i > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className={`draw-y absolute inset-y-0 start-0 hidden w-px bg-lav/20 [--ld:450ms] ${i === 2 ? "lg:block" : "sm:block"}`}
+                  />
+                )}
                 <span
                   aria-hidden="true"
-                  className="absolute inset-x-0 top-0 h-px origin-center scale-x-0 bg-[linear-gradient(90deg,transparent,#c8a8ff,transparent)] transition-transform duration-700 ease-out group-hover:scale-x-100"
+                  className="absolute inset-x-0 top-0 z-[1] h-px origin-center scale-x-0 bg-[linear-gradient(90deg,transparent,#c8a8ff,transparent)] transition-transform duration-700 ease-out group-hover:scale-x-100"
                 />
-                <span dir="ltr" className="font-display text-sm tabular-nums tracking-[0.12em] text-lav/70">
+                <span
+                  dir="ltr"
+                  style={{ "--cd": `${700 + 140 * i}ms` } as CSSProperties}
+                  className="draw-in block font-display text-sm tabular-nums tracking-[0.12em] text-lav/70 rtl:text-right"
+                >
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-8 font-display text-[clamp(21px,1.7vw,25px)] font-semibold leading-tight tracking-[-0.02em] lg:mt-10">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-[15px] leading-relaxed text-muted">{item.body}</p>
+                <div style={{ "--cd": `${800 + 140 * i}ms` } as CSSProperties} className="draw-in">
+                  <h3 className="mt-8 font-display text-[clamp(21px,1.7vw,25px)] font-semibold leading-tight tracking-[-0.02em] lg:mt-10">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-[15px] leading-relaxed text-muted">{item.body}</p>
+                </div>
               </li>
             ))}
           </ol>

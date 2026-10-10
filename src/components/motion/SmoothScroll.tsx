@@ -31,6 +31,9 @@ export function SmoothScroll() {
       return () => window.removeEventListener("popstate", onPop);
     }
     const lenis = new Lenis({ lerp: 0.1, anchors: true });
+    // The head script stopped the browser restoring a refreshed page's scroll; make sure we start at the top.
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    if (nav?.type === "reload" && !window.location.hash) lenis.scrollTo(0, { immediate: true, force: true });
     window.__lenis = lenis;
     let frame = requestAnimationFrame(function raf(time) {
       lenis.raf(time);
