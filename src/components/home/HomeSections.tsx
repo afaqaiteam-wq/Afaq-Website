@@ -84,10 +84,6 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
 
       {/* Selected work: one project up front, the other two beside each other */}
       <section className="relative">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_50%_0%,rgba(124,77,255,.14),transparent_70%)]"
-        />
         <div className={`${shell} relative pb-12 pt-20 lg:pb-16 lg:pt-28`}>
           <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-8">
             <div className="lg:col-span-7">

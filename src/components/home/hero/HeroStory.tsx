@@ -284,30 +284,6 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
           </ul>
         </div>
 
-        {/* Scene 4 */}
-        <div
-          data-panel
-          className={`${panel} invisible inset-x-4 top-[calc(38%_+_var(--logo-size)*0.5_+_8px)] mx-auto max-w-[760px] text-center max-[1099px]:top-[calc(30%_+_var(--logo-size)*0.5_+_8px)]`}
-        >
-          <p data-rest className="eyebrow">
-            {hero.finale.eyebrow}
-          </p>
-          <h2 className={`${h2} mx-auto max-w-[18em]`}>
-            <Words text={hero.finale.title} /> <span className="block"><Words text={hero.finale.titleAccent} chrome /></span>
-          </h2>
-          <p data-rest className="mx-auto mt-4 max-w-[34em] text-muted">
-            {hero.finale.lead}
-          </p>
-          <div data-rest className="mt-7 flex flex-wrap justify-center gap-3">
-            <Button href={site.bookingUrl} external arrow>
-              {bookCall}
-            </Button>
-            <Button href={href(lang, "/contact")} variant="ghost">
-              {hero.finale.secondary}
-            </Button>
-          </div>
-        </div>
-
         <div
           data-hint
           aria-hidden="true"

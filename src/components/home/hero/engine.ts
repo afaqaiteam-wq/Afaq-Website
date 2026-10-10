@@ -157,7 +157,8 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     const edge = Math.max(56, (W - 1440) / 2 + 56);
     const span = W - 2 * edge;
     const c2 = wide ? { x: rtl ? edge + span * 0.3 : W - edge - span * 0.3, y: H * 0.52 } : c1;
-    const c4 = { x: W / 2, y: H * (wide ? 0.38 : 0.3) };
+    // the finale has no text under it any more, so the logo comes home to the middle
+    const c4 = { x: W / 2, y: H * (wide ? 0.46 : 0.42) };
     const move = easeInOutCubic(at(T.logoToSide, p));
     const home = easeInOutCubic(at(T.logoCenter, p));
     const sys = lerp(lerp(1, wide ? 0.86 : 0.94, move), 1, home);

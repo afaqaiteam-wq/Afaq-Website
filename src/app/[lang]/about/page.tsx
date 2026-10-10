@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 
 import { AccentText } from "@/components/ui/AccentText";
 import { Button } from "@/components/ui/Button";
 import { StarBackdrop } from "@/components/ui/StarBackdrop";
-import { aboutContent, type Person } from "@/content/about";
+import { TeamConstellation } from "@/components/about/TeamConstellation";
+import { aboutContent } from "@/content/about";
 import { href, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { pageMetadata } from "@/lib/metadata";
@@ -21,44 +21,13 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/about">): 
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-/**
- * One team member. Photos get the same treatment (slightly muted, a violet dusk at the
- * bottom) so portraits shot in different light still read as one set.
- */
-function PersonCard({ person, index }: { person: Person; index: number }) {
-  return (
-    <figure data-reveal style={delay(80 * index)} className="group text-center">
-      <div data-spotlight className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-line bg-surface sm:rounded-3xl">
-        <Image
-          src={person.photo}
-          alt={person.name}
-          fill
-          sizes="(min-width: 1024px) 260px, (min-width: 640px) 30vw, 46vw"
-          className="object-cover object-top [filter:saturate(0.8)_contrast(1.04)] transition-[transform,filter] duration-700 ease-out group-hover:scale-[1.03] group-hover:[filter:saturate(1)_contrast(1.04)]"
-        />
-        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(7,6,11,.85))]" />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 rounded-2xl opacity-0 shadow-[inset_0_0_0_1px_rgba(166,123,255,.55),inset_0_-40px_80px_-40px_rgba(140,92,255,.5)] transition-opacity duration-500 group-hover:opacity-100 sm:rounded-3xl"
-        />
-      </div>
-      <figcaption className="mt-4 sm:mt-5">
-        <p className="font-display text-base font-semibold tracking-[-0.02em] sm:text-lg">{person.name}</p>
-        <p className="mt-1 text-[13px] leading-snug text-lav sm:text-sm">{person.role}</p>
-        <p className="mx-auto mt-2 max-w-[30em] text-[13px] leading-relaxed text-muted sm:mt-3 sm:text-[15px]">{person.line}</p>
-      </figcaption>
-    </figure>
-  );
-}
-
 export default async function AboutPage({ params }: PageProps<"/[lang]/about">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const c = aboutContent[lang];
   const { common } = getDictionary(lang);
   const shell = "mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-14";
-  const lead = c.team.people.find((p) => p.tier === 1);
-  const rest = c.team.people.filter((p) => p.tier !== 1).sort((a, b) => a.tier - b.tier);
+  const team = [...c.team.people].sort((a, b) => a.tier - b.tier);
   // Arabic quotes with guillemets; English with curly quotes.
   const [open, close] = lang === "ar" ? ["«", "»"] : ["“", "”"];
 
@@ -164,7 +133,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
         </div>
       </section>
 
-      {/* Team: the founder first, then everyone else as one row joined by a line of light */}
+      {/* Team: the A of the logo as a constellation, one star per person */}
       <section className="border-t border-line">
         <div className={`${shell} py-24 lg:py-32`}>
           <p data-reveal className="eyebrow">
@@ -178,74 +147,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
             {c.team.title} <span className="block"><AccentText text={c.team.titleAccent} /></span>
           </h2>
 
-          {lead && (
-            <figure
-              data-reveal
-              className="group relative mt-14 grid overflow-hidden rounded-[28px] border border-line bg-surface/70 shadow-[0_50px_120px_-60px_rgb(124_77_255/0.55)] lg:mt-20 lg:grid-cols-12"
-            >
-              <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:col-span-5 lg:aspect-auto lg:min-h-[540px]">
-                <Image
-                  src={lead.photo}
-                  alt={lead.name}
-                  fill
-                  sizes="(min-width: 1440px) 540px, (min-width: 1024px) 40vw, 100vw"
-                  className="object-cover object-[50%_28%] transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                />
-                {/* the portrait fades into the card: downwards on phones, sideways on large screens */}
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgb(14_12_21))] lg:bg-[linear-gradient(90deg,transparent_62%,rgb(14_12_21))] lg:rtl:bg-[linear-gradient(270deg,transparent_62%,rgb(14_12_21))]"
-                />
-              </div>
-              <figcaption className="relative flex flex-col justify-center p-7 sm:p-10 lg:col-span-7 lg:p-16">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -end-32 -top-32 size-96 rounded-full bg-[radial-gradient(circle,rgb(124_77_255/0.22),transparent_70%)]"
-                />
-                <p className="eyebrow relative">{lead.role}</p>
-                {lead.quote && (
-                  <blockquote className="relative mt-6 font-display text-[clamp(24px,2.5vw,38px)] leading-[1.22] tracking-[-0.02em] text-ink">
-                    <span aria-hidden="true" className="text-lav">{open}</span>
-                    {lead.quote}
-                    <span aria-hidden="true" className="text-lav">{close}</span>
-                  </blockquote>
-                )}
-                <div className="relative mt-10 border-t border-line pt-6">
-                  <p className="font-display text-[clamp(22px,2vw,28px)] font-semibold tracking-[-0.025em]">{lead.name}</p>
-                  <p className="mt-2 max-w-[34em] text-muted">{lead.line}</p>
-                </div>
-              </figcaption>
-            </figure>
-          )}
-
-          {/* padding, not margin, so the connector starts right under the founder */}
-          <div className="relative pt-14 lg:pt-24">
-            {/* from the founder down to a rail above the team (large screens) */}
-            <span
-              aria-hidden="true"
-              data-reveal="line-y"
-              className="absolute left-[calc(50%_-_0.5px)] top-0 hidden h-12 w-px bg-[linear-gradient(180deg,rgba(166,123,255,.15),#a67bff)] lg:block"
-            />
-            <div className="relative flex flex-wrap justify-center gap-x-4 gap-y-10 sm:gap-x-5">
-              <span
-                aria-hidden="true"
-                data-reveal="line"
-                className="absolute inset-x-[calc((100%_-_5rem)/10)] -top-12 hidden h-px bg-[linear-gradient(90deg,rgba(166,123,255,.35),#a67bff,rgba(166,123,255,.35))] lg:block"
-              />
-              {rest.map((p, i) => (
-                <div
-                  key={p.name}
-                  className="relative basis-[calc((100%_-_1rem)/2)] sm:basis-[calc((100%_-_2.5rem)/3)] lg:basis-[calc((100%_-_5rem)/5)]"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute left-1/2 -top-12 hidden h-12 w-px bg-[linear-gradient(180deg,#a67bff,rgba(166,123,255,.15))] -translate-x-1/2 lg:block"
-                  />
-                  <PersonCard person={p} index={i} />
-                </div>
-              ))}
-            </div>
-          </div>
+          <TeamConstellation people={team} lang={lang} labels={{ quoteOpen: open, quoteClose: close }} />
         </div>
       </section>
 

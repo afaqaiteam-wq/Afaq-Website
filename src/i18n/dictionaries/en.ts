@@ -42,13 +42,6 @@ export const en = {
       titleSoft: "One direction.",
       lead: "AI agents, automation, chatbots, integrations, web platforms and consulting. Each strong alone, stronger as one constellation.",
     },
-    finale: {
-      eyebrow: "Your next horizon",
-      title: "Ready to see",
-      titleAccent: "past the horizon?",
-      lead: "Tell us which process slows your team down. We'll show you what it looks like on the other side.",
-      secondary: "Send a message",
-    },
     constellation: {
       agents: "AI Agents",
       automation: "Automation",
