@@ -69,10 +69,14 @@ export const en = {
     workTitleAccent: "so far.",
     workLead: "A real estate installment manager, a multi-company sales platform and a personal finance system. Real projects, shown with their real screens.",
     workLink: "See all work",
+    workView: "View project",
     closingTitle: "Start with",
     closingTitleAccent: "a 30-minute call.",
     closingLead: "No pitch deck. Bring the process that slows you down, and we'll sketch what it could look like.",
-    closingSecondary: "Send a message",
+    closingOr: "Or write to us at",
+    teamEyebrow: "The people behind it",
+    teamWith: "With the rest of the team",
+    teamLink: "Meet the team",
   },
   footer: {
     tagline: "Afaq is Arabic for horizons. We build what lies beyond yours.",
@@ -82,7 +86,6 @@ export const en = {
     rights: "All rights reserved.",
     backToTop: "Back to top",
     // The large faded name at the very bottom of the footer.
-    wordmark: "Afaq AI",
   },
   contact: {
     metaTitle: "Contact",

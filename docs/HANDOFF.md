@@ -48,7 +48,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
   - Services has sticky `ServiceChips`.
   - About shows the team in two columns (the fifth card centred).
   - The footer is two columns with 44px links.
-- **Home order:** hero → selected work → services → closing. "How we work" now lives only on /services.
+- **Home order:** hero → selected work (one lead project with a readable detail crop, then the other two) → services as a grid of cards (the first two large, with their tools) → a team band (founder quote, the other five as avatars, link to About) → closing card (book a call, copy email). "How we work" now lives only on /services.
 - **Contact:** an accent title line, equal cards, one primary (Book a call), and Copy email.
 - **Team titles:** Mohamed Alaa is now "Creative & Video Lead", and Mohamed Ragab is "Social Media & Growth Lead". The founder photo is intentionally different.
 - **Every page** now has the share image and the brand in og:title. The 404 language switch goes to the other home.
