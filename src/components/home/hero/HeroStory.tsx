@@ -97,15 +97,17 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
   }, [rtl]);
 
   const panel = "absolute z-[8]";
-  // Scenes 2 and 3 share one text column with a fixed top, so the eyebrow never jumps.
-  const sidePanel = `${panel} invisible inset-x-4 top-[56%] text-center min-[1100px]:top-[28%] min-[1100px]:w-[min(520px,36vw)] min-[1100px]:text-start min-[1100px]:start-[5vw] min-[1100px]:end-auto`;
+  // Scenes 2 and 3 share one text column with a fixed top, so the eyebrow never jumps. On wide
+  // screens it starts on the navbar's edge and its middle sits level with the system beside it
+  // (52% of the stage, see c2 in engine.ts).
+  const sidePanel = `${panel} invisible inset-x-4 top-[56%] text-center min-[1100px]:top-[calc(52%_-_7rem)] min-[1100px]:w-[min(520px,36vw)] min-[1100px]:text-start min-[1100px]:start-[max(3.5rem,calc((100%_-_1440px)/2_+_3.5rem))] min-[1100px]:end-auto`;
   const h2 = "mt-4 font-display text-[clamp(28px,3.4vw,48px)] font-semibold leading-[1.08] tracking-[-0.035em]";
   const lead = "mt-4 text-[clamp(15px,1.15vw,18px)] text-muted";
   // Drawing layers fade out under the navbar instead of being cut by it.
   const underNav = "[mask-image:linear-gradient(to_bottom,transparent_0,black_120px)]";
 
   return (
-    <section ref={storyRef} className="relative h-[330vh] sm:h-[440vh]" aria-label={hero.eyebrow}>
+    <section ref={storyRef} className="relative h-[265vh] sm:h-[340vh]" aria-label={hero.eyebrow}>
       <div
         ref={stageRef}
         className="sticky top-0 h-svh overflow-hidden [--logo-size:min(58vw,28vh)] [--logo-y:30%] min-[1100px]:[--logo-size:min(32vh,300px)] min-[1100px]:[--logo-y:36%]"
@@ -282,30 +284,6 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
           </ul>
         </div>
 
-        {/* Scene 4 */}
-        <div
-          data-panel
-          className={`${panel} invisible inset-x-4 top-[calc(38%_+_var(--logo-size)*0.5_+_8px)] mx-auto max-w-[760px] text-center max-[1099px]:top-[calc(30%_+_var(--logo-size)*0.5_+_8px)]`}
-        >
-          <p data-rest className="eyebrow">
-            {hero.finale.eyebrow}
-          </p>
-          <h2 className={`${h2} mx-auto max-w-[18em]`}>
-            <Words text={hero.finale.title} /> <span className="block"><Words text={hero.finale.titleAccent} chrome /></span>
-          </h2>
-          <p data-rest className="mx-auto mt-4 max-w-[34em] text-muted">
-            {hero.finale.lead}
-          </p>
-          <div data-rest className="mt-7 flex flex-wrap justify-center gap-3">
-            <Button href={site.bookingUrl} external arrow>
-              {bookCall}
-            </Button>
-            <Button href={href(lang, "/contact")} variant="ghost">
-              {hero.finale.secondary}
-            </Button>
-          </div>
-        </div>
-
         <div
           data-hint
           aria-hidden="true"
@@ -316,7 +294,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
         </div>
 
         <div aria-hidden="true" className="absolute start-6 top-1/2 z-[8] hidden -translate-y-1/2 flex-col gap-3.5 min-[1100px]:flex">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2].map((i) => (
             <span
               key={i}
               data-dot

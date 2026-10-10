@@ -73,6 +73,14 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
       <head>
         {/* Lets CSS hide intro-animated elements only when JS will reveal them. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add(\"js\")" }} />
+        {/* A refresh opens the page at the top, not wherever it was left. Restoration comes back on after
+            load, so back/forward still return to where the visitor was. #links keep their target. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="reload"&&!location.hash){history.scrollRestoration="manual";scrollTo(0,0);addEventListener("load",function(){setTimeout(function(){history.scrollRestoration="auto"},300)})}}catch(e){}',
+          }}
+        />
       </head>
       <body className="min-h-screen">
         <a

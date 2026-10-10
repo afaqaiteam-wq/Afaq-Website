@@ -44,13 +44,6 @@ export const ar: Dictionary = {
       titleSoft: "واتجاه واحد.",
       lead: "وكلاء ذكاء اصطناعي، وأتمتة، ومساعدات محادثة، وتكاملات، ومنصات ويب، واستشارات. كلٌّ منها قوي وحده، وأقوى حين تجتمع في كوكبة واحدة.",
     },
-    finale: {
-      eyebrow: "أفقك القادم",
-      title: "مستعد لترى",
-      titleAccent: "ما وراء الأفق؟",
-      lead: "أخبرنا بالعملية التي تبطئ فريقك، وسنريك كيف تبدو على الجانب الآخر.",
-      secondary: "أرسل رسالة",
-    },
     constellation: {
       agents: "وكلاء ذكاء اصطناعي",
       automation: "أتمتة",
@@ -71,10 +64,14 @@ export const ar: Dictionary = {
     workTitleAccent: "حتى الآن.",
     workLead: "نظام لإدارة العقارات والأقساط، ومنصة مبيعات متعددة الشركات، ونظام مالي شخصي. مشاريع حقيقية، بشاشاتها الحقيقية.",
     workLink: "كل الأعمال",
+    workView: "شاهد المشروع",
     closingTitle: "ابدأ",
     closingTitleAccent: "بمكالمة مدتها 30 دقيقة.",
     closingLead: "بلا عروض تقديمية. أحضر العملية التي تبطئك، وسنرسم معًا كيف يمكن أن تبدو.",
-    closingSecondary: "أرسل رسالة",
+    closingOr: "أو راسلنا على",
+    teamEyebrow: "مَن يقف وراء العمل",
+    teamWith: "مع بقية الفريق",
+    teamLink: "تعرّف على الفريق",
   },
   footer: {
     tagline: "آفاق جمعُ أفق، ونحن نبني ما وراء أفقك.",
@@ -83,7 +80,6 @@ export const ar: Dictionary = {
     talk: "تواصل معنا",
     rights: "جميع الحقوق محفوظة.",
     backToTop: "العودة للأعلى",
-    wordmark: "آفاق",
   },
   contact: {
     metaTitle: "تواصل معنا",
