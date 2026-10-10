@@ -5,7 +5,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 
 ## Done (all pushed)
 - Hero engine (`src/components/home/hero/`): the warp starfield plays on EVERY load and ONLY on load, never on scroll. There are 3 nested, slightly inclined Kepler orbits with tool-logo planets, a constellation "A", and a GSAP intro. The user accepted it; don't cut any motion he liked.
-- Home sections below the hero (`src/components/home/HomeSections.tsx`), the Services page and the About page. The About team is a constellation (`src/components/about/TeamConstellation.tsx`): the logo's A traced in stars, one star per person in `tier` order from `src/content/about.ts`; choosing a star sends a shooting star to the portrait, which opens in a ring of light.
+- Home sections below the hero (`src/components/home/HomeSections.tsx`), the Services page and the About page. The About team is a constellation (`src/components/about/TeamConstellation.tsx`): the logo's A as a 3D star map that assembles, sways and follows the pointer, one star per person in `tier` order from `src/content/about.ts`; choosing a star changes the portrait with a liquid WebGL dissolve.
 - Shared components: `AccentText`, `ToolPill` (logos in `hero/toolLogos.ts`), `StarBackdrop`, `Button`, and `RevealObserver` (`data-reveal` + `--d` delay).
 
 ## Hard rules
@@ -48,7 +48,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
   - Services has sticky `ServiceChips`.
   - About shows the team in two columns (the fifth card centred).
   - The footer is two columns with 44px links.
-- **Home order:** hero (its finale is the logo alone; the only call to action is the closing card) → selected work (one lead project with a readable detail crop, then the other two) → services as a grid of cards (the first two large, with their tools) → a team band (founder quote, the other five as avatars, link to About) → closing card (book a call, copy email) over a live WebGL planet (`src/components/ui/LivePlanet.tsx`, with `PlanetHorizon.tsx` as the static fallback). "How we work" now lives only on /services.
+- **Home order:** hero (its finale is the logo alone, and the work section rises under it; the only call to action is the closing card) → selected work (one lead project with a readable detail crop, then the other two) → services as a grid of cards (the first two large, with their tools) → a team band (founder quote, the other five as avatars, link to About) → closing card (book a call, copy email) over a live WebGL planet (`src/components/ui/LivePlanet.tsx`, with `PlanetHorizon.tsx` as the static fallback). "How we work" now lives only on /services.
 - **Contact:** an accent title line, equal cards, one primary (Book a call), and Copy email.
 - **Team titles:** Mohamed Alaa is now "Creative & Video Lead", and Mohamed Ragab is "Social Media & Growth Lead". The founder photo is intentionally different.
 - **Every page** now has the share image and the brand in og:title. The 404 language switch goes to the other home.

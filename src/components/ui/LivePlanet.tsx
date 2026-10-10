@@ -48,8 +48,10 @@ void main(){
     vec3 day=mix(ocean,vec3(.86,.74,1.),cl);
     vec3 night=vec3(.012,.01,.03)+vec3(.05,.03,.12)*cl*.4;
     // city lights twinkle where the sun hasn't reached
-    vec2 g=floor(vec2((u+spin)*150.,vv*36.));float hh=h(g);
-    float city=step(.975,hh)*(.4+.6*land)*(.55+.45*sin(t*2.2+hh*60.))*(1.-smoothstep(.0,.35,lit))*smoothstep(.05,.3,v);
+    vec2 gc=vec2((u+spin)*150.,vv*36.);vec2 g=floor(gc);float hh=h(g);
+    // each lit cell is a pin-point, not the whole cell, and only near the limb where cells are small
+    float pin=smoothstep(.22,.0,length(fract(gc)-.5))*(1.-smoothstep(.35,.7,v));
+    float city=step(.975,hh)*pin*(.4+.6*land)*(.55+.45*sin(t*2.2+hh*60.))*(1.-smoothstep(.0,.35,lit))*smoothstep(.05,.3,v);
     col=mix(night,day,clamp(lit*1.6,0.,1.))+vec3(.75,.65,1.)*city*.9;
     // the limb glows from inside, brightest under the sun
     col+=vec3(.82,.72,1.)*exp(-depth/5.)*(.25+1.3*sunX);
@@ -67,11 +69,11 @@ void main(){
     col+=mix(vec3(.35,.85,1.),vec3(.6,.4,1.),cur)*aur;
     al=0.;
   }
-  // the sun on the limb: a core, an anamorphic streak and slow rays reaching up
+  // the sun on the limb: a bright core, a short flare and slow rays reaching up
   vec2 sp=px-vec2(c.x,capE);float r=length(sp);
   float pulse=(.88+.12*sin(t*1.3)+.05*sin(t*3.7))*(.25+.75*rise);
   float core=exp(-r/5.)*1.8+exp(-r/28.)*.5+exp(-r/(S.x*.07))*.2;
-  float streak=exp(-abs(sp.y)/1.4)*exp(-abs(sp.x)/(S.x*.2))*.85;
+  float streak=exp(-abs(sp.y)/1.2)*exp(-abs(sp.x)/40.)*.6;
   float a2=atan(sp.y,abs(sp.x)+.0001);
   float rays=step(0.,sp.y)*exp(-r/(S.x*.085))*pow(fb(vec2(a2*7.,t*.3)),3.)*1.25;
   col+=vec3(1.,.97,1.)*(core+streak)*pulse+vec3(.78,.66,1.)*rays*pulse;
@@ -125,8 +127,9 @@ export function LivePlanet({ className = "", children }: { className?: string; c
       const wide = r.width >= 768;
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uDpr, dpr);
-      gl.uniform1f(uCap, wide ? 130 : 78);
-      gl.uniform1f(uR, r.width * (wide ? 1.35 : 1.6));
+      // a dome, not a strip: the limb peaks well inside the box and curves away toward the sides
+      gl.uniform1f(uCap, r.height * (wide ? 0.6 : 0.56));
+      gl.uniform1f(uR, r.width * (wide ? 0.75 : 0.88));
     };
     const draw = (now: number) => {
       // 0 as the planet's box enters at the bottom of the window, 1 once it's fully in view

@@ -73,8 +73,9 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
 
   return (
     <>
-      {/* the horizon: where the story ends and the page begins */}
-      <div className={shell}>
+      {/* the horizon: where the story ends and the page begins. Pulled up into the last of the
+          pinned intro, so the work rises under the returning logo instead of after an empty screen. */}
+      <div className={`${shell} relative -mt-[38svh]`}>
         <div
           data-reveal="line"
           aria-hidden="true"
@@ -301,7 +302,7 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
         <div className={`${shell} pb-20 pt-4 lg:pb-28`}>
           <div
             data-reveal
-            className={`${card} flex flex-col items-center border-lav/25 px-6 pb-36 pt-16 text-center sm:px-10 lg:pb-52 lg:pt-24`}
+            className={`${card} flex min-h-[740px] flex-col items-center border-lav/25 px-6 pt-16 text-center sm:px-10 lg:min-h-[760px] lg:pt-20`}
           >
             <div aria-hidden="true" className={topLight} />
             {/* a few far stars over the planet */}
@@ -309,7 +310,7 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(1px_1px_at_14%_22%,rgba(255,255,255,.5),transparent),radial-gradient(1px_1px_at_31%_64%,rgba(255,255,255,.3),transparent),radial-gradient(1.5px_1.5px_at_47%_12%,rgba(226,214,255,.45),transparent),radial-gradient(1px_1px_at_68%_38%,rgba(255,255,255,.35),transparent),radial-gradient(1px_1px_at_86%_18%,rgba(255,255,255,.4),transparent),radial-gradient(1px_1px_at_92%_58%,rgba(255,255,255,.25),transparent),radial-gradient(1px_1px_at_6%_52%,rgba(255,255,255,.3),transparent)] bg-[length:520px_420px] opacity-70"
             />
-            <LivePlanet className="absolute inset-x-0 bottom-0 h-[220px] lg:h-[340px]">
+            <LivePlanet className="absolute inset-x-0 bottom-0 h-[44%] lg:h-[55%]">
               <PlanetHorizon id="home-planet" className="block h-[150px] w-full lg:h-[230px]" />
             </LivePlanet>
             <h2 className="relative max-w-[16em] font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.04] tracking-[-0.035em]">

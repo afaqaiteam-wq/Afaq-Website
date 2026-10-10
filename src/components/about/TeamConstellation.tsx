@@ -1,284 +1,465 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import type { Person } from "@/content/about";
 
 /*
- * The team as a constellation: the A of the logo traced in stars (the same figure as the
- * home intro), with each person on one of its stars. Choosing a star sends a shooting star
- * to the portrait; where it lands, the new portrait opens in a ring of light and a burst
- * of sparks scatters. The name rises word by word and the role decodes into place.
+ * The team as a star map. The A of the logo hangs in 3D among a cloud of faint stars: it
+ * assembles out of the dark when it comes into view, sways slowly and turns toward the
+ * pointer. Each person is one of its stars. Choosing a star changes the portrait with a
+ * liquid WebGL dissolve (a violet edge of light runs through the image); the name rises
+ * word by word and the role decodes into place.
  */
 
-// The logo's A, in logo units around its centre (matches components/home/hero/constellation.ts).
-const NODES = [
-  [0, -0.36],
-  [-0.1, -0.18],
-  [-0.2, 0.01],
-  [-0.34, 0.26],
-  [-0.19, 0.2],
-  [0, -0.05],
-  [0.19, 0.2],
-  [0.34, 0.26],
-  [0.2, 0.01],
-  [0.1, -0.18],
-] as const;
-const PATH = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-const MESH = [
-  [1, 9],
-  [2, 5],
-  [5, 8],
+// The logo's A in logo units, given a little depth so it reads as a figure in space.
+const NODES: readonly (readonly [number, number, number])[] = [
+  [0, -0.36, 0],
+  [-0.1, -0.18, 0.04],
+  [-0.2, 0.01, -0.05],
+  [-0.34, 0.26, 0.06],
+  [-0.19, 0.2, -0.07],
+  [0, -0.05, 0.1],
+  [0.19, 0.2, -0.04],
+  [0.34, 0.26, 0.05],
+  [0.2, 0.01, -0.06],
+  [0.1, -0.18, 0.03],
 ];
-// Which star each person sits on, in tier order: apex, the two shoulders, the inner apex, the feet.
+const EDGES: readonly (readonly [number, number])[] = [
+  [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 0],
+];
+const MESH: readonly (readonly [number, number])[] = [[1, 9], [2, 5], [5, 8]];
+// Which star each person sits on, in tier order: apex, shoulders, inner apex, feet.
 // Mirrored in Arabic so the second person sits on the reading side.
 const SEATS_LTR = [0, 2, 8, 5, 3, 7];
 const SEATS_RTL = [0, 8, 2, 5, 7, 3];
-// Where each star's name sits so labels never collide: above the apex, outward on the
-// shoulders and over the inner apex (clear of its lines), below the feet.
-const LABEL: Record<number, "up" | "down" | "start" | "end"> = { 0: "up", 2: "start", 8: "end", 5: "up", 3: "down", 7: "down" };
-
-// viewBox in thousandths of a logo unit, with room for the labels
-const VB = { x: -460, y: -470, w: 920, h: 830 };
-const pct = (n: readonly [number, number]) => ({
-  left: `${((n[0] * 1000 - VB.x) / VB.w) * 100}%`,
-  top: `${((n[1] * 1000 - VB.y) / VB.h) * 100}%`,
-});
-const pathD = PATH.map((i, k) => `${k ? "L" : "M"}${NODES[i][0] * 1000} ${NODES[i][1] * 1000}`).join(" ");
-const meshD = MESH.map(([a, b]) => `M${NODES[a][0] * 1000} ${NODES[a][1] * 1000}L${NODES[b][0] * 1000} ${NODES[b][1] * 1000}`).join(" ");
+type Side = "up" | "down" | "start" | "end";
+const LABEL: Record<number, Side> = { 0: "up", 2: "start", 8: "end", 5: "up", 3: "down", 7: "down" };
 
 const GLYPHS = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي0123456789";
+const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
-interface Spark { x: number; y: number; vx: number; vy: number; life: number; max: number; s: number }
+/* ───────────── the star map (canvas 2D, projected from 3D) ───────────── */
 
-interface Els {
-  stage: HTMLDivElement;
-  canvas: HTMLCanvasElement;
-  frame: HTMLDivElement;
-  ring: HTMLSpanElement;
-  layers: (HTMLDivElement | null)[];
-  stars: (HTMLButtonElement | null)[];
-}
-
-/** The animation behind the component: the shooting star, the sparks and the portrait reveal. */
-function createShow(el: Els, onActive: (k: number) => void) {
-  let busy = false;
-  let shown = 0;
-  let queued: number | null = null;
-  const sparks: Spark[] = [];
-  let comet: { t0: number; from: [number, number]; to: [number, number]; ctl: [number, number]; trail: [number, number][]; k: number } | null = null;
-  let raf = 0;
+function createSky(box: HTMLDivElement, canvas: HTMLCanvasElement, buttons: (HTMLButtonElement | null)[], seats: number[]) {
+  const ctx = canvas.getContext("2d")!;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // where every A star starts before it flies into place
+  const starts = NODES.map(() => {
+    const a = Math.random() * Math.PI * 2;
+    const b = (Math.random() - 0.5) * Math.PI;
+    const r = 1.2 + Math.random() * 0.8;
+    // never behind the viewer: they come in from the far side and the edges
+    return [Math.cos(a) * Math.cos(b) * r, Math.sin(b) * r * 0.8, 0.4 + Math.abs(Math.sin(a) * Math.cos(b)) * r] as const;
+  });
+  const delays = NODES.map((_, i) => i * 0.045 + Math.random() * 0.08);
+  // faint background stars in a loose cloud around the figure
+  const dust = Array.from({ length: 170 }, () => {
+    const g = () => (Math.random() + Math.random() + Math.random()) / 3 - 0.5;
+    return { x: g() * 1.5, y: g() * 1.3 - 0.03, z: g() * 1.1, s: 0.4 + Math.random() * 1.1, ph: Math.random() * 6.28, sp: 0.6 + Math.random() * 1.6 };
+  });
+  let active = 0;
+  let shownAt = -1;
+  let raf = 0;
+  let running = false;
+  const view = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
+  const ring = { t0: 0 };
 
-  // ---- canvas: the shooting star and the sparks ----
-  function loop() {
-    const c = el.canvas;
-    const s = el.stage;
-    if (!c || !s) return;
-    const ctx = c.getContext("2d")!;
+  function project(x: number, y: number, z: number, W: number, H: number, S: number) {
+    const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw);
+    const cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
+    const x1 = x * cy - z * sy;
+    const z1 = x * sy + z * cy;
+    const y1 = (y + 0.05) * cp - z1 * sp;
+    const z2 = (y + 0.05) * sp + z1 * cp;
+    const f = 1.7 / Math.max(0.6, 1.7 + z2);
+    return { x: W / 2 + x1 * S * f, y: H / 2 + y1 * S * f, f, z: z2 };
+  }
+
+  function frame(now: number) {
+    const t = now / 1000;
+    const r = box.getBoundingClientRect();
+    const W = r.width, H = r.height;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const r = s.getBoundingClientRect();
-    if (c.width !== Math.round(r.width * dpr) || c.height !== Math.round(r.height * dpr)) {
-      c.width = Math.round(r.width * dpr);
-      c.height = Math.round(r.height * dpr);
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, r.width, r.height);
+    ctx.clearRect(0, 0, W, H);
+    // narrow boxes leave room for the names on the shoulders
+    const S = Math.min(W / (W < 440 ? 1.12 : 0.9), H / 0.8);
+
+    // a slow sway, nudged toward the pointer
+    const sway = reduced ? 0 : Math.sin(t * 0.22) * 0.2;
+    const nod = reduced ? 0 : Math.sin(t * 0.17) * 0.06;
+    view.yaw += (sway + view.ty - view.yaw) * 0.05;
+    view.pitch += (nod + view.tp - view.pitch) * 0.05;
+
+    const asm = shownAt < 0 ? 0 : reduced ? 1 : (now - shownAt) / 1000 / 1.9;
+    const prog = NODES.map((_, i) => ease(clamp((asm - delays[i]) / 0.62)));
+    const pos = NODES.map((n, i) => {
+      const k = prog[i];
+      const s = starts[i];
+      return project(s[0] + (n[0] - s[0]) * k, s[1] + (n[1] - s[1]) * k, s[2] + (n[2] - s[2]) * k, W, H, S);
+    });
+
     ctx.globalCompositeOperation = "lighter";
-    const now = performance.now();
-
-    const cm = comet;
-    if (cm) {
-      const k = Math.min(1, (now - cm.t0) / 720);
-      const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      const x = (1 - e) * (1 - e) * cm.from[0] + 2 * (1 - e) * e * cm.ctl[0] + e * e * cm.to[0];
-      const y = (1 - e) * (1 - e) * cm.from[1] + 2 * (1 - e) * e * cm.ctl[1] + e * e * cm.to[1];
-      cm.trail.unshift([x, y]);
-      if (cm.trail.length > 22) cm.trail.pop();
-      // tail: a line that thins and fades behind the head
-      for (let i = 1; i < cm.trail.length; i++) {
-        const a = 1 - i / cm.trail.length;
-        ctx.strokeStyle = `rgba(214,196,255,${(a * 0.9).toFixed(3)})`;
-        ctx.lineWidth = 3.2 * a + 0.4;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(cm.trail[i - 1][0], cm.trail[i - 1][1]);
-        ctx.lineTo(cm.trail[i][0], cm.trail[i][1]);
-        ctx.stroke();
-      }
-      // the head
-      const g = ctx.createRadialGradient(x, y, 0, x, y, 22);
-      g.addColorStop(0, "rgba(255,255,255,1)");
-      g.addColorStop(0.18, "rgba(236,226,255,0.85)");
-      g.addColorStop(1, "rgba(140,92,255,0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(x - 22, y - 22, 44, 44);
-      // a few sparks shed along the way
-      if (Math.random() < 0.7) sparks.push({ x, y, vx: (Math.random() - 0.5) * 1.2, vy: (Math.random() - 0.5) * 1.2, life: 0, max: 380 + Math.random() * 260, s: 0.8 + Math.random() * 1.2 });
-      if (k >= 1) {
-        comet = null;
-        impact(cm.k, cm.to);
-      }
-    }
-
-    // sparks: tiny four-point stars that drift, slow down and fade
-    const list = sparks;
-    for (let i = list.length - 1; i >= 0; i--) {
-      const p = list[i];
-      p.life += 16;
-      if (p.life > p.max) {
-        list.splice(i, 1);
-        continue;
-      }
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.95;
-      p.vy *= 0.95;
-      const a = 1 - p.life / p.max;
-      const sz = p.s * (0.6 + a);
-      ctx.fillStyle = `rgba(240,232,255,${a.toFixed(3)})`;
-      ctx.fillRect(p.x - sz * 2.2, p.y - 0.5, sz * 4.4, 1);
-      ctx.fillRect(p.x - 0.5, p.y - sz * 2.2, 1, sz * 4.4);
-      ctx.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+    // dust
+    const dustA = clamp(asm * 1.6);
+    for (const d of dust) {
+      const p = project(d.x, d.y, d.z, W, H, S);
+      const a = dustA * (0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * d.sp + d.ph))) * clamp(p.f * 0.9);
+      const sz = d.s * p.f;
+      ctx.fillStyle = `rgba(226,214,255,${a.toFixed(3)})`;
       ctx.fillRect(p.x - sz / 2, p.y - sz / 2, sz, sz);
     }
 
-    if (comet || list.length) raf = requestAnimationFrame(loop);
-    else raf = 0;
-  }
+    // lines: the outline, then the faint cross-links; the chosen star's own lines burn brighter
+    const seat = seats[active];
+    const line = (a: number, b: number, base: number) => {
+      const k = Math.min(prog[a], prog[b]);
+      if (k <= 0.01) return;
+      const lit = a === seat || b === seat;
+      const pa = pos[a], pb = pos[b];
+      const depth = clamp(((pa.f + pb.f) / 2 - 0.75) * 1.6, 0.35, 1);
+      ctx.strokeStyle = `rgba(214,196,255,${(k * depth * (lit ? 0.95 : base)).toFixed(3)})`;
+      ctx.lineWidth = lit ? 1.6 : 1;
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pa.x + (pb.x - pa.x) * k, pa.y + (pb.y - pa.y) * k);
+      ctx.stroke();
+      if (lit && !reduced) {
+        // a bead of light running out from the chosen star
+        const u = (t * 0.6) % 1;
+        const [from, to] = a === seat ? [pa, pb] : [pb, pa];
+        const x = from.x + (to.x - from.x) * u, y = from.y + (to.y - from.y) * u;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 7);
+        g.addColorStop(0, `rgba(255,255,255,${(0.9 * (1 - u)).toFixed(3)})`);
+        g.addColorStop(1, "rgba(200,168,255,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(x - 7, y - 7, 14, 14);
+      }
+    };
+    EDGES.forEach(([a, b]) => line(a, b, 0.5));
+    MESH.forEach(([a, b]) => line(a, b, 0.18));
 
-  const kick = () => {
-    if (!raf) raf = requestAnimationFrame(loop);
-  };
-
-  // ---- the portrait opens from where the shooting star lands ----
-  function reveal(k: number, at: [number, number] | null) {
-    const prev = shown;
-    shown = k;
-    const f = el.frame;
-    const L = el.layers;
-    if (!f) return;
-    const fr = f.getBoundingClientRect();
-    const sr = el.stage!.getBoundingClientRect();
-    const ix = at ? ((at[0] + sr.left - fr.left) / fr.width) * 100 : 50;
-    const iy = at ? ((at[1] + sr.top - fr.top) / fr.height) * 100 : 50;
-    L.forEach((el, i) => {
-      if (!el) return;
-      if (i === k) {
-        el.style.transition = "none";
-        el.style.zIndex = "3";
-        el.style.clipPath = `circle(0% at ${ix}% ${iy}%)`;
-        el.querySelector("img")?.animate([{ scale: "1.08" }, { scale: "1" }], { duration: 1600, easing: "cubic-bezier(.22,1,.36,1)" });
-        void el.offsetWidth;
-        el.style.transition = "clip-path 1.15s cubic-bezier(.65,0,.35,1)";
-        el.style.clipPath = `circle(150% at ${ix}% ${iy}%)`;
-      } else if (i === prev) {
-        el.style.zIndex = "2";
-      } else {
-        el.style.zIndex = "1";
-        el.style.transition = "none";
-        el.style.clipPath = "circle(0% at 50% 50%)";
+    // stars: spare ones small, people's bright, the chosen one with a breathing halo
+    NODES.forEach((_, i) => {
+      const p = pos[i];
+      const k = prog[i];
+      if (k <= 0) return;
+      const person = seats.indexOf(i);
+      const on = i === seat;
+      const rad = (person < 0 ? 1.4 : on ? 4.2 : 2.6) * p.f;
+      const glow = (person < 0 ? 6 : on ? 26 : 14) * p.f;
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glow);
+      g.addColorStop(0, `rgba(255,255,255,${k.toFixed(3)})`);
+      g.addColorStop(0.25, `rgba(226,214,255,${(0.55 * k).toFixed(3)})`);
+      g.addColorStop(1, "rgba(140,92,255,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(p.x - glow, p.y - glow, glow * 2, glow * 2);
+      ctx.fillStyle = `rgba(255,255,255,${k.toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
+      ctx.fill();
+      if (on && !reduced) {
+        const c = ((now - ring.t0) / 1000 / 2.4) % 1;
+        ctx.strokeStyle = `rgba(200,168,255,${(0.7 * (1 - c) * k).toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (10 + c * 22) * p.f, 0, Math.PI * 2);
+        ctx.stroke();
       }
     });
-    const rg = el.ring;
-    if (rg && !reduced) {
-      rg.style.left = `${ix}%`;
-      rg.style.top = `${iy}%`;
-      rg.animate(
-        [
-          { transform: "translate(-50%,-50%) scale(0)", opacity: 1 },
-          { transform: "translate(-50%,-50%) scale(1)", opacity: 0 },
-        ],
-        { duration: 1150, easing: "cubic-bezier(.65,0,.35,1)" },
-      );
-    }
-    window.setTimeout(() => {
-      const p = L[prev];
-      if (p && shown !== prev) {
-        p.style.transition = "none";
-        p.style.zIndex = "1";
-        p.style.clipPath = "circle(0% at 50% 50%)";
-      }
-      busy = false;
-      if (queued != null && queued !== shown) {
-        const q = queued;
-        queued = null;
-        go(q);
-      }
-    }, reduced ? 0 : 1200);
+    ctx.globalCompositeOperation = "source-over";
+
+    // the buttons ride on their stars
+    buttons.forEach((b, i) => {
+      if (!b) return;
+      const p = pos[seats[i]];
+      b.style.transform = `translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px) translate(-50%,-50%)`;
+      b.style.opacity = prog[seats[i]].toFixed(3);
+    });
+
+    if (running) raf = requestAnimationFrame(frame);
   }
 
-  function impact(k: number, at: [number, number]) {
-    for (let i = 0; i < 46; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const v = 1.2 + Math.random() * 5.5;
-      sparks.push({ x: at[0], y: at[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: 600 + Math.random() * 600, s: 0.8 + Math.random() * 1.6 });
-    }
-    kick();
-    reveal(k, at);
-  }
-
-  function go(k: number) {
-    if (k === shown && !busy) return;
-    if (busy) {
-      queued = k;
-      onActive(k);
-      return;
-    }
-    busy = true;
-    onActive(k);
-    if (reduced) {
-      reveal(k, null);
-      return;
-    }
-    const s = el.stage!.getBoundingClientRect();
-    const st = el.stars[k]!.getBoundingClientRect();
-    const fr = el.frame!.getBoundingClientRect();
-    const from: [number, number] = [st.left + st.width / 2 - s.left, st.top + st.height / 2 - s.top];
-    // land just inside the portrait, on the side facing the star
-    const cx = Math.min(fr.right - fr.width * 0.18, Math.max(fr.left + fr.width * 0.18, st.left + st.width / 2));
-    const cy = Math.min(fr.bottom - fr.height * 0.2, Math.max(fr.top + fr.height * 0.22, st.top + st.height / 2));
-    const to: [number, number] = [cx - s.left, cy - s.top];
-    const mx = (from[0] + to[0]) / 2;
-    const my = (from[1] + to[1]) / 2;
-    const dist = Math.hypot(to[0] - from[0], to[1] - from[1]);
-    const ctl: [number, number] = [mx, my - dist * 0.28];
-    comet = { t0: performance.now(), from, to, ctl, trail: [], k };
-    kick();
-  }
+  const onMove = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse" || reduced) return;
+    const r = box.getBoundingClientRect();
+    view.ty = clamp((e.clientX - r.left) / r.width - 0.5, -0.8, 0.8) * 0.7;
+    view.tp = -clamp((e.clientY - r.top) / r.height - 0.5, -0.8, 0.8) * 0.3;
+  };
+  const onLeave = () => {
+    view.ty = 0;
+    view.tp = 0;
+  };
+  box.addEventListener("pointermove", onMove);
+  box.addEventListener("pointerleave", onLeave);
 
   return {
-    go,
-    destroy() {
+    start() {
+      if (shownAt < 0) shownAt = performance.now();
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
+    },
+    stop() {
+      running = false;
       cancelAnimationFrame(raf);
+    },
+    setActive(k: number) {
+      active = k;
+      ring.t0 = performance.now();
+    },
+    destroy() {
+      running = false;
+      cancelAnimationFrame(raf);
+      box.removeEventListener("pointermove", onMove);
+      box.removeEventListener("pointerleave", onLeave);
     },
   };
 }
+
+/* ───────────── the portrait: a liquid WebGL dissolve between photos ───────────── */
+
+const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
+const FRAG = `precision highp float;varying vec2 v;uniform sampler2D u0,u1;uniform vec2 res,s0,s1;uniform float p,t,z;uniform vec2 m;
+float h(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
+float no(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fb(vec2 q){float a=.5,r=0.;for(int i=0;i<5;i++){r+=a*no(q);q*=2.03;a*=.5;}return r;}
+vec2 cov(vec2 uv,vec2 s){float rs=res.x/res.y,ri=s.x/s.y;vec2 k=rs<ri?vec2(rs/ri,1.):vec2(1.,ri/rs);vec2 o=vec2((1.-k.x)*.5,(1.-k.y)*.76);return clamp(uv*k+o,0.,1.);}
+void main(){vec2 uv=v;vec2 c=(uv-.5)*(1.-.04*z)+.5+m*.01;
+  float n=fb(uv*2.6+vec2(0.,t*.05));
+  float d=n*.62+uv.y*.38;float th=p*1.32-.16;
+  float w=1.-smoothstep(th-.05,th+.05,d);
+  vec2 dp=vec2(n-.5)*.22;
+  vec4 a=texture2D(u0,cov(c+dp*p,s0));
+  float sh=.006*(1.-p);
+  vec2 c1=c-dp*(1.-p);
+  vec3 b=vec3(texture2D(u1,cov(c1-vec2(sh,0.),s1)).r,texture2D(u1,cov(c1,s1)).g,texture2D(u1,cov(c1+vec2(sh,0.),s1)).b);
+  float e=clamp(1.-abs(d-th)/.06,0.,1.)*step(.001,p)*step(p,.999);
+  vec3 col=mix(a.rgb,b,w)+vec3(.62,.42,1.)*pow(e,2.2)*1.35;
+  gl_FragColor=vec4(col,1.);}`;
+
+function createPortrait(canvas: HTMLCanvasElement, imgs: HTMLImageElement[], onReady: () => void) {
+  const gl = canvas.getContext("webgl", { antialias: true });
+  if (!gl) return null;
+  const sh = (type: number, src: string) => {
+    const s = gl.createShader(type)!;
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  };
+  const vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return null;
+  const prog = gl.createProgram()!;
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const al = gl.getAttribLocation(prog, "a");
+  gl.enableVertexAttribArray(al);
+  gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+  const U: Record<string, WebGLUniformLocation | null> = {};
+  ["u0", "u1", "res", "s0", "s1", "p", "t", "z", "m"].forEach((k) => (U[k] = gl.getUniformLocation(prog, k)));
+  gl.uniform1i(U.u0, 0);
+  gl.uniform1i(U.u1, 1);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const tex: (WebGLTexture | null)[] = imgs.map(() => null);
+  const upload = (i: number) => {
+    const im = imgs[i];
+    if (!im.complete || !im.naturalWidth) return false;
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    tex[i] = t;
+    return true;
+  };
+
+  let cur = 0, nxt = 0, p = 0, z = 0, t0 = 0, zt0 = 0, raf = 0, running = false;
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  let pending: number | null = null;
+
+  const size = () => {
+    const r = canvas.getBoundingClientRect();
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(r.width * d);
+    canvas.height = Math.round(r.height * d);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  };
+  const draw = (now: number) => {
+    if (!tex[cur] || !tex[nxt]) return;
+    if (t0) {
+      p = clamp((now - t0) / 1500);
+      if (p >= 1) {
+        cur = nxt;
+        p = 0;
+        t0 = 0;
+        zt0 = now;
+        if (pending != null) {
+          const q = pending;
+          pending = null;
+          go(q);
+        }
+      }
+    }
+    z = reduced ? 0 : clamp((now - zt0) / 8000);
+    mouse.x += (mouse.tx - mouse.x) * 0.06;
+    mouse.y += (mouse.ty - mouse.y) * 0.06;
+    gl.uniform2f(U.res, canvas.width, canvas.height);
+    gl.uniform2f(U.s0, imgs[cur].naturalWidth, imgs[cur].naturalHeight);
+    gl.uniform2f(U.s1, imgs[nxt].naturalWidth, imgs[nxt].naturalHeight);
+    gl.uniform1f(U.p, ease(p));
+    gl.uniform1f(U.t, now / 1000);
+    gl.uniform1f(U.z, ease(z));
+    gl.uniform2f(U.m, mouse.x, mouse.y);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex[cur]);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, tex[nxt]);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  };
+  const loop = (now: number) => {
+    draw(now);
+    if (running) raf = requestAnimationFrame(loop);
+  };
+  function go(k: number) {
+    if (!tex[k] && !upload(k)) return false;
+    if (t0) {
+      pending = k;
+      return true;
+    }
+    if (k === cur) return true;
+    nxt = k;
+    if (reduced) {
+      cur = k;
+      draw(performance.now());
+      return true;
+    }
+    t0 = performance.now();
+    return true;
+  }
+
+  // textures as the photos arrive; the canvas takes over once the first one is in
+  let ready = false;
+  const tryAll = () => {
+    imgs.forEach((_, i) => {
+      if (!tex[i]) upload(i);
+    });
+    if (!ready && tex[0]) {
+      ready = true;
+      size();
+      draw(performance.now());
+      onReady();
+    }
+  };
+  imgs.forEach((im) => im.addEventListener("load", tryAll));
+  tryAll();
+  const ro = new ResizeObserver(() => {
+    if (ready) {
+      size();
+      draw(performance.now());
+    }
+  });
+  ro.observe(canvas);
+
+  return {
+    go,
+    pointer(x: number, y: number) {
+      mouse.tx = x;
+      mouse.ty = y;
+    },
+    start() {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
+    },
+    stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    },
+    destroy() {
+      running = false;
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      imgs.forEach((im) => im.removeEventListener("load", tryAll));
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    },
+  };
+}
+
+/* ───────────── the component ───────────── */
 
 export function TeamConstellation({ people, lang, labels }: { people: Person[]; lang: string; labels: { quoteOpen: string; quoteClose: string } }) {
   const rtl = lang === "ar";
   const seats = rtl ? SEATS_RTL : SEATS_LTR;
   const sep = rtl ? "، " : ", ";
   const [active, setActive] = useState(0);
-  const [drawn, setDrawn] = useState(false);
+  const [glReady, setGlReady] = useState(false);
 
   const stage = useRef<HTMLDivElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const frame = useRef<HTMLDivElement>(null);
-  const layers = useRef<(HTMLDivElement | null)[]>([]);
-  const ring = useRef<HTMLSpanElement>(null);
+  const skyBox = useRef<HTMLDivElement>(null);
+  const skyCanvas = useRef<HTMLCanvasElement>(null);
   const stars = useRef<(HTMLButtonElement | null)[]>([]);
+  const frameEl = useRef<HTMLDivElement>(null);
+  const glCanvas = useRef<HTMLCanvasElement>(null);
   const roleEl = useRef<HTMLParagraphElement>(null);
-  const show = useRef<ReturnType<typeof createShow> | null>(null);
-  const reduced = useRef(false);
+  const sky = useRef<ReturnType<typeof createSky> | null>(null);
+  const portrait = useRef<ReturnType<typeof createPortrait>>(null);
+  const hoverTimer = useRef(0);
+
+  const choose = (k: number) => {
+    setActive(k);
+    sky.current?.setActive(k);
+    portrait.current?.go(k);
+  };
+
+  useEffect(() => {
+    const seatsNow = lang === "ar" ? SEATS_RTL : SEATS_LTR;
+    sky.current = createSky(skyBox.current!, skyCanvas.current!, stars.current, seatsNow);
+    const imgs = [...frameEl.current!.querySelectorAll<HTMLImageElement>("img[data-face]")];
+    portrait.current = createPortrait(glCanvas.current!, imgs, () => setGlReady(true));
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          sky.current?.start();
+          portrait.current?.start();
+        } else {
+          sky.current?.stop();
+          portrait.current?.stop();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(stage.current!);
+    return () => {
+      io.disconnect();
+      sky.current?.destroy();
+      portrait.current?.destroy();
+    };
+  }, [lang]);
 
   // the role decodes into place, like a model writing it
   useEffect(() => {
     const el = roleEl.current;
     if (!el) return;
     const text = people[active].role;
-    if (reduced.current) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       el.textContent = text;
       return;
     }
@@ -296,92 +477,70 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
     return () => cancelAnimationFrame(id);
   }, [active, people]);
 
-  // draw the figure when it comes into view
-  useEffect(() => {
-    reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    show.current = createShow(
-      { stage: stage.current!, canvas: canvas.current!, frame: frame.current!, ring: ring.current!, layers: layers.current, stars: stars.current },
-      setActive,
-    );
-    const el = stage.current!;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        setDrawn(true);
-        io.disconnect();
-      },
-      { threshold: 0.25 },
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      show.current?.destroy();
-    };
-  }, []);
-
-  const hoverTimer = useRef(0);
   const p = people[active];
+  const words = p.name.split(" ");
 
   return (
-    <div ref={stage} className="relative mt-14 grid gap-10 lg:mt-20 lg:grid-cols-12 lg:items-center lg:gap-12" data-drawn={drawn ? "" : undefined}>
-      <canvas ref={canvas} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
-
-      {/* the portrait */}
-      <div className="lg:order-2 lg:col-span-7">
+    <div ref={stage} className="relative mt-14 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:items-center lg:gap-12">
+      {/* the portrait, leaning gently toward the pointer */}
+      <div className="[perspective:1400px] lg:order-2 lg:col-span-7">
         <div
-          ref={frame}
-          className="relative mx-auto aspect-[4/5] w-full max-w-[520px] overflow-hidden rounded-[28px] border border-lav/20 bg-surface shadow-[0_60px_120px_-50px_rgb(124_77_255/0.6)]"
+          onPointerMove={(e) => {
+            if (e.pointerType !== "mouse") return;
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            e.currentTarget.style.transform = `rotateY(${(x * 8).toFixed(2)}deg) rotateX(${(-y * 6).toFixed(2)}deg)`;
+            e.currentTarget.style.setProperty("--gx", `${(x + 0.5) * 100}%`);
+            e.currentTarget.style.setProperty("--gy", `${(y + 0.5) * 100}%`);
+            portrait.current?.pointer(x, -y);
+          }}
+          onPointerLeave={(e) => {
+            e.currentTarget.style.transform = "";
+            portrait.current?.pointer(0, 0);
+          }}
+          className="relative mx-auto w-full max-w-[520px] transition-transform duration-700 ease-out motion-reduce:transition-none"
         >
-          {people.map((m, i) => (
-            <div
-              key={m.name}
-              ref={(el) => {
-                layers.current[i] = el;
-              }}
-              className="absolute inset-0"
-              style={{ zIndex: i === 0 ? 3 : 1, clipPath: i === 0 ? "circle(150% at 50% 50%)" : "circle(0% at 50% 50%)" }}
-            >
-              <Image
-                src={m.photo}
-                alt={m.name}
-                fill
-                priority={i === 0}
-                sizes="(min-width: 1024px) 520px, 100vw"
-                className="object-cover object-[50%_24%]"
-              />
-            </div>
-          ))}
-          <div aria-hidden="true" className="absolute inset-0 z-[4] bg-[linear-gradient(180deg,transparent_60%,rgb(7_6_11/0.55))]" />
-          <span
-            ref={ring}
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute z-[5] size-[260%] rounded-full opacity-0 shadow-[0_0_0_2px_rgb(236_226_255/0.9),0_0_40px_10px_rgb(140_92_255/0.55),inset_0_0_40px_6px_rgb(140_92_255/0.45)]"
-            style={{ transform: "translate(-50%,-50%) scale(0)" }}
+            className="pointer-events-none absolute -inset-y-10 inset-x-0 -z-10 rounded-[60px] sm:-inset-x-10 bg-[radial-gradient(60%_55%_at_50%_60%,rgb(124_77_255/0.42),transparent_72%)] blur-2xl"
           />
+          <div ref={frameEl} className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-lav/25 bg-surface">
+            {people.map((m, i) => (
+              <div key={m.name} className={`absolute inset-0 transition-opacity duration-700 ${i === active ? "opacity-100" : "opacity-0"}`}>
+                <Image
+                  data-face=""
+                  src={m.photo}
+                  alt={m.name}
+                  fill
+                  priority={i === 0}
+                  loading={i === 0 ? undefined : "eager"}
+                  sizes="(min-width: 1024px) 520px, 100vw"
+                  className="object-cover object-[50%_24%]"
+                />
+              </div>
+            ))}
+            <canvas
+              ref={glCanvas}
+              aria-hidden="true"
+              className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${glReady ? "opacity-100" : "opacity-0"}`}
+            />
+            {/* a soft glare that follows the pointer, and a dusk at the foot of the photo */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(420px_circle_at_var(--gx,50%)_var(--gy,30%),rgb(255_255_255/0.1),transparent_60%)] mix-blend-screen"
+            />
+            <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_62%,rgb(7_6_11/0.5))]" />
+          </div>
         </div>
       </div>
 
-      {/* the constellation and the words */}
+      {/* the star map and the words */}
       <div className="min-w-0 lg:order-1 lg:col-span-5">
-        <div dir="ltr" className="relative mx-auto aspect-[92/83] w-full max-w-[460px]">
-          <svg viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} className="absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
-            <defs>
-              <filter id="team-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="6" />
-              </filter>
-            </defs>
-            <path d={meshD} fill="none" stroke="rgb(200 168 255 / 0.18)" strokeWidth="2" pathLength={1} className="team-draw" style={{ "--draw-d": "700ms" } as CSSProperties} />
-            <path d={pathD} fill="none" stroke="rgb(200 168 255 / 0.35)" strokeWidth="8" pathLength={1} filter="url(#team-glow)" className="team-draw" />
-            <path d={pathD} fill="none" stroke="rgb(236 226 255 / 0.85)" strokeWidth="2.2" strokeLinejoin="round" pathLength={1} className="team-draw" />
-            {/* light running along the outline */}
-            <path d={pathD} fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" pathLength={1} className="team-pulse" />
-            {NODES.map((n, i) =>
-              seats.includes(i) ? null : <circle key={i} cx={n[0] * 1000} cy={n[1] * 1000} r="5" fill="rgb(236 226 255 / 0.7)" className="team-twinkle" style={{ animationDelay: `${i * 0.37}s` }} />,
-            )}
-          </svg>
+        <div ref={skyBox} dir="ltr" className="relative mx-auto aspect-square w-full max-w-[480px] touch-pan-y overflow-hidden">
+          <canvas ref={skyCanvas} aria-hidden="true" className="absolute inset-0 h-full w-full" />
           {people.map((m, i) => {
-            const node = seats[i];
-            const side = LABEL[node];
+            const side = LABEL[seats[i]];
             const on = i === active;
             return (
               <button
@@ -392,29 +551,20 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
                 type="button"
                 aria-pressed={on}
                 aria-label={`${m.name}${sep}${m.role}`}
-                onClick={() => show.current?.go(i)}
-                onFocus={() => show.current?.go(i)}
+                onClick={() => choose(i)}
+                onFocus={() => choose(i)}
                 onMouseEnter={() => {
                   if (!window.matchMedia("(hover: hover)").matches) return;
                   window.clearTimeout(hoverTimer.current);
-                  hoverTimer.current = window.setTimeout(() => show.current?.go(i), 120);
+                  hoverTimer.current = window.setTimeout(() => choose(i), 140);
                 }}
                 onMouseLeave={() => window.clearTimeout(hoverTimer.current)}
-                className="group/star absolute z-20 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
-                style={pct(NODES[node])}
+                className="group/star absolute left-0 top-0 grid size-11 place-items-center rounded-full opacity-0"
               >
-                <span
-                  aria-hidden="true"
-                  className={`absolute inset-1.5 rounded-full border border-lav/60 transition-[scale,opacity] duration-500 ${on ? "scale-100 opacity-100 [animation:team-ring_2.4s_ease-out_infinite]" : "scale-50 opacity-0"}`}
-                />
-                <span
-                  aria-hidden="true"
-                  className={`block rounded-full bg-[#efe6ff] shadow-[0_0_10px_#c8a8ff,0_0_24px_rgb(200_168_255/0.6)] transition-[width,height,background-color] duration-500 ${on ? "size-4 bg-white" : "size-2.5 group-hover/star:size-3.5"}`}
-                />
                 <span
                   dir={rtl ? "rtl" : "ltr"}
                   className={`pointer-events-none absolute whitespace-nowrap text-[11px] transition-colors duration-300 sm:text-[13px] ${on ? "font-medium text-ink" : "text-dim group-hover/star:text-soft"} ${
-                    side === "up" ? "bottom-full mb-0.5" : side === "down" ? "top-full mt-0.5" : side === "start" ? "right-full mr-1" : "left-full ml-1"
+                    side === "up" ? "bottom-full -mb-1" : side === "down" ? "top-full -mt-1" : side === "start" ? "right-full -mr-1" : "left-full -ml-1"
                   }`}
                 >
                   {m.name}
@@ -424,18 +574,20 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
           })}
         </div>
 
-        <div className="mt-8 min-h-[13rem] text-center lg:mt-10 lg:text-start" aria-live="polite">
+        <div className="mt-6 min-h-[13rem] text-center lg:mt-8 lg:text-start" aria-live="polite">
           <p dir="ltr" className={`font-display text-[13px] tracking-[0.16em] text-dim ${rtl ? "lg:text-right" : ""}`}>
             <span className="text-lav">{String(active + 1).padStart(2, "0")}</span> / {String(people.length).padStart(2, "0")}
           </p>
           <h3 key={`n${active}`} className="mt-3 font-display text-[clamp(32px,3.6vw,52px)] font-semibold leading-[1.12] tracking-[-0.025em]">
-            {p.name.split(" ").map((w, i) => (
-              <span key={i} className="inline-block overflow-hidden pb-[0.12em] align-top">
-                <span className="team-word inline-block" style={{ animationDelay: `${150 + i * 70}ms` }}>
-                  {w}
+            {words.map((w, i) => (
+              <Fragment key={i}>
+                <span className="inline-block overflow-hidden pb-[0.12em] align-top">
+                  <span className="team-word inline-block" style={{ animationDelay: `${150 + i * 70}ms` }}>
+                    {w}
+                  </span>
                 </span>
-                {i < p.name.split(" ").length - 1 ? " " : ""}
-              </span>
+                {i < words.length - 1 ? " " : null}
+              </Fragment>
             ))}
           </h3>
           <p ref={roleEl} className="mt-1 text-[15px] text-lav">
@@ -447,7 +599,7 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
         </div>
       </div>
 
-      {/* the whole team for screen readers and search, regardless of which star is chosen */}
+      {/* the whole team for screen readers and search, whichever star is chosen */}
       <ul className="sr-only">
         {people.map((m) => (
           <li key={m.name}>

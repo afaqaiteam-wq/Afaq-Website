@@ -102,7 +102,7 @@ export function PlanetHorizon({ id, className = "" }: { id: string; className?: 
       {/* the sun, breaking over the edge */}
       <g className="animate-[sunrise-breathe_7s_ease-in-out_infinite]" style={{ transformOrigin: `${cx}px ${top}px` }}>
         <circle cx={cx} cy={top} r="150" fill="#a67bff" opacity="0.35" filter={`url(#${u("glow")})`} />
-        <rect x={cx - 560} y={top - 1.5} width="1120" height="3" fill={`url(#${u("streak")})`} opacity="0.75" />
+        <rect x={cx - 60} y={top - 1} width="120" height="2" fill={`url(#${u("streak")})`} opacity="0.6" />
         <circle cx={cx} cy={top} r="34" fill={`url(#${u("sun")})`} />
       </g>
     </svg>
