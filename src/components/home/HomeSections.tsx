@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { CopyEmail } from "@/components/contact/CopyEmail";
 import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
+import { LivePlanet } from "@/components/ui/LivePlanet";
 import { PlanetHorizon } from "@/components/ui/PlanetHorizon";
 import { ToolPill } from "@/components/ui/ToolPill";
 import { aboutContent } from "@/content/about";
@@ -312,7 +313,9 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(1px_1px_at_14%_22%,rgba(255,255,255,.5),transparent),radial-gradient(1px_1px_at_31%_64%,rgba(255,255,255,.3),transparent),radial-gradient(1.5px_1.5px_at_47%_12%,rgba(226,214,255,.45),transparent),radial-gradient(1px_1px_at_68%_38%,rgba(255,255,255,.35),transparent),radial-gradient(1px_1px_at_86%_18%,rgba(255,255,255,.4),transparent),radial-gradient(1px_1px_at_92%_58%,rgba(255,255,255,.25),transparent),radial-gradient(1px_1px_at_6%_52%,rgba(255,255,255,.3),transparent)] bg-[length:520px_420px] opacity-70"
             />
-            <PlanetHorizon id="home-planet" className="absolute inset-x-0 bottom-0 h-[150px] w-full lg:h-[230px]" />
+            <LivePlanet className="absolute inset-x-0 bottom-0 h-[220px] lg:h-[340px]">
+              <PlanetHorizon id="home-planet" className="block h-[150px] w-full lg:h-[230px]" />
+            </LivePlanet>
             <h2 className="relative max-w-[16em] font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.04] tracking-[-0.035em]">
               {home.closingTitle} <span className="block"><AccentText text={home.closingTitleAccent} /></span>
             </h2>
