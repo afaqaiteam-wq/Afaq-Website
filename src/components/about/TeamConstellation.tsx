@@ -6,25 +6,26 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import type { Person } from "@/content/about";
 
 /*
- * The team as a star map. The A of the logo hangs in 3D among a cloud of faint stars: it
- * assembles out of the dark when it comes into view, sways slowly and turns toward the
- * pointer. Each person is one of its stars. Choosing a star changes the portrait with a
- * liquid WebGL dissolve (a violet edge of light runs through the image); the name rises
- * word by word and the role decodes into place.
+ * The team as a star map. The A of the logo hangs among a 3D cloud of faint stars: it
+ * assembles out of the dark when it comes into view, then floats while the cloud turns
+ * slowly around it and toward the pointer. Each person is one of its stars. Choosing a
+ * star brings in the next portrait through a soft, feathered edge that rises up the frame
+ * (WebGL); the name rises word by word and the role decodes into place.
  */
 
-// The logo's A in logo units, given a little depth so it reads as a figure in space.
+// The logo's A in logo units. It stays flat and upright so the letter never warps; the depth
+// comes from the cloud of stars turning around it.
 const NODES: readonly (readonly [number, number, number])[] = [
   [0, -0.36, 0],
-  [-0.1, -0.18, 0.04],
-  [-0.2, 0.01, -0.05],
-  [-0.34, 0.26, 0.06],
-  [-0.19, 0.2, -0.07],
-  [0, -0.05, 0.1],
-  [0.19, 0.2, -0.04],
-  [0.34, 0.26, 0.05],
-  [0.2, 0.01, -0.06],
-  [0.1, -0.18, 0.03],
+  [-0.1, -0.18, 0],
+  [-0.2, 0.01, 0],
+  [-0.34, 0.26, 0],
+  [-0.19, 0.2, 0],
+  [0, -0.05, 0],
+  [0.19, 0.2, 0],
+  [0.34, 0.26, 0],
+  [0.2, 0.01, 0],
+  [0.1, -0.18, 0],
 ];
 const EDGES: readonly (readonly [number, number])[] = [
   [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 0],
@@ -65,11 +66,18 @@ function createSky(box: HTMLDivElement, canvas: HTMLCanvasElement, buttons: (HTM
   let raf = 0;
   let running = false;
   const view = { yaw: 0, pitch: 0, ty: 0, tp: 0 };
+  let drift = 0;
   const ring = { t0: 0 };
 
-  function project(x: number, y: number, z: number, W: number, H: number, S: number) {
-    const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw);
-    const cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
+  // the cloud turns with the view; the A itself (rigid) only drifts a little, never rotates
+  function project(x: number, y: number, z: number, W: number, H: number, S: number, rigid = false) {
+    const yaw = rigid ? 0 : view.yaw, pitch = rigid ? 0 : view.pitch;
+    if (rigid) {
+      x += view.yaw * 0.03;
+      y += drift - view.pitch * 0.03;
+    }
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
     const x1 = x * cy - z * sy;
     const z1 = x * sy + z * cy;
     const y1 = (y + 0.05) * cp - z1 * sp;
@@ -93,7 +101,8 @@ function createSky(box: HTMLDivElement, canvas: HTMLCanvasElement, buttons: (HTM
     const S = Math.min(W / (W < 440 ? 1.12 : 0.9), H / 0.8);
 
     // a slow sway, nudged toward the pointer
-    const sway = reduced ? 0 : Math.sin(t * 0.22) * 0.2;
+    const sway = reduced ? 0 : Math.sin(t * 0.22) * 0.35;
+    drift = reduced ? 0 : Math.sin(t * 0.6) * 0.008;
     const nod = reduced ? 0 : Math.sin(t * 0.17) * 0.06;
     view.yaw += (sway + view.ty - view.yaw) * 0.05;
     view.pitch += (nod + view.tp - view.pitch) * 0.05;
@@ -103,7 +112,7 @@ function createSky(box: HTMLDivElement, canvas: HTMLCanvasElement, buttons: (HTM
     const pos = NODES.map((n, i) => {
       const k = prog[i];
       const s = starts[i];
-      return project(s[0] + (n[0] - s[0]) * k, s[1] + (n[1] - s[1]) * k, s[2] + (n[2] - s[2]) * k, W, H, S);
+      return project(s[0] + (n[0] - s[0]) * k, s[1] + (n[1] - s[1]) * k, s[2] + (n[2] - s[2]) * k, W, H, S, true);
     });
 
     ctx.globalCompositeOperation = "lighter";
@@ -225,25 +234,23 @@ function createSky(box: HTMLDivElement, canvas: HTMLCanvasElement, buttons: (HTM
   };
 }
 
-/* ───────────── the portrait: a liquid WebGL dissolve between photos ───────────── */
+/* ───────────── the portrait: a soft rising reveal between photos (WebGL) ───────────── */
 
 const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
 const FRAG = `precision highp float;varying vec2 v;uniform sampler2D u0,u1;uniform vec2 res,s0,s1;uniform float p,t,z;uniform vec2 m;
-float h(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
-float no(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-float fb(vec2 q){float a=.5,r=0.;for(int i=0;i<5;i++){r+=a*no(q);q*=2.03;a*=.5;}return r;}
 vec2 cov(vec2 uv,vec2 s){float rs=res.x/res.y,ri=s.x/s.y;vec2 k=rs<ri?vec2(rs/ri,1.):vec2(1.,ri/rs);vec2 o=vec2((1.-k.x)*.5,(1.-k.y)*.76);return clamp(uv*k+o,0.,1.);}
-void main(){vec2 uv=v;vec2 c=(uv-.5)*(1.-.04*z)+.5+m*.01;
-  float n=fb(uv*2.6+vec2(0.,t*.05));
-  float d=n*.62+uv.y*.38;float th=p*1.32-.16;
-  float w=1.-smoothstep(th-.05,th+.05,d);
-  vec2 dp=vec2(n-.5)*.22;
-  vec4 a=texture2D(u0,cov(c+dp*p,s0));
-  float sh=.006*(1.-p);
-  vec2 c1=c-dp*(1.-p);
-  vec3 b=vec3(texture2D(u1,cov(c1-vec2(sh,0.),s1)).r,texture2D(u1,cov(c1,s1)).g,texture2D(u1,cov(c1+vec2(sh,0.),s1)).b);
-  float e=clamp(1.-abs(d-th)/.06,0.,1.)*step(.001,p)*step(p,.999);
-  vec3 col=mix(a.rgb,b,w)+vec3(.62,.42,1.)*pow(e,2.2)*1.35;
+void main(){vec2 uv=v;
+  // the current photo drifts in slowly and steps back as the next one arrives;
+  // the next one settles from a slight zoom. Faces are never bent.
+  vec2 c0=(uv-.5)*(1.-.04*z)*(1.-.05*p)+.5+m*.01;
+  vec2 c1=(uv-.5)*(1.-.07*(1.-p))+.5+m*.01;
+  vec3 a=texture2D(u0,cov(c0,s0)).rgb*(1.-.6*p);
+  vec3 b=texture2D(u1,cov(c1,s1)).rgb;
+  // a soft, feathered edge rises through the frame, carrying a faint line of light
+  float edge=p*1.5-.25;
+  float w=1.-smoothstep(edge-.2,edge+.2,uv.y);
+  vec3 col=mix(a,b,w);
+  col+=vec3(.78,.66,1.)*exp(-pow((uv.y-edge)/.05,2.))*sin(3.14159*p)*.16;
   gl_FragColor=vec4(col,1.);}`;
 
 function createPortrait(canvas: HTMLCanvasElement, imgs: HTMLImageElement[], onReady: () => void) {
@@ -303,7 +310,7 @@ function createPortrait(canvas: HTMLCanvasElement, imgs: HTMLImageElement[], onR
   const draw = (now: number) => {
     if (!tex[cur] || !tex[nxt]) return;
     if (t0) {
-      p = clamp((now - t0) / 1500);
+      p = clamp((now - t0) / 1300);
       if (p >= 1) {
         cur = nxt;
         p = 0;

@@ -15,6 +15,7 @@ import {
   easeOutCubic,
   lerp,
   sceneIndex,
+  STORY_END,
   sstep,
 } from "./timeline";
 
@@ -146,7 +147,7 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     const target = clamp((window.scrollY - storyTop) / scrollable);
     state.p =
       reduced || Math.abs(target - state.p) > 0.2 ? target : state.p + (target - state.p) * (1 - Math.exp(-dt * 5.5));
-    const p = state.p;
+    const p = state.p * STORY_END;
     state.mx += (state.tmx - state.mx) * 0.06;
     state.my += (state.tmy - state.my) * 0.06;
     if (window.scrollY > storyTop + scrollable + H) return; // hero is off screen
@@ -157,8 +158,7 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     const edge = Math.max(56, (W - 1440) / 2 + 56);
     const span = W - 2 * edge;
     const c2 = wide ? { x: rtl ? edge + span * 0.3 : W - edge - span * 0.3, y: H * 0.52 } : c1;
-    // the logo comes home to the upper part of the screen; the work section rises beneath it
-    const c4 = { x: W / 2, y: H * (wide ? 0.33 : 0.28) };
+    const c4 = { x: W / 2, y: H * (wide ? 0.38 : 0.3) };
     const move = easeInOutCubic(at(T.logoToSide, p));
     const home = easeInOutCubic(at(T.logoCenter, p));
     const sys = lerp(lerp(1, wide ? 0.86 : 0.94, move), 1, home);
@@ -357,11 +357,10 @@ export function startHero(el: HeroElements, { rtl }: { rtl: boolean }) {
     });
 
     // ---- copy ----
-    const [p1, p2, p3, p4] = el.panels;
+    const [p1, p2, p3] = el.panels;
     drivePanel(p1, state.introText, at(T.introOut, p));
     drivePanel(p2, at(T.stackIn, p), at(T.stackOut, p));
     drivePanel(p3, at(T.servicesIn, p), at(T.servicesOut, p));
-    drivePanel(p4, at(T.finaleIn, p), 0);
     if (el.hint) el.hint.style.opacity = (state.introText * (1 - at([0.005, 0.04], p))).toFixed(3);
     const scene = sceneIndex(p);
     if (scene !== lastScene) {

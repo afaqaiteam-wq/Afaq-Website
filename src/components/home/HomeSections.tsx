@@ -73,9 +73,9 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
 
   return (
     <>
-      {/* the horizon: where the story ends and the page begins. Pulled up into the last of the
-          pinned intro, so the work rises under the returning logo instead of after an empty screen. */}
-      <div className={`${shell} relative -mt-[38svh]`}>
+      {/* the horizon: where the story ends and the page begins. Pulled up over the empty foot
+          of the intro's last scene so the work follows it without a gap. */}
+      <div className={`${shell} relative -mt-[10svh] min-[1100px]:-mt-[24svh]`}>
         <div
           data-reveal="line"
           aria-hidden="true"

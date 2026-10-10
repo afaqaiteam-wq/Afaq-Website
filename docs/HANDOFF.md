@@ -43,12 +43,12 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - **Phones:**
   - The header shows only the logo and the menu. The old `hidden sm:inline-flex` lost to the Button's own `inline-flex`; now `max-sm:hidden`.
   - The menu is solid and has the email, the language switch and the CTA. Safe areas are handled (`viewportFit: cover`).
-  - The home hero is `330vh` on phones only; the intro is untouched.
+  - The home hero is `265vh` on phones and `340vh` from `sm` up. It ends on the constellation scene, held (`STORY_END` in `timeline.ts`); the old finale (logo return and its call to action) is gone.
   - The work screenshots use `*-mobile.webp` detail crops, with a `ZoomImage` lightbox.
   - Services has sticky `ServiceChips`.
   - About shows the team in two columns (the fifth card centred).
   - The footer is two columns with 44px links.
-- **Home order:** hero (its finale is the logo alone, and the work section rises under it; the only call to action is the closing card) → selected work (one lead project with a readable detail crop, then the other two) → services as a grid of cards (the first two large, with their tools) → a team band (founder quote, the other five as avatars, link to About) → closing card (book a call, copy email) over a live WebGL planet (`src/components/ui/LivePlanet.tsx`, with `PlanetHorizon.tsx` as the static fallback). "How we work" now lives only on /services.
+- **Home order:** hero (ends on the six-stars constellation; the only call to action is the closing card) → selected work (one lead project with a readable detail crop, then the other two) → services as a grid of cards (the first two large, with their tools) → a team band (founder quote, the other five as avatars, link to About) → closing card (book a call, copy email) over a live WebGL planet (`src/components/ui/LivePlanet.tsx`, with `PlanetHorizon.tsx` as the static fallback). "How we work" now lives only on /services.
 - **Contact:** an accent title line, equal cards, one primary (Book a call), and Copy email.
 - **Team titles:** Mohamed Alaa is now "Creative & Video Lead", and Mohamed Ragab is "Social Media & Growth Lead". The founder photo is intentionally different.
 - **Every page** now has the share image and the brand in og:title. The 404 language switch goes to the other home.

@@ -53,8 +53,16 @@ export const T = {
 
 export const at = (w: Window, p: number) => sstep(w[0], w[1], p);
 
+/**
+ * The story ends on the constellation (scene 3), fully lit and held while the page scrolls
+ * on. Scroll progress is scaled into [0, STORY_END], so the windows from `servicesOut`
+ * onward (the old finale: the A collapsing into the logo and the logo returning) are
+ * never reached.
+ */
+export const STORY_END = 0.71;
+
 /** Crossing one of these (in either direction) sends a short warp pulse through the starfield. */
 export const WARP_GATES = [0.07, 0.4, 0.82];
 
-/** Which of the four scenes `p` is in, for the progress dots. */
-export const sceneIndex = (p: number) => (p < 0.15 ? 0 : p < 0.4 ? 1 : p < 0.8 ? 2 : 3);
+/** Which of the three scenes `p` is in, for the progress dots. */
+export const sceneIndex = (p: number) => (p < 0.15 ? 0 : p < 0.4 ? 1 : 2);
