@@ -26,6 +26,17 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - `src/components/motion/PageTransition.tsx` is a React `<ViewTransition>` keyed by pathname and wraps the page in the layout. The CSS lives in globals.css (`page-exit` / `page-enter`). The navbar has `view-transition-name: site-header`, so it stays fixed during the transition. Reduced motion turns it off.
 - `SmoothScroll` now scrolls every new page to the top. Lenis used to keep the old scroll position. Back/forward and `#hash` links are left to the browser.
 
+## Arabic copy (October 2026, done)
+- **Full review:** every Arabic string was reviewed against its English. The fixes were wording only: literal translations ("حول عملك", "حيث يهم", "واجهة ترحيب", "قيمة أسرع"), a verb repeated in the contact title and lead, "أيها" reading as a vocative in the services closing title, "العلامة" without "التجارية", and "السوشيال ميديا" in a role.
+- **`npm run check:arabic` (`scripts/check-arabic.mjs`):** run it after any Arabic edit. It checks the Arabic in `ar.ts` and the `ar` blocks of `src/content/*.ts` for:
+  - missing hamzas on common words and ي written for ى;
+  - colloquial words;
+  - Latin punctuation and stray spaces inside Arabic;
+  - unbalanced «»;
+  - English left untranslated (anything not on its allowlist of product and tool names).
+  It exits with 1 on findings. To check other files, pass them as arguments.
+- **Case-study meta descriptions:** made of the one-liner plus whole sentences of the problem, up to about 160 characters, so they never stop mid-sentence.
+
 ## Security and quality audit (October 2026, done)
 - **Next.js:** pinned at 16.3.8, the patched release for the 16.3 line's advisories (image optimizer SSRF, SSG/ISR cache poisoning, metadata image disclosure). `npm audit` now lists only `braces`, which has no patched version. It comes in through `eslint-config-next`, so it's dev tooling and never ships.
 - **Headers (`next.config.ts`):**
@@ -40,7 +51,6 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
   - Prunes its rate-limit map.
 - **Reveals:** the layout's inline script starts them as soon as the page is parsed (production only); `RevealObserver` takes over after hydration. Before, a slow phone showed the first screen only after the app loaded.
 - **Language switch:** no longer prefetched, which removes a 404 from the console on Arabic pages.
-- **Case-study meta descriptions:** cut at about 160 characters.
 - **Crawl result:** 18 pages × 3 widths with no console errors, broken links or images, horizontal overflow, duplicate ids or unnamed controls, and one `h1` per page.
 - **Lighthouse (mobile, local):** accessibility, best practices and SEO are 100 on every page; performance is 78–93.
 

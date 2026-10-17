@@ -23,11 +23,15 @@ export function generateStaticParams() {
   return locales.flatMap((lang) => workSlugs.map((slug) => ({ lang, slug })));
 }
 
-// Search results show about 160 characters, so the description is cut there, at a word.
-function clip(text: string, max = 160) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max - 1);
-  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[\s,،;:.\-—]+$/, "")}…`;
+// Search results show about 160 characters: the one-liner, then whole sentences of the
+// problem for as long as they fit, so the description never stops mid-sentence.
+function describe(lead: string, more: string, max = 160) {
+  let out = lead;
+  for (const sentence of more.split(/(?<=[.!?؟])\s+/)) {
+    if (out.length + 1 + sentence.length > max) break;
+    out += ` ${sentence}`;
+  }
+  return out;
 }
 
 function findProject(lang: string, slug: string) {
@@ -42,7 +46,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/work/[slug
   const found = findProject(lang, slug);
   if (!found) return {};
   const { project: p } = found;
-  return pageMetadata(found.lang, `/work/${p.slug}`, { title: p.name, description: clip(`${p.oneLiner} ${p.problem}`) });
+  return pageMetadata(found.lang, `/work/${p.slug}`, { title: p.name, description: describe(p.oneLiner, p.problem) });
 }
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;

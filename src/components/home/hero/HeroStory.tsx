@@ -53,9 +53,11 @@ interface HeroStoryProps {
   lang: Locale;
   hero: Dictionary["hero"];
   bookCall: string;
+  /** The logo's alt text, in the page's language. */
+  siteName: string;
 }
 
-export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
+export function HeroStory({ lang, hero, bookCall, siteName }: HeroStoryProps) {
   const storyRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const rtl = lang === "ar";
@@ -125,7 +127,7 @@ export function HeroStory({ lang, hero, bookCall }: HeroStoryProps) {
           data-intro
           className="absolute left-1/2 top-[var(--logo-y)] z-[3] size-[var(--logo-size)] -translate-x-1/2 -translate-y-1/2 will-change-[transform,opacity,filter]"
         >
-          <Image src={logo} alt="Afaq AI" fill priority sizes="(min-width: 1100px) 300px, 58vw" className="object-contain" />
+          <Image src={logo} alt={siteName} fill priority sizes="(min-width: 1100px) 300px, 58vw" className="object-contain" />
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 overflow-hidden"

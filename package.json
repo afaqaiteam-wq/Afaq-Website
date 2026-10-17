@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:arabic": "node scripts/check-arabic.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
