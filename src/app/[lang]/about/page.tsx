@@ -133,8 +133,9 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
         </div>
       </section>
 
-      {/* Team: the A of the logo as a constellation, one star per person */}
-      <section className="border-t border-line">
+      {/* Team: the A of the logo as a constellation, one star per person, beside a deck of portraits
+          (clipped sideways so a thrown card never scrolls the page) */}
+      <section className="overflow-x-clip border-t border-line">
         <div className={`${shell} py-24 lg:py-32`}>
           <p data-reveal className="eyebrow">
             {c.team.eyebrow}
@@ -147,7 +148,11 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
             {c.team.title} <span className="block"><AccentText text={c.team.titleAccent} /></span>
           </h2>
 
-          <TeamConstellation people={team} lang={lang} labels={{ quoteOpen: open, quoteClose: close }} />
+          <TeamConstellation
+            people={team}
+            lang={lang}
+            labels={{ quoteOpen: open, quoteClose: close, hint: c.team.hint, prev: c.team.prev, next: c.team.next }}
+          />
         </div>
       </section>
 

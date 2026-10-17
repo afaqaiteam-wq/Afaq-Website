@@ -394,6 +394,52 @@ html.js:not([data-reveal-ready]) [data-reveal="draw"] :is(.draw-x, .draw-y, .dra
     filter: blur(6px);
   }
 }
+/* The deck of portraits: the front photo drifts in slowly, the deck once half-throws its front
+   card to show it can be swiped, and the current segment fills while it turns by itself.
+   --fwd is -1 in English (cards leave to the left) and 1 in Arabic. */
+.team-card[data-front] img {
+  animation: team-drift 9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes team-drift {
+  from {
+    scale: 1.08;
+  }
+}
+.team-tease {
+  animation: team-tease 1.6s cubic-bezier(0.45, 0, 0.2, 1) both;
+}
+@keyframes team-tease {
+  40%,
+  55% {
+    translate: calc(var(--fwd) * 18%) 0;
+    rotate: calc(var(--fwd) * 6deg);
+  }
+}
+.team-fill {
+  animation: team-fill 7s linear both;
+}
+@keyframes team-fill {
+  from {
+    scale: 0 1;
+  }
+}
+.team-swipe {
+  animation: team-swipe 2.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+@keyframes team-swipe {
+  0% {
+    opacity: 0;
+    translate: calc(var(--fwd) * -12px) 0;
+  }
+  20%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: calc(var(--fwd) * 12px) 0;
+  }
+}
 
 /* An eyebrow's horizon line draws in after its words arrive. */
 .js .eyebrow[data-reveal]::before {

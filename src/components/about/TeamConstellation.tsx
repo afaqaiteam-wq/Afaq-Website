@@ -1,16 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useEffectEvent, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from "react";
 
 import type { Person } from "@/content/about";
 
 /*
- * The team as a star map. The A of the logo hangs among a 3D cloud of faint stars: it
- * assembles out of the dark when it comes into view, then floats while the cloud turns
- * slowly around it and toward the pointer. Each person is one of its stars. Choosing a
- * star brings in the next portrait through a soft, feathered edge that rises up the frame
- * (WebGL); the name rises word by word and the role decodes into place.
+ * The team as a star map beside a deck of portraits. The A of the logo hangs among a 3D cloud
+ * of faint stars: it assembles out of the dark when it comes into view, then floats while the
+ * cloud turns slowly around it and toward the pointer. Each person is one of its stars.
+ * The portraits are a deck: the next two peek out from behind the front one, so it reads as
+ * something to swipe. Throw the front card (touch or mouse) and the next comes forward; until
+ * the visitor takes over, the deck turns by itself. Choosing a star brings its person forward.
  */
 
 // The logo's A in logo units. It stays flat and upright so the letter never warps; the depth
@@ -38,7 +39,8 @@ const SEATS_RTL = [0, 8, 2, 5, 7, 3];
 type Side = "up" | "down" | "start" | "end";
 const LABEL: Record<number, Side> = { 0: "up", 2: "start", 8: "end", 5: "up", 3: "down", 7: "down" };
 
-const GLYPHS = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي0123456789";
+// the role decodes out of letters of its own script
+const GLYPHS = { ar: "ابتثجحخدذرزسشصضطظعغفقكلمنهوي0123456789", en: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" };
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
@@ -234,222 +236,125 @@ function createSky(box: HTMLDivElement, canvas: HTMLCanvasElement, buttons: (HTM
   };
 }
 
-/* ───────────── the portrait: a soft rising reveal between photos (WebGL) ───────────── */
+/* ───────────── the deck of portraits ───────────── */
 
-const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
-const FRAG = `precision highp float;varying vec2 v;uniform sampler2D u0,u1;uniform vec2 res,s0,s1;uniform float p,t,z;uniform vec2 m;
-vec2 cov(vec2 uv,vec2 s){float rs=res.x/res.y,ri=s.x/s.y;vec2 k=rs<ri?vec2(rs/ri,1.):vec2(1.,ri/rs);vec2 o=vec2((1.-k.x)*.5,(1.-k.y)*.76);return clamp(uv*k+o,0.,1.);}
-void main(){vec2 uv=v;
-  // the current photo drifts in slowly and steps back as the next one arrives;
-  // the next one settles from a slight zoom. Faces are never bent.
-  vec2 c0=(uv-.5)*(1.-.04*z)*(1.-.05*p)+.5+m*.01;
-  vec2 c1=(uv-.5)*(1.-.07*(1.-p))+.5+m*.01;
-  vec3 a=texture2D(u0,cov(c0,s0)).rgb*(1.-.6*p);
-  vec3 b=texture2D(u1,cov(c1,s1)).rgb;
-  // a soft, feathered edge rises through the frame, carrying a faint line of light
-  float edge=p*1.5-.25;
-  float w=1.-smoothstep(edge-.2,edge+.2,uv.y);
-  vec3 col=mix(a,b,w);
-  col+=vec3(.78,.66,1.)*exp(-pow((uv.y-edge)/.05,2.))*sin(3.14159*p)*.16;
-  gl_FragColor=vec4(col,1.);}`;
+// how long each person stays in front while the deck turns by itself
+const AUTO_MS = 7000;
+const MOVE = "transform 700ms cubic-bezier(0.22,1,0.36,1), opacity 500ms ease";
+const THROW = "transform 650ms cubic-bezier(0.2,0.8,0.3,1), opacity 420ms ease 140ms";
 
-function createPortrait(canvas: HTMLCanvasElement, imgs: HTMLImageElement[], onReady: () => void) {
-  const gl = canvas.getContext("webgl", { antialias: true });
-  if (!gl) return null;
-  const sh = (type: number, src: string) => {
-    const s = gl.createShader(type)!;
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
-  };
-  const vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return null;
-  const prog = gl.createProgram()!;
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
-  gl.useProgram(prog);
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  const al = gl.getAttribLocation(prog, "a");
-  gl.enableVertexAttribArray(al);
-  gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-  const U: Record<string, WebGLUniformLocation | null> = {};
-  ["u0", "u1", "res", "s0", "s1", "p", "t", "z", "m"].forEach((k) => (U[k] = gl.getUniformLocation(prog, k)));
-  gl.uniform1i(U.u0, 0);
-  gl.uniform1i(U.u1, 1);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+type Pose = { transform: string; opacity: number; z: number; dim: string };
 
-  const tex: (WebGLTexture | null)[] = imgs.map(() => null);
-  const upload = (i: number) => {
-    const im = imgs[i];
-    if (!im.complete || !im.naturalWidth) return false;
-    const t = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    tex[i] = t;
-    return true;
-  };
+// `rel` is how far a card sits behind the front one. `fan` is the side the deck opens toward
+// (the end of the line: right in English, left in Arabic). While a card is dragged, --dx moves
+// the front one and --pull draws the next one forward; both live on the deck, so no re-render.
+function pose(rel: number, fan: number, dealt: boolean): Pose {
+  if (rel === 0)
+    return {
+      transform: "translate3d(calc(var(--dx,0) * 1px),0,0) rotate(calc(var(--dx,0) * 0.045deg)) scale(1)",
+      opacity: 1,
+      z: 30,
+      dim: "0",
+    };
+  if (!dealt) return { transform: "translate3d(0,0,0) rotate(0deg) scale(0.96)", opacity: rel < 3 ? 1 : 0, z: 30 - rel * 10, dim: "0.6" };
+  if (rel === 1)
+    return {
+      transform: `translate3d(calc(${10 * fan}% * (1 - var(--pull,0))),calc(-3% * (1 - var(--pull,0))),0) rotate(calc(${5 * fan}deg * (1 - var(--pull,0)))) scale(calc(0.93 + 0.07 * var(--pull,0)))`,
+      opacity: 1,
+      z: 20,
+      dim: "calc(0.3 * (1 - var(--pull,0)))",
+    };
+  if (rel === 2) return { transform: `translate3d(${19 * fan}%,-5%,0) rotate(${9 * fan}deg) scale(0.86)`, opacity: 1, z: 10, dim: "0.5" };
+  return { transform: `translate3d(${23 * fan}%,-7%,0) rotate(${12 * fan}deg) scale(0.8)`, opacity: 0, z: 0, dim: "0.7" };
+}
+const away = (dir: number): Pose => ({
+  transform: `translate3d(${dir * 125}%,-6%,0) rotate(${dir * 16}deg) scale(0.96)`,
+  opacity: 0,
+  z: 40,
+  dim: "0",
+});
 
-  let cur = 0, nxt = 0, p = 0, z = 0, t0 = 0, zt0 = 0, raf = 0, running = false;
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  let pending: number | null = null;
-
-  const size = () => {
-    const r = canvas.getBoundingClientRect();
-    const d = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(r.width * d);
-    canvas.height = Math.round(r.height * d);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  };
-  const draw = (now: number) => {
-    if (!tex[cur] || !tex[nxt]) return;
-    if (t0) {
-      p = clamp((now - t0) / 1300);
-      if (p >= 1) {
-        cur = nxt;
-        p = 0;
-        t0 = 0;
-        zt0 = now;
-        if (pending != null) {
-          const q = pending;
-          pending = null;
-          go(q);
-        }
-      }
-    }
-    z = reduced ? 0 : clamp((now - zt0) / 8000);
-    mouse.x += (mouse.tx - mouse.x) * 0.06;
-    mouse.y += (mouse.ty - mouse.y) * 0.06;
-    gl.uniform2f(U.res, canvas.width, canvas.height);
-    gl.uniform2f(U.s0, imgs[cur].naturalWidth, imgs[cur].naturalHeight);
-    gl.uniform2f(U.s1, imgs[nxt].naturalWidth, imgs[nxt].naturalHeight);
-    gl.uniform1f(U.p, ease(p));
-    gl.uniform1f(U.t, now / 1000);
-    gl.uniform1f(U.z, ease(z));
-    gl.uniform2f(U.m, mouse.x, mouse.y);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, tex[cur]);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, tex[nxt]);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  };
-  const loop = (now: number) => {
-    draw(now);
-    if (running) raf = requestAnimationFrame(loop);
-  };
-  function go(k: number) {
-    if (!tex[k] && !upload(k)) return false;
-    if (t0) {
-      pending = k;
-      return true;
-    }
-    if (k === cur) return true;
-    nxt = k;
-    if (reduced) {
-      cur = k;
-      draw(performance.now());
-      return true;
-    }
-    t0 = performance.now();
-    return true;
-  }
-
-  // textures as the photos arrive; the canvas takes over once the first one is in
-  let ready = false;
-  const tryAll = () => {
-    imgs.forEach((_, i) => {
-      if (!tex[i]) upload(i);
-    });
-    if (!ready && tex[0]) {
-      ready = true;
-      size();
-      draw(performance.now());
-      onReady();
-    }
-  };
-  imgs.forEach((im) => im.addEventListener("load", tryAll));
-  tryAll();
-  const ro = new ResizeObserver(() => {
-    if (ready) {
-      size();
-      draw(performance.now());
-    }
-  });
-  ro.observe(canvas);
-
-  return {
-    go,
-    pointer(x: number, y: number) {
-      mouse.tx = x;
-      mouse.ty = y;
-    },
-    start() {
-      if (!running) {
-        running = true;
-        raf = requestAnimationFrame(loop);
-      }
-    },
-    stop() {
-      running = false;
-      cancelAnimationFrame(raf);
-    },
-    destroy() {
-      running = false;
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      imgs.forEach((im) => im.removeEventListener("load", tryAll));
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-    },
-  };
+function Chevron({ back = false }: { back?: boolean }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="rtl:-scale-x-100"
+    >
+      <path d={back ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"} />
+    </svg>
+  );
 }
 
 /* ───────────── the component ───────────── */
 
-export function TeamConstellation({ people, lang, labels }: { people: Person[]; lang: string; labels: { quoteOpen: string; quoteClose: string } }) {
+type Labels = { quoteOpen: string; quoteClose: string; hint: { touch: string; pointer: string }; prev: string; next: string };
+
+export function TeamConstellation({ people, lang, labels }: { people: Person[]; lang: string; labels: Labels }) {
   const rtl = lang === "ar";
   const seats = rtl ? SEATS_RTL : SEATS_LTR;
   const sep = rtl ? "، " : ", ";
+  const n = people.length;
+  // moving forward throws the card toward the start of the line; the deck fans toward the end
+  const fwd = rtl ? 1 : -1;
+  const fan = -fwd;
+
   const [active, setActive] = useState(0);
-  const [glReady, setGlReady] = useState(false);
+  const [thrown, setThrown] = useState<{ i: number; dir: number } | null>(null);
+  const [entering, setEntering] = useState(-1);
+  const [dealt, setDealt] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [hover, setHover] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const [tease, setTease] = useState(false);
 
   const stage = useRef<HTMLDivElement>(null);
   const skyBox = useRef<HTMLDivElement>(null);
   const skyCanvas = useRef<HTMLCanvasElement>(null);
   const stars = useRef<(HTMLButtonElement | null)[]>([]);
-  const frameEl = useRef<HTMLDivElement>(null);
-  const glCanvas = useRef<HTMLCanvasElement>(null);
+  const deck = useRef<HTMLDivElement>(null);
   const roleEl = useRef<HTMLParagraphElement>(null);
   const sky = useRef<ReturnType<typeof createSky> | null>(null);
-  const portrait = useRef<ReturnType<typeof createPortrait>>(null);
+  const activeRef = useRef(0);
+  const throwTimer = useRef(0);
   const hoverTimer = useRef(0);
+  const drag = useRef({ id: -1, x: 0, y: 0, dx: 0, lx: 0, t: 0, v: 0, axis: "" as "" | "x" | "y" });
 
-  const choose = (k: number) => {
+  // bring person k to the front: the next one by throwing the front card away, the previous one
+  // by bringing its card back in from the side it left by, anyone else up from the back of the deck
+  const goTo = (k: number, o: { dir?: number; user?: boolean } = {}) => {
+    if (o.user) setTouched(true);
+    const cur = activeRef.current;
+    if (k === cur) return;
+    if (!o.dir && k === (cur - 1 + n) % n) {
+      setEntering(k);
+      requestAnimationFrame(() => requestAnimationFrame(() => setEntering(-1)));
+    } else {
+      setThrown({ i: cur, dir: o.dir ?? fwd });
+      window.clearTimeout(throwTimer.current);
+      throwTimer.current = window.setTimeout(() => setThrown(null), 800);
+    }
+    activeRef.current = k;
     setActive(k);
     sky.current?.setActive(k);
-    portrait.current?.go(k);
   };
+  const next = (user = true) => goTo((activeRef.current + 1) % n, { user });
+  const prev = () => goTo((activeRef.current - 1 + n) % n, { user: true });
 
   useEffect(() => {
     const seatsNow = lang === "ar" ? SEATS_RTL : SEATS_LTR;
     sky.current = createSky(skyBox.current!, skyCanvas.current!, stars.current, seatsNow);
-    const imgs = [...frameEl.current!.querySelectorAll<HTMLImageElement>("img[data-face]")];
-    portrait.current = createPortrait(glCanvas.current!, imgs, () => setGlReady(true));
-
     const io = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) {
-          sky.current?.start();
-          portrait.current?.start();
-        } else {
-          sky.current?.stop();
-          portrait.current?.stop();
-        }
+        if (e.isIntersecting) sky.current?.start();
+        else sky.current?.stop();
       },
       { threshold: 0.15 },
     );
@@ -457,15 +362,50 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
     return () => {
       io.disconnect();
       sky.current?.destroy();
-      portrait.current?.destroy();
     };
   }, [lang]);
+
+  // the deck deals itself out the first time it's in view, then once teases a swipe
+  const teaseOnce = useEffectEvent(() => {
+    if (!touched) setTease(true);
+  });
+  useEffect(() => {
+    let dealtYet = false;
+    let t = 0;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        const vis = e.intersectionRatio >= 0.5;
+        setInView(vis);
+        if (vis && !dealtYet) {
+          dealtYet = true;
+          setDealt(true);
+          if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) t = window.setTimeout(teaseOnce, 1300);
+        }
+      },
+      { threshold: [0, 0.5] },
+    );
+    io.observe(deck.current!);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(t);
+    };
+  }, []);
+
+  // until the visitor takes over, the deck turns by itself while it's in view and not under the pointer
+  const running = !touched && inView && !hover;
+  const advance = useEffectEvent(() => next(false));
+  useEffect(() => {
+    if (!running || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setTimeout(advance, AUTO_MS);
+    return () => window.clearTimeout(id);
+  }, [active, running]);
 
   // the role decodes into place, like a model writing it
   useEffect(() => {
     const el = roleEl.current;
     if (!el) return;
     const text = people[active].role;
+    const glyphs = lang === "ar" ? GLYPHS.ar : GLYPHS.en;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       el.textContent = text;
       return;
@@ -474,77 +414,100 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
     const t0 = performance.now();
     const step = (now: number) => {
       const k = Math.min(1, (now - t0) / 850);
-      const n = Math.floor(k * text.length);
-      let out = text.slice(0, n);
-      for (let i = n; i < text.length; i++) out += text[i] === " " ? " " : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      const m = Math.floor(k * text.length);
+      let out = text.slice(0, m);
+      for (let i = m; i < text.length; i++) out += text[i] === " " ? " " : glyphs[(Math.random() * glyphs.length) | 0];
       el.textContent = out;
       if (k < 1) id = requestAnimationFrame(step);
     };
     id = requestAnimationFrame(step);
     return () => cancelAnimationFrame(id);
-  }, [active, people]);
+  }, [active, people, lang]);
+
+  /* dragging: the front card follows the finger or mouse and tilts; let go past a quarter of its
+     width (or with a flick) and it's thrown, otherwise it settles back. A tap brings the next one. */
+  const setDx = (el: HTMLElement, dx: number) => {
+    el.style.setProperty("--dx", dx.toFixed(1));
+    el.style.setProperty("--pull", Math.min(1, Math.abs(dx) / (el.offsetWidth * 0.6)).toFixed(3));
+  };
+  const tilt = (el: HTMLElement, x: number, y: number) => {
+    el.style.setProperty("--ry", (x * 8).toFixed(2));
+    el.style.setProperty("--rx", (-y * 6).toFixed(2));
+    el.style.setProperty("--gx", `${((x + 0.5) * 100).toFixed(1)}%`);
+    el.style.setProperty("--gy", `${((y + 0.5) * 100).toFixed(1)}%`);
+  };
+  const onDown = (e: RPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, lx: e.clientX, t: e.timeStamp, v: 0, axis: "" };
+  };
+  const onMove = (e: RPointerEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const s = drag.current;
+    if (s.id !== e.pointerId) {
+      if (e.pointerType === "mouse") {
+        const r = el.getBoundingClientRect();
+        tilt(el, (e.clientX - r.left) / r.width - 0.5, (e.clientY - r.top) / r.height - 0.5);
+      }
+      return;
+    }
+    const dx = e.clientX - s.x;
+    const dy = e.clientY - s.y;
+    if (!s.axis) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+        s.axis = "x";
+        el.setPointerCapture(e.pointerId);
+        el.dataset.drag = "";
+        tilt(el, 0, 0);
+        setTouched(true);
+        setTease(false);
+      } else if (Math.abs(dy) > 8) {
+        s.axis = "y";
+      }
+      if (s.axis !== "x") return;
+    }
+    if (s.axis !== "x") return;
+    const dt = e.timeStamp - s.t;
+    if (dt > 0) s.v = ((e.clientX - s.lx) / dt) * 0.6 + s.v * 0.4;
+    s.lx = e.clientX;
+    s.t = e.timeStamp;
+    s.dx = dx;
+    setDx(el, dx);
+  };
+  const onUp = (e: RPointerEvent<HTMLDivElement>) => {
+    const s = drag.current;
+    if (s.id !== e.pointerId) return;
+    s.id = -1;
+    const el = e.currentTarget;
+    if (s.axis === "x") {
+      delete el.dataset.drag;
+      const thrownAway = Math.abs(s.dx) > el.offsetWidth * 0.25 || (Math.abs(s.v) > 0.45 && Math.abs(s.dx) > 24);
+      setDx(el, 0);
+      if (thrownAway) goTo((activeRef.current + 1) % n, { dir: s.dx < 0 ? -1 : 1, user: true });
+    } else if (!s.axis) {
+      next();
+    }
+  };
+  const onCancel = (e: RPointerEvent<HTMLDivElement>) => {
+    const s = drag.current;
+    if (s.id !== e.pointerId) return;
+    s.id = -1;
+    if (s.axis === "x") {
+      delete e.currentTarget.dataset.drag;
+      setDx(e.currentTarget, 0);
+    }
+  };
 
   const p = people[active];
   const words = p.name.split(" ");
 
   return (
-    <div ref={stage} className="relative mt-14 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:items-center lg:gap-12">
-      {/* the portrait, leaning gently toward the pointer */}
-      <div className="[perspective:1400px] lg:order-2 lg:col-span-7">
-        <div
-          onPointerMove={(e) => {
-            if (e.pointerType !== "mouse") return;
-            const r = e.currentTarget.getBoundingClientRect();
-            const x = (e.clientX - r.left) / r.width - 0.5;
-            const y = (e.clientY - r.top) / r.height - 0.5;
-            e.currentTarget.style.transform = `rotateY(${(x * 8).toFixed(2)}deg) rotateX(${(-y * 6).toFixed(2)}deg)`;
-            e.currentTarget.style.setProperty("--gx", `${(x + 0.5) * 100}%`);
-            e.currentTarget.style.setProperty("--gy", `${(y + 0.5) * 100}%`);
-            portrait.current?.pointer(x, -y);
-          }}
-          onPointerLeave={(e) => {
-            e.currentTarget.style.transform = "";
-            portrait.current?.pointer(0, 0);
-          }}
-          className="relative mx-auto w-full max-w-[520px] transition-transform duration-700 ease-out motion-reduce:transition-none"
-        >
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-y-10 inset-x-0 -z-10 rounded-[60px] sm:-inset-x-10 bg-[radial-gradient(60%_55%_at_50%_60%,rgb(124_77_255/0.42),transparent_72%)] blur-2xl"
-          />
-          <div ref={frameEl} className="relative aspect-[4/5] overflow-hidden rounded-[28px] border border-lav/25 bg-surface">
-            {people.map((m, i) => (
-              <div key={m.name} className={`absolute inset-0 transition-opacity duration-700 ${i === active ? "opacity-100" : "opacity-0"}`}>
-                <Image
-                  data-face=""
-                  src={m.photo}
-                  alt={m.name}
-                  fill
-                  priority={i === 0}
-                  loading={i === 0 ? undefined : "eager"}
-                  sizes="(min-width: 1024px) 520px, 100vw"
-                  className="object-cover object-[50%_24%]"
-                />
-              </div>
-            ))}
-            <canvas
-              ref={glCanvas}
-              aria-hidden="true"
-              className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${glReady ? "opacity-100" : "opacity-0"}`}
-            />
-            {/* a soft glare that follows the pointer, and a dusk at the foot of the photo */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(420px_circle_at_var(--gx,50%)_var(--gy,30%),rgb(255_255_255/0.1),transparent_60%)] mix-blend-screen"
-            />
-            <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_62%,rgb(7_6_11/0.5))]" />
-          </div>
-        </div>
-      </div>
-
-      {/* the star map and the words */}
-      <div className="min-w-0 lg:order-1 lg:col-span-5">
-        <div ref={skyBox} dir="ltr" className="relative mx-auto aspect-square w-full max-w-[480px] touch-pan-y overflow-hidden">
+    <div
+      ref={stage}
+      className="relative mt-14 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:items-center lg:gap-x-12 lg:gap-y-8"
+    >
+      {/* the star map: the A of the logo, one star per person */}
+      <div className="min-w-0 lg:col-span-5 lg:col-start-1 lg:row-start-1 lg:self-end">
+        <div ref={skyBox} dir="ltr" className="relative mx-auto aspect-[6/5] w-full max-w-[480px] touch-pan-y sm:aspect-square">
           <canvas ref={skyCanvas} aria-hidden="true" className="absolute inset-0 h-full w-full" />
           {people.map((m, i) => {
             const side = LABEL[seats[i]];
@@ -558,12 +521,12 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
                 type="button"
                 aria-pressed={on}
                 aria-label={`${m.name}${sep}${m.role}`}
-                onClick={() => choose(i)}
-                onFocus={() => choose(i)}
+                onClick={() => goTo(i, { user: true })}
+                onFocus={() => goTo(i, { user: true })}
                 onMouseEnter={() => {
                   if (!window.matchMedia("(hover: hover)").matches) return;
                   window.clearTimeout(hoverTimer.current);
-                  hoverTimer.current = window.setTimeout(() => choose(i), 140);
+                  hoverTimer.current = window.setTimeout(() => goTo(i, { user: true }), 200);
                 }}
                 onMouseLeave={() => window.clearTimeout(hoverTimer.current)}
                 className="group/star absolute left-0 top-0 grid size-11 place-items-center rounded-full opacity-0"
@@ -580,33 +543,169 @@ export function TeamConstellation({ people, lang, labels }: { people: Person[]; 
             );
           })}
         </div>
-
-        <div className="mt-6 min-h-[13rem] text-center lg:mt-8 lg:text-start" aria-live="polite">
-          <p dir="ltr" className={`font-display text-[13px] tracking-[0.16em] text-dim ${rtl ? "lg:text-right" : ""}`}>
-            <span className="text-lav">{String(active + 1).padStart(2, "0")}</span> / {String(people.length).padStart(2, "0")}
-          </p>
-          <h3 key={`n${active}`} className="mt-3 font-display text-[clamp(32px,3.6vw,52px)] font-semibold leading-[1.12] tracking-[-0.025em]">
-            {words.map((w, i) => (
-              <Fragment key={i}>
-                <span className="inline-block overflow-hidden pb-[0.12em] align-top">
-                  <span className="team-word inline-block" style={{ animationDelay: `${150 + i * 70}ms` }}>
-                    {w}
-                  </span>
-                </span>
-                {i < words.length - 1 ? " " : null}
-              </Fragment>
-            ))}
-          </h3>
-          <p ref={roleEl} className="mt-1 text-[15px] text-lav">
-            {p.role}
-          </p>
-          <p key={`l${active}`} className={`team-fade mx-auto mt-4 max-w-[30em] lg:mx-0 ${p.quote ? "text-[clamp(17px,1.5vw,21px)] text-ink" : "text-muted"}`}>
-            {p.quote ? `${labels.quoteOpen}${p.quote}${labels.quoteClose}` : p.line}
-          </p>
-        </div>
       </div>
 
-      {/* the whole team for screen readers and search, whichever star is chosen */}
+      {/* the deck of portraits, with its controls right under it */}
+      <div className="min-w-0 lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
+        <div className="relative -start-[5%] mx-auto w-[74%] max-w-[330px] sm:w-[56%] sm:max-w-[380px] lg:w-[74%] lg:max-w-[440px]">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-y-10 inset-x-0 -z-10 rounded-[60px] bg-[radial-gradient(60%_55%_at_50%_60%,rgb(124_77_255/0.42),transparent_72%)] blur-2xl sm:-inset-x-10"
+          />
+          <div
+            ref={deck}
+            role="group"
+            tabIndex={0}
+            aria-label={labels.hint.pointer}
+            style={{ "--fwd": fwd } as CSSProperties}
+            onPointerDown={onDown}
+            onPointerMove={onMove}
+            onPointerUp={onUp}
+            onPointerCancel={onCancel}
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse") setHover(true);
+            }}
+            onPointerLeave={(e) => {
+              tilt(e.currentTarget, 0, 0);
+              setHover(false);
+            }}
+            onDragStart={(e) => e.preventDefault()}
+            onKeyDown={(e) => {
+              if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+              e.preventDefault();
+              if ((e.key === "ArrowRight") !== rtl) next();
+              else prev();
+            }}
+            className="group/deck relative aspect-[4/5] cursor-grab touch-pan-y select-none rounded-[24px] outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lav active:cursor-grabbing"
+          >
+            {people.map((m, i) => {
+              const rel = (i - active + n) % n;
+              const isThrown = thrown?.i === i;
+              const isEntering = entering === i;
+              const front = rel === 0 && !isThrown;
+              const ps = isThrown ? away(thrown.dir) : isEntering ? away(fwd) : pose(rel, fan, dealt);
+              const live = rel <= 1 && !isThrown && !isEntering;
+              return (
+                <div
+                  key={m.name}
+                  data-front={front ? "" : undefined}
+                  aria-hidden={!front}
+                  onAnimationEnd={(e) => {
+                    if (e.animationName === "team-tease") setTease(false);
+                  }}
+                  style={{ transform: ps.transform, opacity: ps.opacity, zIndex: ps.z, transition: isEntering ? "none" : isThrown ? THROW : MOVE }}
+                  className={`team-card absolute inset-0 [perspective:1400px] ${live ? "group-data-[drag]/deck:transition-none!" : ""} ${front && tease ? "team-tease" : ""}`}
+                >
+                  <div
+                    className="relative h-full transition-transform duration-700 ease-out"
+                    style={front ? { transform: "rotateY(calc(var(--ry,0) * 1deg)) rotateX(calc(var(--rx,0) * 1deg))" } : undefined}
+                  >
+                    <div className="relative h-full overflow-hidden rounded-[24px] border border-lav/25 bg-surface shadow-[0_30px_70px_-25px_rgb(0_0_0/0.95)]">
+                      <Image
+                        src={m.photo}
+                        alt={m.name}
+                        fill
+                        draggable={false}
+                        priority={i === 0}
+                        loading={i === 0 ? undefined : "eager"}
+                        sizes="(min-width: 1024px) 440px, (min-width: 640px) 380px, 74vw"
+                        className="object-cover object-[50%_24%]"
+                      />
+                      {/* a dusk at the foot of the photo, a soft glare under the pointer, and shade on the cards behind */}
+                      <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_62%,rgb(7_6_11/0.5))]" />
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-0 bg-[radial-gradient(420px_circle_at_var(--gx,50%)_var(--gy,30%),rgb(255_255_255/0.1),transparent_60%)] mix-blend-screen transition-opacity duration-500 ${front ? "" : "opacity-0"}`}
+                      />
+                      <span
+                        aria-hidden="true"
+                        style={{ opacity: ps.dim }}
+                        className={`pointer-events-none absolute inset-0 bg-[#07060b] transition-opacity duration-500 ${live ? "group-data-[drag]/deck:transition-none!" : ""}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* previous · where you are, filling while it turns by itself · next */}
+        <div className="mt-8 flex items-center justify-center gap-5">
+          <button
+            type="button"
+            onClick={prev}
+            aria-label={labels.prev}
+            className="grid size-11 place-items-center rounded-full border border-line text-soft transition-colors duration-300 hover:border-lav/50 hover:text-ink"
+          >
+            <Chevron back />
+          </button>
+          <div className="w-[164px] sm:w-[200px]">
+            <p dir="ltr" className="text-center font-display text-[13px] tabular-nums tracking-[0.16em] text-dim">
+              <span className="text-lav">{String(active + 1).padStart(2, "0")}</span> / {String(n).padStart(2, "0")}
+            </p>
+            <div aria-hidden="true" className="mt-2.5 flex gap-1.5">
+              {people.map((m, i) => (
+                <span key={m.name} className="h-0.5 flex-1 overflow-hidden rounded-full bg-lav/15">
+                  <span
+                    key={i === active ? `${active}-${running}` : "s"}
+                    style={i === active && running ? { animationDuration: `${AUTO_MS}ms` } : undefined}
+                    className={`block h-full origin-left rounded-full bg-lav transition-[scale] duration-500 rtl:origin-right ${
+                      i < active ? "scale-x-100" : i === active ? `scale-x-100 ${running ? "team-fill" : ""}` : "scale-x-0"
+                    }`}
+                  />
+                </span>
+              ))}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => next()}
+            aria-label={labels.next}
+            className="grid size-11 place-items-center rounded-full border border-line text-soft transition-colors duration-300 hover:border-lav/50 hover:text-ink"
+          >
+            <Chevron />
+          </button>
+        </div>
+        <p
+          aria-hidden={touched}
+          style={{ "--fwd": fwd } as CSSProperties}
+          className={`mt-4 flex items-center justify-center gap-2.5 text-[13px] text-dim transition-opacity duration-700 ${touched ? "opacity-0" : ""}`}
+        >
+          <span aria-hidden="true" className="relative h-px w-8 bg-lav/30">
+            <span className="team-swipe absolute start-[calc(50%-3px)] top-[-2.5px] size-1.5 rounded-full bg-lav" />
+          </span>
+          <span className="[@media(pointer:fine)]:hidden">{labels.hint.touch}</span>
+          <span className="hidden [@media(pointer:fine)]:inline">{labels.hint.pointer}</span>
+        </p>
+      </div>
+
+      {/* who's in front: the name rises word by word, the role decodes, the line fades in */}
+      <div
+        className="min-h-[13rem] min-w-0 text-center lg:col-span-5 lg:col-start-1 lg:row-start-2 lg:self-start lg:text-start"
+        aria-live={touched ? "polite" : "off"}
+      >
+        <h3 key={`n${active}`} className="font-display text-[clamp(32px,3.6vw,52px)] font-semibold leading-[1.12] tracking-[-0.025em]">
+          {words.map((w, i) => (
+            <Fragment key={i}>
+              <span className="inline-block overflow-hidden pb-[0.12em] align-top">
+                <span className="team-word inline-block" style={{ animationDelay: `${150 + i * 70}ms` }}>
+                  {w}
+                </span>
+              </span>
+              {i < words.length - 1 ? " " : null}
+            </Fragment>
+          ))}
+        </h3>
+        <p ref={roleEl} className="mt-1 text-[15px] text-lav">
+          {p.role}
+        </p>
+        <p key={`l${active}`} className={`team-fade mx-auto mt-4 max-w-[30em] lg:mx-0 ${p.quote ? "text-[clamp(17px,1.5vw,21px)] text-ink" : "text-muted"}`}>
+          {p.quote ? `${labels.quoteOpen}${p.quote}${labels.quoteClose}` : p.line}
+        </p>
+      </div>
+
+      {/* the whole team for screen readers and search, whoever is in front */}
       <ul className="sr-only">
         {people.map((m) => (
           <li key={m.name}>

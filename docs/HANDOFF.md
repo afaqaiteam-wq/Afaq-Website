@@ -5,7 +5,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 
 ## Done (all pushed)
 - Hero engine (`src/components/home/hero/`): the warp starfield plays on EVERY load and ONLY on load, never on scroll. There are 3 nested, slightly inclined Kepler orbits with tool-logo planets, a constellation "A", and a GSAP intro. The user accepted it; don't cut any motion he liked.
-- Home sections below the hero (`src/components/home/HomeSections.tsx`), the Services page and the About page. The About team is a constellation (`src/components/about/TeamConstellation.tsx`): the logo's A as a 3D star map that assembles, sways and follows the pointer, one star per person in `tier` order from `src/content/about.ts`; choosing a star changes the portrait with a liquid WebGL dissolve.
+- Home sections below the hero (`src/components/home/HomeSections.tsx`), the Services page and the About page. The About team is a constellation (`src/components/about/TeamConstellation.tsx`): the logo's A as a 3D star map that assembles, sways and follows the pointer, one star per person in `tier` order from `src/content/about.ts`; beside it the portraits are a deck of cards (the next two peek out from behind) that can be swiped or dragged, tapped, stepped with the arrows or the keyboard, or changed from a star. The deck deals itself out and teases one swipe when it first comes into view, then turns by itself every 7s until the visitor touches anything. On phones the order is star map, deck, then the name and words.
 - Shared components: `AccentText`, `ToolPill` (logos in `hero/toolLogos.ts`), `StarBackdrop`, `Button`, and `RevealObserver` (`data-reveal` + `--d` delay).
 
 ## Hard rules
