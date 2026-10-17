@@ -26,6 +26,10 @@ const plexArabic = IBM_Plex_Sans_Arabic({
   preload: false,
 });
 
+// Mirrors RevealObserver (same margins), in plain ES5 so it runs before any bundle.
+const EARLY_REVEAL =
+  'try{var d=document.documentElement,els=document.querySelectorAll("[data-reveal]:not([data-shown])"),show=function(e){e.setAttribute("data-shown","")};d.setAttribute("data-reveal-ready","");if(!("IntersectionObserver"in window)||matchMedia("(prefers-reduced-motion: reduce)").matches){els.forEach(show)}else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){show(e.target);io.unobserve(e.target)}})},{rootMargin:"0px 0px -12% 0px",threshold:0.08});els.forEach(function(e){io.observe(e)});window.__revealIO=io}}catch(e){}';
+
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
 }
@@ -97,6 +101,10 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
           <PageTransition>{children}</PageTransition>
         </main>
         <Footer lang={lang} dict={dict} />
+        {/* Start the scroll reveals as soon as the page is parsed instead of after the app loads,
+            so the first screen animates in on slow phones too. RevealObserver takes over once it
+            mounts. Production only: in dev the extra attributes would flag as hydration mismatches. */}
+        {process.env.NODE_ENV === "production" && <script dangerouslySetInnerHTML={{ __html: EARLY_REVEAL }} />}
       </body>
     </html>
   );

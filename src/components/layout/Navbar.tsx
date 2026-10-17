@@ -90,6 +90,9 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
   const langSwitch = (extra: string) => (
     <Link
       href={href(otherLang, known ? path : "/")}
+      // Switching language swaps the root layout, so it's a full page load anyway; prefetching it
+      // only produced a failed request (English pages are served by rewrite).
+      prefetch={false}
       hrefLang={otherLang}
       lang={otherLang}
       // The spoken name starts with the visible word, so voice control ("click English") still works.

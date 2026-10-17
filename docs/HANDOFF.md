@@ -26,6 +26,24 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - `src/components/motion/PageTransition.tsx` is a React `<ViewTransition>` keyed by pathname and wraps the page in the layout. The CSS lives in globals.css (`page-exit` / `page-enter`). The navbar has `view-transition-name: site-header`, so it stays fixed during the transition. Reduced motion turns it off.
 - `SmoothScroll` now scrolls every new page to the top. Lenis used to keep the old scroll position. Back/forward and `#hash` links are left to the browser.
 
+## Security and quality audit (October 2026, done)
+- **Next.js:** pinned at 16.3.8, the patched release for the 16.3 line's advisories (image optimizer SSRF, SSG/ISR cache poisoning, metadata image disclosure). `npm audit` now lists only `braces`, which has no patched version. It comes in through `eslint-config-next`, so it's dev tooling and never ships.
+- **Headers (`next.config.ts`):**
+  - A Content-Security-Policy in production. Everything is same-origin, and `vercel.live` is allowed for the preview toolbar. Inline scripts stay allowed because Next streams page data inline.
+  - `Cross-Origin-Opener-Policy`.
+  - The existing HSTS, frame, nosniff, referrer and permissions headers.
+  - If you add a third-party script, font or image host, add it to the CSP.
+- **`/api/contact`:**
+  - Refuses a cross-site `Origin` (403), anything that isn't JSON (415) and bodies over 32 KB (413).
+  - Accepts only the services listed in the dictionaries.
+  - Keeps the name, company and service on one line in the email subject.
+  - Prunes its rate-limit map.
+- **Reveals:** the layout's inline script starts them as soon as the page is parsed (production only); `RevealObserver` takes over after hydration. Before, a slow phone showed the first screen only after the app loaded.
+- **Language switch:** no longer prefetched, which removes a 404 from the console on Arabic pages.
+- **Case-study meta descriptions:** cut at about 160 characters.
+- **Crawl result:** 18 pages × 3 widths with no console errors, broken links or images, horizontal overflow, duplicate ids or unnamed controls, and one `h1` per page.
+- **Lighthouse (mobile, local):** accessibility, best practices and SEO are 100 on every page; performance is 78–93.
+
 ## Site audit (done)
 - The home page has a "Selected work" section (3 cards → `/work#slug`), placed after the services and before "How we work".
 - The home page has Organization JSON-LD with confirmed details only. The 404 has its own tab title.
