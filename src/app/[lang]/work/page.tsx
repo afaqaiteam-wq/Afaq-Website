@@ -167,13 +167,27 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
             <p data-reveal style={delay(160)} className="mt-6 text-[17px] leading-relaxed text-soft">
               {c.automation.body}
             </p>
-            <ol data-reveal style={delay(200)} className="mt-8 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-3">
+            {/* Phones: numbered stops down one line that draws itself. Wider: chips joined by arrows. */}
+            <ol data-reveal="draw" className="mt-8 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-3">
               {c.automation.flow.map((step, j, all) => (
-                <li key={step} className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
-                  <span className="inline-flex h-8 items-center rounded-pill border border-lav/30 bg-violet/10 px-3.5 text-[13px] text-ink">
+                <li
+                  key={step}
+                  style={{ "--cd": `${150 + 110 * j}ms`, "--ld": `${250 + 110 * j}ms` } as CSSProperties}
+                  className="relative flex items-center gap-4 pb-5 last:pb-0 sm:gap-2 sm:pb-0"
+                >
+                  {j < all.length - 1 && (
+                    <span aria-hidden="true" className="draw-y absolute start-[17.5px] top-9 bottom-0 w-px bg-lav/30 sm:hidden" />
+                  )}
+                  <span
+                    aria-hidden="true"
+                    className="draw-in relative inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-lav/40 bg-surface text-xs font-medium text-lav shadow-[0_0_20px_-6px_rgb(124_77_255/0.7)] sm:hidden"
+                  >
+                    {String(j + 1).padStart(2, "0")}
+                  </span>
+                  <span className="draw-in text-[15px] text-ink sm:inline-flex sm:h-8 sm:items-center sm:rounded-pill sm:border sm:border-lav/30 sm:bg-violet/10 sm:px-3.5 sm:text-[13px]">
                     {step}
                   </span>
-                  {j < all.length - 1 && <ArrowIcon className="size-3 text-lav max-sm:rotate-90 max-sm:rtl:-rotate-90" />}
+                  {j < all.length - 1 && <ArrowIcon className="draw-in hidden size-3 text-lav sm:block" />}
                 </li>
               ))}
             </ol>

@@ -7,7 +7,8 @@ import { isLocale, locales } from "@/i18n/config";
 import { ar } from "@/i18n/dictionaries/ar";
 import { en } from "@/i18n/dictionaries/en";
 
-export const alt = "Afaq AI · AI agents, automation and custom software";
+// Used where a page doesn't set its own share image (the 404s), in either language.
+export const alt = "Afaq AI · آفاق AI";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

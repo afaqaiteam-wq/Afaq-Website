@@ -31,7 +31,16 @@ export interface AboutPage {
   titleAccent: string;
   story: string[];
   principles: { eyebrow: string; title: string; titleAccent: string; items: { title: string; body: string }[] };
-  team: { eyebrow: string; title: string; titleAccent: string; people: Person[] };
+  team: {
+    eyebrow: string;
+    title: string;
+    titleAccent: string;
+    /** Under the deck of portraits: what to do on a touch screen, and with a mouse. */
+    hint: { touch: string; pointer: string };
+    prev: string;
+    next: string;
+    people: Person[];
+  };
   cta: { title: string; titleAccent: string; lead: string; secondary: string };
 }
 
@@ -60,6 +69,9 @@ const en: AboutPage = {
     eyebrow: "The team",
     title: "The people",
     titleAccent: "behind the orbit.",
+    hint: { touch: "Swipe the photo to meet the rest", pointer: "Drag the photo, or pick a star" },
+    prev: "Previous",
+    next: "Next",
     people: [
       { name: "Mohamed Saber", role: "Founder & CEO", line: "Sets the direction and ties every project to a real business result.", photo: saber, tier: 1, quote: "Empower businesses with AI that works, so they can focus on what matters most." },
       { name: "Mostafa Aboelwafa", role: "Co-CEO & Co-Founder", line: "Connects engineering, business and AI, and leads our partnerships.", photo: mostafa, tier: 2 },
@@ -102,13 +114,16 @@ const ar: AboutPage = {
     eyebrow: "الفريق",
     title: "مَن يقف",
     titleAccent: "وراء المدار.",
+    hint: { touch: "اسحب الصورة لتتعرّف على البقية", pointer: "اسحب الصورة أو اختر نجمة" },
+    prev: "السابق",
+    next: "التالي",
     people: [
-      { name: "محمد صابر", role: "المؤسس والرئيس التنفيذي", line: "يحدّد الاتجاه، ويربط كل مشروع بنتيجة حقيقية للعمل.", photo: saber, tier: 1, quote: "نمكّن الشركات بذكاء اصطناعي يعمل فعلًا، لتتفرّغ لما يهمها أكثر." },
+      { name: "محمد صابر", role: "المؤسس والرئيس التنفيذي", line: "يحدّد الاتجاه، ويربط كل مشروع بنتيجة تجارية حقيقية.", photo: saber, tier: 1, quote: "نمكّن الشركات بذكاء اصطناعي يعمل فعلًا، لتتفرّغ لما يهمها أكثر." },
       { name: "مصطفى أبو الوفا", role: "الرئيس التنفيذي المشارك والشريك المؤسس", line: "يربط الهندسة بالأعمال والذكاء الاصطناعي، ويقود الشراكات.", photo: mostafa, tier: 2 },
       { name: "غفران غرس الله", role: "المديرة التقنية ورئيسة فريق التطوير", line: "تقود فريق الهندسة والبنية التقنية لكل ما نسلّمه.", photo: ghofran, tier: 3 },
       { name: "محمود أحمد", role: "مهندس أتمتة بالذكاء الاصطناعي", line: "يبني أنظمة الأتمتة بالذكاء الاصطناعي وn8n والواجهات البرمجية، من التصميم حتى التشغيل.", photo: mahmoud, tier: 4 },
-      { name: "محمد علاء", role: "قائد الإبداع والفيديو", line: "يصنع حضور العلامة عبر المحتوى والفيديو والتصميم.", photo: alaa, tier: 4 },
-      { name: "محمد رجب", role: "قائد السوشيال ميديا والنمو", line: "يقود استراتيجية المحتوى والحملات التي تنمّي العلامة.", photo: ragab, tier: 4 },
+      { name: "محمد علاء", role: "قائد الإبداع والفيديو", line: "يصنع حضور العلامة التجارية عبر المحتوى والفيديو والتصميم.", photo: alaa, tier: 4 },
+      { name: "محمد رجب", role: "قائد وسائل التواصل الاجتماعي والنمو", line: "يقود استراتيجية المحتوى والحملات التي تنمّي العلامة التجارية.", photo: ragab, tier: 4 },
     ],
   },
   cta: {

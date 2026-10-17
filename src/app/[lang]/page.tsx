@@ -37,7 +37,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organization).replace(/</g, "\\u003c") }}
       />
-      <HeroStory lang={lang} hero={dict.hero} bookCall={dict.common.bookCall} />
+      <HeroStory lang={lang} hero={dict.hero} bookCall={dict.common.bookCall} siteName={dict.meta.siteName} />
       <HomeSections lang={lang} dict={dict} />
     </>
   );

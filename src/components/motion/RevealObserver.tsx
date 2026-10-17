@@ -11,6 +11,8 @@ import { useEffect } from "react";
 export function RevealObserver() {
   const pathname = usePathname();
   useEffect(() => {
+    // the layout's inline script may already be watching the first page; take over from it
+    (window as { __revealIO?: IntersectionObserver }).__revealIO?.disconnect();
     document.documentElement.setAttribute("data-reveal-ready", "");
     const els = [...document.querySelectorAll<HTMLElement>("[data-reveal]:not([data-shown])")];
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
