@@ -82,6 +82,8 @@ export interface WorkPage {
     image: StaticImageData;
     imageAlt: string;
   };
+  /** Our own product in progress, after the client work: Marid, linking to its page. */
+  building: { eyebrow: string; name: string; category: string; body: string; link: string };
   cta: { title: string; titleAccent: string; lead: string; secondary: string };
 }
 
@@ -205,6 +207,13 @@ const en: WorkPage = {
     tech: ["n8n", "OpenRouter", "YouTube Data API"],
     image: youtubeShot,
     imageAlt: "The n8n canvas: a five-minute schedule, requests to the YouTube API, a filter, a video lookup, an AI agent on an OpenRouter chat model, and a YouTube reply step.",
+  },
+  building: {
+    eyebrow: "What we're building now",
+    name: "Marid",
+    category: "Voice assistant · Android",
+    body: "Our own voice assistant. It understands Egyptian Arabic, answers in an Egyptian voice and gets things done on the phone, from calls and reminders to taps inside other apps. It's in development, and already in daily use.",
+    link: "Meet Marid",
   },
   cta: {
     title: "Your process could be",
@@ -333,6 +342,13 @@ const ar: WorkPage = {
     tech: ["n8n", "OpenRouter", "YouTube Data API"],
     image: youtubeShot,
     imageAlt: "مسار العمل في n8n: جدولة كل خمس دقائق، وطلبات إلى YouTube API، وتصفية، وجلب بيانات الفيديو، ووكيل ذكاء اصطناعي على نموذج OpenRouter، وخطوة الرد على يوتيوب.",
+  },
+  building: {
+    eyebrow: "ما نبنيه الآن",
+    name: "مارد",
+    category: "مساعد صوتي · أندرويد",
+    body: "مساعدنا الصوتي الخاص. يفهم العامية المصرية، ويرد بصوت مصري، وينجز المهام على الهاتف، من المكالمات والتذكيرات إلى الضغط داخل التطبيقات الأخرى. ما زال قيد التطوير، وهو في الاستخدام اليومي بالفعل.",
+    link: "تعرّف على مارد",
   },
   cta: {
     title: "قد تكون عمليتك",

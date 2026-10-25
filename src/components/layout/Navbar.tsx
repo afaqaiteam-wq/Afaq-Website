@@ -16,6 +16,7 @@ const LINKS = [
   { key: "home", path: "/" },
   { key: "services", path: "/services" },
   { key: "work", path: "/work" },
+  { key: "marid", path: "/marid" },
   { key: "about", path: "/about" },
   { key: "contact", path: "/contact" },
 ] as const;
@@ -84,6 +85,12 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
     };
   }, [open]);
 
+  // Marid is our newest page, so its link carries a small gold "new".
+  const newBadge = (extra: string) => (
+    <span className={`inline-flex rounded-pill bg-gold/15 px-1.5 py-0.5 align-[1px] font-sans text-[10px] font-medium leading-none text-gold-soft ${extra}`}>
+      {nav.new}
+    </span>
+  );
   const isActive = (p: string) => (p === "/" ? path === "/" : path.startsWith(p));
   // On a 404 there is no matching page in the other language, so switch to its home instead.
   const known = LINKS.some((l) => l.path === path) || (path.startsWith("/work/") && isWorkSlug(path.slice(6)));
@@ -130,6 +137,7 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
                   }`}
                 >
                   {nav[l.key]}
+                  {l.key === "marid" && newBadge("ms-1.5")}
                 </Link>
               </li>
             ))}
@@ -179,7 +187,10 @@ export function Navbar({ lang, nav, common, siteName }: NavbarProps) {
                     }`}
                   >
                     <span className="w-6 font-sans text-xs tracking-[0.2em] text-dim">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="flex-1">{nav[l.key]}</span>
+                    <span className="flex flex-1 items-center gap-3">
+                      {nav[l.key]}
+                      {l.key === "marid" && newBadge("")}
+                    </span>
                     {isActive(l.path) && (
                       <span aria-hidden="true" className="size-2 rounded-full bg-lav shadow-[0_0_10px_#a67bff]" />
                     )}

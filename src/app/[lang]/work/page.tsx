@@ -7,8 +7,10 @@ import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
 import { StarBackdrop } from "@/components/ui/StarBackdrop";
 import { ToolPill } from "@/components/ui/ToolPill";
+import { MaridOrb } from "@/components/marid/MaridOrb";
 import { ProjectShot } from "@/components/work/ProjectShot";
 import { ZoomImage } from "@/components/work/ZoomImage";
+import { maridContent } from "@/content/marid";
 import { workContent } from "@/content/work";
 import { href, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -217,6 +219,46 @@ export default async function WorkPage({ params }: PageProps<"/[lang]/work">) {
                 />
               </ZoomImage>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our own product in progress: Marid, with his living orb */}
+      <section className="border-t border-line">
+        <div className={`${shell} grid items-center gap-10 py-20 lg:grid-cols-12 lg:py-28`}>
+          <div className="lg:col-span-7">
+            <p data-reveal className="eyebrow">
+              {c.building.eyebrow}
+            </p>
+            <h2
+              data-reveal="rise"
+              style={delay(80)}
+              className="mt-6 font-display text-[clamp(28px,3vw,44px)] font-semibold leading-[1.05] tracking-[-0.03em]"
+            >
+              {c.building.name}
+            </h2>
+            <p data-reveal style={delay(120)} className="mt-3 text-sm tracking-[0.12em] text-gold">
+              {c.building.category}
+            </p>
+            <p data-reveal style={delay(160)} className="mt-6 max-w-[36em] text-[17px] leading-relaxed text-soft">
+              {c.building.body}
+            </p>
+            <div data-reveal style={delay(220)} className="mt-8">
+              <Button href={href(lang, "/marid")} arrow>
+                {c.building.link}
+              </Button>
+            </div>
+          </div>
+          <div data-reveal style={delay(120)} className="relative lg:col-span-5">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgb(245_185_66/0.16),transparent_64%)] blur-2xl"
+            />
+            <MaridOrb
+              alt={maridContent[lang].orbAlt}
+              sizes="(min-width: 1024px) 440px, (min-width: 640px) 400px, 84vw"
+              className="relative mx-auto w-[min(84vw,400px)] lg:w-full lg:max-w-[440px]"
+            />
           </div>
         </div>
       </section>

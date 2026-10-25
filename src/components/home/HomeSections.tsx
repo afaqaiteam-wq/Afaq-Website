@@ -3,12 +3,14 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 
 import { CopyEmail } from "@/components/contact/CopyEmail";
+import { MaridOrb } from "@/components/marid/MaridOrb";
 import { AccentText } from "@/components/ui/AccentText";
 import { ArrowIcon, Button } from "@/components/ui/Button";
 import { LivePlanet } from "@/components/ui/LivePlanet";
 import { PlanetHorizon } from "@/components/ui/PlanetHorizon";
 import { ToolPill } from "@/components/ui/ToolPill";
 import { aboutContent } from "@/content/about";
+import { maridContent } from "@/content/marid";
 import { servicesContent } from "@/content/services";
 import { workContent, type Project } from "@/content/work";
 import { href, type Locale } from "@/i18n/config";
@@ -24,7 +26,8 @@ const topLight = "absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,trans
 
 /**
  * What follows the hero story on the home page: proof first (selected work as a showcase),
- * then the services as a grid, a glimpse of the people behind them, and a closing card.
+ * then Marid, the assistant we're building, the services as a grid, a glimpse of the people
+ * behind them, and a closing card.
  * The hero's constellation already names the services and /services carries the full
  * process, so neither is repeated here.
  */
@@ -36,6 +39,9 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
   const founder = people.find((p) => p.tier === 1)!;
   const team = people.filter((p) => p !== founder).sort((a, b) => a.tier - b.tier);
   const [open, close] = lang === "ar" ? ["«", "»"] : ["“", "”"];
+  const marid = maridContent[lang];
+  // three short lines people really say to him, one from each kind of request
+  const maridLines = [marid.examples.groups[0].items[0], marid.examples.groups[1].items[2], marid.examples.groups[2].items[1]];
 
   const shell = "mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-14";
   const h2 = "mt-6 font-display text-[clamp(32px,4.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.035em]";
@@ -168,6 +174,55 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
             <Button href={href(lang, "/work")} variant="ghost" arrow>
               {home.workLink}
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Marid: our own assistant, with his living orb, linking to his page */}
+      <section aria-labelledby="home-marid">
+        <div className={`${shell} pb-4 pt-4 lg:pb-8`}>
+          <div
+            data-reveal
+            className="relative grid items-center gap-6 overflow-hidden rounded-[28px] border border-gold/25 bg-[linear-gradient(180deg,rgb(245_185_66/0.06),rgb(255_255_255/0.008))] p-6 shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] sm:p-10 lg:grid-cols-12 lg:gap-12 lg:p-14"
+          >
+            <div aria-hidden="true" className="absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,#f5b942,transparent)]" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -start-24 top-1/2 size-[520px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(245_185_66/0.14),transparent_66%)]"
+            />
+            <div className="relative lg:col-span-5">
+              <MaridOrb alt={marid.orbAlt} sizes="(min-width: 1024px) 420px, (min-width: 640px) 380px, 80vw" className="mx-auto w-[min(80vw,380px)] lg:w-full lg:max-w-[420px]" />
+            </div>
+            <div className="relative lg:col-span-7">
+              <div className="flex flex-wrap items-center gap-3">
+                <p id="home-marid" className="eyebrow">
+                  {home.maridEyebrow}
+                </p>
+                <span className="inline-flex h-7 items-center gap-2 rounded-pill border border-gold/30 bg-gold/10 px-3 text-xs font-medium text-gold-soft">
+                  <span aria-hidden="true" className="size-1.5 rounded-full bg-gold shadow-[0_0_8px_#f5b942]" />
+                  {marid.badge}
+                </span>
+              </div>
+              <h2 className={h2}>
+                {home.maridTitle} <span className="block"><AccentText text={home.maridTitleAccent} /></span>
+              </h2>
+              <p className="mt-6 max-w-[34em] text-lg text-muted">{home.maridLead}</p>
+              <ul className="mt-8 flex flex-wrap gap-2">
+                {maridLines.map((l) => (
+                  <li
+                    key={l.say}
+                    lang="ar"
+                    dir="rtl"
+                    className="inline-flex h-10 items-center rounded-pill border border-gold/25 bg-gold/[0.07] px-4 font-arabic text-[15px] text-gold-soft"
+                  >
+                    {`«${l.say}»`}
+                  </li>
+                ))}
+              </ul>
+              <Button href={href(lang, "/marid")} variant="ghost" arrow className="mt-8">
+                {home.maridLink}
+              </Button>
+            </div>
           </div>
         </div>
       </section>

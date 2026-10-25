@@ -16,11 +16,14 @@ export const en = {
     home: "Home",
     services: "Services",
     work: "Work",
+    marid: "Marid",
     about: "About",
     contact: "Contact",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     main: "Main",
+    /** The badge beside a new page's link. */
+    new: "New",
   },
   hero: {
     eyebrow: "Afaq · Arabic for “horizons”",
@@ -70,6 +73,11 @@ export const en = {
     teamEyebrow: "The people behind it",
     teamWith: "With the rest of the team",
     teamLink: "Meet the team",
+    maridEyebrow: "New from Afaq",
+    maridTitle: "Meet Marid,",
+    maridTitleAccent: "our voice assistant.",
+    maridLead: "It understands Egyptian Arabic, answers in an Egyptian voice and gets things done on your Android phone. We're building it to go further than Siri and Bixby.",
+    maridLink: "Meet Marid",
   },
   footer: {
     tagline: "Afaq is Arabic for horizons. We build what lies beyond yours.",
