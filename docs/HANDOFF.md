@@ -28,7 +28,7 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
   - Every ability must exist in that repo's code or docs (`docs/ASSISTANT.md`, `docs/DECISIONS.md`).
   - Nothing personal: no health, medication, college, job, family or private goals, and not the founder's name inside Marid's lines.
   - Don't name the voice model or the `hey_jarvis` wake-word model; their licences aren't confirmed.
-  - What you say to Marid and what he answers stay in Egyptian Arabic on both pages (`say` and `reply` keys, which `check:arabic` skips).
+  - What you say to Marid and what he answers are Egyptian Arabic (`say` and `reply` keys, which `check:arabic` skips). The English page leads with the English gloss and shows the Arabic small beneath it; his name is written “Ya Marid” there, never «يا مارد».
 - **Siri and Bixby:** every point about them comes from Apple's iOS feature availability page and Samsung's newsroom post of 2026-10-14 (both linked under the table). Re-check those pages before changing a claim, and keep it to facts: languages, devices, requirements.
 - **The orb:** `src/components/marid/orb-shader.ts` is the app's own AGSL (`tools/orb/orb.agsl` in life-agent), translated to WebGL the same way as the app's `tools/orb/preview.py`. To update it, paste the new AGSL over the old one. `MaridOrb.tsx` ports the preview's state machine. `MaridDemo.tsx` plays the hero's exchanges (only lines the app really understands, and only its own spoken answers).
 - **Images in `src/assets/marid/`:**

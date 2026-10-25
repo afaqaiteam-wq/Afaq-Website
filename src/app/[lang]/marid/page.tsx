@@ -129,8 +129,9 @@ export default async function MaridPage({ params }: PageProps<"/[lang]/marid">) 
                 <ul className="mt-5 grid gap-5">
                   {g.items.map((it) => (
                     <li key={it.say} className="grid gap-1.5">
-                      <p className="text-[19px] leading-snug text-ink">{arabic(it.say)}</p>
-                      {it.gloss && <p className="text-sm text-dim">{it.gloss}</p>}
+                      {/* English leads on the English page, with the Arabic as Marid hears it beneath */}
+                      <p className="text-[19px] leading-snug text-ink">{it.gloss ? `“${it.gloss}”` : arabic(it.say)}</p>
+                      {it.gloss && <p className="text-sm text-dim">{arabic(it.say)}</p>}
                       <p className="flex items-start gap-2 text-[15px] text-muted">
                         <ArrowIcon className="mt-1.5 size-3 shrink-0 text-gold" />
                         {it.does}

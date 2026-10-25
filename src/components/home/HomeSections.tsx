@@ -208,14 +208,15 @@ export function HomeSections({ lang, dict }: { lang: Locale; dict: Dictionary })
               </h2>
               <p className="mt-6 max-w-[34em] text-lg text-muted">{home.maridLead}</p>
               <ul className="mt-8 flex flex-wrap gap-2">
+                {/* in the page's language: English glosses here, Marid's Egyptian lines on the Arabic page */}
                 {maridLines.map((l) => (
                   <li
                     key={l.say}
-                    lang="ar"
-                    dir="rtl"
-                    className="inline-flex h-10 items-center rounded-pill border border-gold/25 bg-gold/[0.07] px-4 font-arabic text-[15px] text-gold-soft"
+                    lang={l.gloss ? undefined : "ar"}
+                    dir={l.gloss ? undefined : "rtl"}
+                    className={`inline-flex h-10 items-center rounded-pill border border-gold/25 bg-gold/[0.07] px-4 text-[15px] text-gold-soft ${l.gloss ? "" : "font-arabic"}`}
                   >
-                    {`«${l.say}»`}
+                    {l.gloss ? `“${l.gloss}”` : `«${l.say}»`}
                   </li>
                 ))}
               </ul>
