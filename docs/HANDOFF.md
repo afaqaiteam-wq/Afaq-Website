@@ -22,6 +22,22 @@ Read `AGENTS.md` first (Next.js 16: read `node_modules/next/dist/docs/` before w
 - The Sales & Invoicing stack is unknown, so it has no stack block. Add `tech` in `work.ts` once the user confirms it.
 - The user may send demo-data screenshots later. To use them, replace the webp files; the filenames stay the same.
 
+## Marid page (October 2026, done)
+- **What it is:** `/marid` (`src/app/[lang]/marid/page.tsx`, copy in `src/content/marid.ts`) presents Marid, our own Android voice assistant, as our new project. The project lives in the private repo `afaqaiteam-wq/life-agent`; never link to it.
+- **Rules for its copy:**
+  - Every ability must exist in that repo's code or docs (`docs/ASSISTANT.md`, `docs/DECISIONS.md`).
+  - Nothing personal: no health, medication, college, job, family or private goals, and not the founder's name inside Marid's lines.
+  - Don't name the voice model or the `hey_jarvis` wake-word model; their licences aren't confirmed.
+  - What you say to Marid and what he answers stay in Egyptian Arabic on both pages (`say` and `reply` keys, which `check:arabic` skips).
+- **Siri and Bixby:** every point about them comes from Apple's iOS feature availability page and Samsung's newsroom post of 2026-10-14 (both linked under the table). Re-check those pages before changing a claim, and keep it to facts: languages, devices, requirements.
+- **The orb:** `src/components/marid/orb-shader.ts` is the app's own AGSL (`tools/orb/orb.agsl` in life-agent), translated to WebGL the same way as the app's `tools/orb/preview.py`. To update it, paste the new AGSL over the old one. `MaridOrb.tsx` ports the preview's state machine. `MaridDemo.tsx` plays the hero's exchanges (only lines the app really understands, and only its own spoken answers).
+- **Images in `src/assets/marid/`:**
+  - `orb-still.webp` is a frame of the shader (idle, t = 3.2 s), shown until WebGL draws and kept without it.
+  - `smoke.webp` is the shader's texture.
+  - `logo.webp` is Marid's logo.
+  - `og-en.jpg` and `og-ar.jpg` are the share images, rendered in Chromium from an HTML page, because the built-in image renderer leaves gaps between some Arabic words. Re-render them if the title or tagline changes.
+- **Elsewhere on the site:** Marid has a navbar link with a gold «جديد / New» badge, a card on the home page after the work, a section on the Work page after the automation, and a footer link. `/marid` is in the sitemap.
+
 ## Page transitions (done)
 - `src/components/motion/PageTransition.tsx` is a React `<ViewTransition>` keyed by pathname and wraps the page in the layout. The CSS lives in globals.css (`page-exit` / `page-enter`). The navbar has `view-transition-name: site-header`, so it stays fixed during the transition. Reduced motion turns it off.
 - `SmoothScroll` now scrolls every new page to the top. Lenis used to keep the old scroll position. Back/forward and `#hash` links are left to the browser.

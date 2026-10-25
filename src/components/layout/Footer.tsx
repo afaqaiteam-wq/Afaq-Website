@@ -30,6 +30,7 @@ export function Footer({ lang, dict }: FooterProps) {
       links: [
         { label: nav.home, to: "/" },
         { label: nav.services, to: "/services" },
+        { label: nav.marid, to: "/marid" },
       ],
     },
   ];

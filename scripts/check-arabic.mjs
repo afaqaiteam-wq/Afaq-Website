@@ -16,6 +16,7 @@ const DEFAULT_SOURCES = [
   { file: "src/content/about.ts", from: /^const ar\b/m, to: /^export const/m },
   { file: "src/content/services.ts", from: /^const ar\b/m, to: /^export const/m },
   { file: "src/content/work.ts", from: /^const ar\b/m, to: /^export const/m },
+  { file: "src/content/marid.ts", from: /^const ar\b/m, to: /^export const/m },
 ];
 const args = process.argv.slice(2);
 const SOURCES = args.length ? args.map((file) => ({ file })) : DEFAULT_SOURCES;
@@ -26,11 +27,12 @@ const ALLOWED_LATIN = new Set(
     "AI", "Afaq", "English", "OpenAI", "Claude", "Gemini", "n8n", "Python", "Docker", "Next.js",
     "Supabase", "AWS", "SaaS", "Excel", "Django", "SQLite", "HTML", "CSS", "JS", "TypeScript",
     "Tailwind", "Prisma", "Vitest", "YouTube", "Data", "API", "OpenRouter", "CIB", "BDC", "MO",
-    "Finance", "OS",
+    "Finance", "OS", "Siri", "Bixby", "Apple", "Samsung", "Galaxy", "iPhone", "Mac", "iOS",
+    "Intelligence", "Kotlin", "FastAPI", "Whisper",
   ].map((w) => w.toLowerCase()),
 );
-// Keys whose values are identifiers, not copy.
-const SKIP_KEYS = new Set(["slug"]);
+// Keys whose values are identifiers, or Marid's examples, which are Egyptian Arabic on purpose.
+const SKIP_KEYS = new Set(["slug", "say", "reply"]);
 
 const L = "\\u0600-\\u06FF"; // Arabic letters
 const word = (list) => new RegExp(`(?<![${L}])(${list.join("|")})(?![${L}])`, "g");
