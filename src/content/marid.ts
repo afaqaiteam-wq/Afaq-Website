@@ -3,7 +3,8 @@ import type { Locale } from "@/i18n/config";
 /*
  * The Marid page in both languages. Marid is our own voice assistant, still in development.
  * Every ability below exists in its code today; nothing personal about the people who use it is shown.
- * What it says and what you say to it stay in Egyptian Arabic on both pages, as Marid hears and speaks it.
+ * What you say to Marid and what he answers are Egyptian Arabic. The English page leads with their English
+ * glosses and shows the Arabic beneath them; the Arabic page shows the Arabic alone.
  * Points about Siri and Bixby come only from Apple's and Samsung's own pages (see compare.sources).
  */
 
@@ -104,7 +105,7 @@ const en: MaridPage = {
     you: "You",
     marid: "Marid",
     turns: [
-      { say: SAY.wake, sayGloss: "Hey Marid", reply: SAY.greet, replyGloss: "I'm here. What can I do for you?" },
+      { say: SAY.wake, sayGloss: "Ya Marid", reply: SAY.greet, replyGloss: "I'm here. What can I do for you?" },
       { say: SAY.call, sayGloss: "Call Mostafa", reply: SAY.callAsk, replyGloss: "Call Mostafa?" },
       { say: SAY.light, sayGloss: "Turn on the flashlight", done: "Flashlight on" },
       { say: SAY.remind, sayGloss: "Remind me tomorrow at 5 to call Mostafa", done: "Reminder set: tomorrow, 5:00 PM" },
@@ -158,7 +159,7 @@ const en: MaridPage = {
     items: [
       {
         title: "Wakes to its name",
-        body: "Say «يا مارد» even with the screen locked, or use the side key, the widget or the quick-settings tile. Then keep talking: when it asks you something, it listens for your answer without being called again.",
+        body: "Say “Ya Marid” even with the screen locked, or use the side key, the widget or the quick-settings tile. Then keep talking: when it asks you something, it listens for your answer without being called again.",
       },
       {
         title: "Understands Egyptian, answers in it",
@@ -199,7 +200,7 @@ const en: MaridPage = {
     title: "Five steps,",
     titleAccent: "in a few seconds.",
     items: [
-      { name: "Wake", body: "«يا مارد», the side key or the widget. The wake word runs on the phone itself." },
+      { name: "Wake", body: "“Ya Marid”, the side key or the widget. The wake word runs on the phone itself." },
       { name: "Listen", body: "The phone hears you and sends its best guesses of what you said." },
       { name: "Understand", body: "Clear commands are handled at once, without AI. Everything else goes to Claude, with your day and what it remembers about you." },
       { name: "Act", body: "The server decides and the phone does it: a call, a setting, a reminder." },

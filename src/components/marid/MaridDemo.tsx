@@ -8,9 +8,10 @@ import type { Turn } from "@/content/marid";
 /*
  * The hero's demo: Marid listens to a line, thinks, then answers in words or with what it did on the
  * phone, and moves on to the next line. Every line is one the app really understands, and every spoken
- * answer is the app's own. It plays only while on screen; before it starts (and with reduced motion)
- * the first exchange shows complete. The orb's alt text carries the meaning, so the captions are hidden
- * from screen readers; the same lines are listed as text in the examples section.
+ * answer is the app's own. On the English page each line leads in English, with the Arabic beneath it.
+ * It plays only while on screen; before it starts (and with reduced motion) the first exchange shows
+ * complete. The orb's alt text carries the meaning, so the captions are hidden from screen readers;
+ * the same lines are listed as text in the examples section.
  */
 
 type Stage = "listen" | "think" | "answer" | "rest";
@@ -23,6 +24,13 @@ const NEXT: Record<Stage, [Stage, number]> = {
 };
 
 const PHASE: Record<Stage, OrbPhase> = { listen: "listening", think: "thinking", answer: "speaking", rest: "idle" };
+
+// A line as Marid hears or says it, in Egyptian Arabic.
+const arabic = (text: string, className: string) => (
+  <span lang="ar" dir="rtl" className={`font-arabic ${className}`}>
+    «{text}»
+  </span>
+);
 
 export function MaridDemo({
   turns,
@@ -85,10 +93,14 @@ export function MaridDemo({
           className={`${fade} flex min-h-[3.25rem] flex-col items-start gap-1 rounded-[18px] rounded-ss-md border border-line bg-white/[0.04] px-4 py-3 ${heard ? "opacity-100" : "translate-y-1 opacity-0"}`}
         >
           <span className="text-xs tracking-[0.14em] text-dim">{you}</span>
-          <span lang="ar" dir="rtl" className="font-arabic text-ink">
-            «{t.say}»
-          </span>
-          {showGloss && t.sayGloss && <span className="text-sm text-muted">{t.sayGloss}</span>}
+          {showGloss && t.sayGloss ? (
+            <>
+              <span className="text-ink">“{t.sayGloss}”</span>
+              {arabic(t.say, "text-sm text-dim")}
+            </>
+          ) : (
+            arabic(t.say, "text-ink")
+          )}
         </p>
         <p
           className={`${fade} flex min-h-[3.25rem] flex-col items-end gap-1 rounded-[18px] rounded-se-md border border-gold/25 bg-gold/[0.06] px-4 py-3 text-end ${answered ? "opacity-100" : "translate-y-1 opacity-0"}`}
@@ -97,10 +109,13 @@ export function MaridDemo({
             {marid}
             {stage === "think" && <span className="marid-dots" />}
           </span>
-          {t.reply ? (
-            <span lang="ar" dir="rtl" className="font-arabic text-gold-soft">
-              «{t.reply}»
-            </span>
+          {t.reply && showGloss && t.replyGloss ? (
+            <>
+              <span className="text-gold-soft">“{t.replyGloss}”</span>
+              {arabic(t.reply, "text-sm text-muted")}
+            </>
+          ) : t.reply ? (
+            arabic(t.reply, "text-gold-soft")
           ) : (
             <span className="inline-flex items-center gap-2 text-gold-soft">
               <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -109,7 +124,6 @@ export function MaridDemo({
               {t.done}
             </span>
           )}
-          {showGloss && t.replyGloss && <span className="text-sm text-muted">{t.replyGloss}</span>}
         </p>
       </div>
     </div>
